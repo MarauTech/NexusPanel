@@ -100,12 +100,13 @@ export function initializeDatabase(db) {
 export function initializeDefaultSettings(db) {
   const defaults = [
     ['dashboard_name', 'NexusPanel', 'string'],
+    ['user_name', '', 'string'],
     ['theme', 'dark', 'string'],
-    ['theme_preset', 'umbrel-dark', 'string'],
+    ['theme_preset', 'nexus-dark', 'string'],
     ['accent_color', '#6366f1', 'string'],
     ['tile_style', 'default', 'string'],
     ['tile_size', 'medium', 'string'],
-    ['tile_border_radius', '20', 'string'],
+    ['tile_border_radius', '18', 'string'],
     ['grid_gap', '16', 'string'],
     ['grid_columns', '4', 'string'],
     ['background_url', '', 'string'],
@@ -139,7 +140,8 @@ export function initializeDefaultSettings(db) {
     ['proxmox_verify_ssl', 'false', 'string']
   ];
 
-  const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value, type) VALUES (?, ?, ?)');
+  // Use INSERT OR IGNORE so we never overwrite user configured settings
+  const stmt = db.prepare('INSERT OR IGNORE INTO settings (key, value, type) VALUES (?, ?, ?)');
   for (const [key, value, type] of defaults) {
     stmt.run(key, value, type);
   }

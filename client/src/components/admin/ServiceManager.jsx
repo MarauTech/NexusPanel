@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useServices } from '../../hooks/useServices';
-import { Plus, GripVertical, Edit2, Trash2, CheckCircle, XCircle, Star, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Plus, GripVertical, Edit2, Trash2, CheckCircle, XCircle, Star } from 'lucide-react';
 import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ServiceForm from './ServiceForm';
 import BrandIcon from '../common/BrandIcon';
 import {
-  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors
 } from '@dnd-kit/core';
 import {
   arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable
@@ -157,10 +157,14 @@ export default function ServiceManager() {
   const handleToggleEnabled = async (service) => {
     const newEnabled = service.enabled === 1 || service.enabled === true ? 0 : 1;
     try {
-      await api.services.updateService(service.id, {
-        ...service,
-        enabled: newEnabled
-      });
+      if (api.services.toggleEnabled) {
+        await api.services.toggleEnabled(service.id, newEnabled);
+      } else {
+        await api.services.updateService(service.id, {
+          ...service,
+          enabled: newEnabled
+        });
+      }
       addToast(newEnabled ? `Włączono ${service.name}` : `Ukryto ${service.name}`, 'info');
       refresh();
     } catch (err) {

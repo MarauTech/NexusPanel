@@ -1,5 +1,5 @@
-import React from 'react';
-import { Star, ArrowUpRight, Activity, ShieldCheck, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Star, ArrowUpRight } from 'lucide-react';
 import BrandIcon from '../common/BrandIcon';
 import { getStatusColor } from '../../utils/helpers';
 import { useSettings } from '../../hooks/useSettings';
@@ -13,7 +13,10 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   
   const style = settings?.tile_style || 'default';
   const openInNewTab = service.open_new_tab === 1 || service.open_new_tab === true || service.openInNewTab !== false;
-  const isFavorite = service.favorite === 1 || service.favorite === true;
+  
+  // Local state for instant optimistic UI reaction
+  const [isFavorite, setIsFavorite] = useState(service.favorite === 1 || service.favorite === true);
+
   const healthStatus = service.health_status || service.status || 'unknown';
   const statusColor = getStatusColor(healthStatus);
   const showStatus = settings?.show_status_indicators !== 'false';
@@ -32,17 +35,24 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   const handleFavoriteClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+    const newFav = isFavorite ? 0 : 1;
+    setIsFavorite(Boolean(newFav));
+    
     try {
-      const newFav = isFavorite ? 0 : 1;
-      await api.services.updateService(service.id, {
-        ...service,
-        favorite: newFav,
-        open_new_tab: service.open_new_tab ? 1 : 0,
-        enabled: service.enabled ? 1 : 0
-      });
+      if (api.services.toggleFavorite) {
+        await api.services.toggleFavorite(service.id, newFav);
+      } else {
+        await api.services.updateService(service.id, {
+          ...service,
+          favorite: newFav,
+          open_new_tab: service.open_new_tab ? 1 : 0,
+          enabled: service.enabled ? 1 : 0
+        });
+      }
       if (onFavoriteToggle) onFavoriteToggle(service.id, newFav);
       addToast(newFav ? `Przypięto ${service.name} do Ulubionych` : `Usunięto ${service.name} z Ulubionych`, 'success');
     } catch (err) {
+      setIsFavorite(!newFav);
       addToast('Nie udało się zaktualizować statusu', 'error');
     }
   };
