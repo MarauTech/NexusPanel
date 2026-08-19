@@ -119,7 +119,7 @@ if [ "$IS_PVE_HOST" = true ]; then
     --memory "$CT_RAM" \
     --swap 512 \
     --rootfs "$CT_STORAGE:$CT_DISK" \
-    --net0 name=eth0,bridge=vmbr0,ip=dhcp,firewall=1 \
+    --net0 name=eth0,bridge=vmbr0,ip=dhcp,firewall=0 \
     --ostype debian \
     --unprivileged 1 \
     --features nesting=1 \
@@ -127,7 +127,7 @@ if [ "$IS_PVE_HOST" = true ]; then
     --start 1
 
   echo -e "${YW}--> Czekam na uruchomienie sieci i przydział IP z DHCP...${CL}"
-  for i in {1..12}; do
+  for i in {1..15}; do
     sleep 2
     IP_ADDR=$(pct exec "$CT_ID" -- ip -4 addr show eth0 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -n1 || echo "")
     if [ -n "$IP_ADDR" ]; then
@@ -135,28 +135,30 @@ if [ "$IS_PVE_HOST" = true ]; then
     fi
   done
   
-  echo -e "${YW}--> Instalowanie Node.js 20 i NexusPanel wewnątrz kontenera...${CL}"
+  echo -e "${YW}--> Instalowanie Node.js 20 i pakietów w kontenerze...${CL}"
   pct exec "$CT_ID" -- bash -c "
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update >/dev/null 2>&1
+    apt-get update -y >/dev/null 2>&1
     apt-get install -y curl git sudo ca-certificates >/dev/null 2>&1
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
     apt-get install -y nodejs >/dev/null 2>&1
-    mkdir -p /opt/nexuspanel
   "
 
-  # Clone and build
-  echo -e "${YW}--> Pobieranie i budowanie aplikacji (npm install && npm run build)...${CL}"
+  # Clean clone and build
+  echo -e "${YW}--> Pobieranie kodu NexusPanel i budowanie aplikacji...${CL}"
   pct exec "$CT_ID" -- bash -c "
-    set -e
+    rm -rf /opt/nexuspanel
+    mkdir -p /opt/nexuspanel
+    git clone --depth 1 https://github.com/MarauTech/NexusPanel.git /opt/nexuspanel
     cd /opt/nexuspanel
-    git clone https://github.com/MarauTech/NexusPanel.git .
     npm install
     npm run build
   "
 
   # Create Systemd Service for Auto-start
-  pct exec "$CT_ID" -- bash -c "cat << 'EOF' > /etc/systemd/system/nexuspanel.service
+  pct exec "$CT_ID" -- bash -c "
+    NODE_BIN=\$(which node || echo /usr/bin/node)
+    cat << EOF > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -165,19 +167,19 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/nexuspanel
-ExecStart=/usr/bin/node server/index.js
+ExecStart=\$NODE_BIN server/index.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production
 Environment=PORT=3000
-Environment=JWT_SECRET=nexuspanel-prod-secret-$(date +%s)
+Environment=JWT_SECRET=nexuspanel-prod-secret-\$(date +%s)
 
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl daemon-reload
-systemctl enable --now nexuspanel.service
-"
+    systemctl daemon-reload
+    systemctl enable --now nexuspanel.service
+  "
 
   echo -e "\n${GN}======================================================${CL}"
   echo -e "${GN}🎉 NexusPanel został pomyślnie zainstalowany w Proxmox!${CL}"
@@ -214,22 +216,20 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 INSTALL_DIR="/opt/nexuspanel"
+rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
 echo -e "${YW}--> Pobieranie najnowszego wydania NexusPanel...${CL}"
-if [ -d ".git" ]; then
-  git pull >/dev/null 2>&1 || true
-else
-  git clone https://github.com/MarauTech/NexusPanel.git . >/dev/null 2>&1 || true
-fi
+git clone --depth 1 https://github.com/MarauTech/NexusPanel.git .
 
 echo -e "${YW}--> Budowanie aplikacji...${CL}"
-npm install >/dev/null 2>&1
-npm run build >/dev/null 2>&1
+npm install
+npm run build
 
 echo -e "${YW}--> Konfiguracja usługi systemowej autostartu (systemd)...${CL}"
-cat << 'EOF' > /etc/systemd/system/nexuspanel.service
+NODE_BIN=$(which node || echo /usr/bin/node)
+cat << EOF > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -238,7 +238,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/nexuspanel
-ExecStart=/usr/bin/node server/index.js
+ExecStart=$NODE_BIN server/index.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production
