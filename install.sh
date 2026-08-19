@@ -146,12 +146,13 @@ if [ "$IS_PVE_HOST" = true ]; then
   "
 
   # Clone and build
-  echo -e "${YW}--> Pobieranie i budowanie aplikacji...${CL}"
+  echo -e "${YW}--> Pobieranie i budowanie aplikacji (npm install && npm run build)...${CL}"
   pct exec "$CT_ID" -- bash -c "
+    set -e
     cd /opt/nexuspanel
-    git clone https://github.com/MarauTech/NexusPanel.git . >/dev/null 2>&1 || true
-    npm install --omit=dev >/dev/null 2>&1 || npm install >/dev/null 2>&1
-    npm run build >/dev/null 2>&1 || true
+    git clone https://github.com/MarauTech/NexusPanel.git .
+    npm install
+    npm run build
   "
 
   # Create Systemd Service for Auto-start
