@@ -138,6 +138,8 @@ if [ "$IS_PVE_HOST" = true ]; then
   echo -e "${YW}--> Instalowanie środowiska Node.js 20 wewnątrz kontenera...${CL}"
   pct exec "$CT_ID" -- bash -c "
     export DEBIAN_FRONTEND=noninteractive
+    echo 'nameserver 1.1.1.1' > /etc/resolv.conf
+    echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
     apt-get update -y
     apt-get install -y curl git sudo ca-certificates
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
