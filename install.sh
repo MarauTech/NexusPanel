@@ -135,20 +135,20 @@ if [ "$IS_PVE_HOST" = true ]; then
     fi
   done
   
-  echo -e "${YW}--> Instalowanie Node.js 20 i pakietów w kontenerze...${CL}"
+  echo -e "${YW}--> Instalowanie środowiska Node.js 20 wewnątrz kontenera...${CL}"
   pct exec "$CT_ID" -- bash -c "
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update -y >/dev/null 2>&1
-    apt-get install -y curl git sudo ca-certificates >/dev/null 2>&1
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
-    apt-get install -y nodejs >/dev/null 2>&1
+    apt-get update -y
+    apt-get install -y curl git sudo ca-certificates
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    apt-get install -y nodejs
   "
 
   # Clean clone and build
-  echo -e "${YW}--> Pobieranie kodu NexusPanel i budowanie aplikacji...${CL}"
+  echo -e "${YW}--> Pobieranie kodu i budowanie aplikacji NexusPanel...${CL}"
   pct exec "$CT_ID" -- bash -c "
+    set -e
     rm -rf /opt/nexuspanel
-    mkdir -p /opt/nexuspanel
     git clone --depth 1 https://github.com/MarauTech/NexusPanel.git /opt/nexuspanel
     cd /opt/nexuspanel
     npm install
@@ -156,9 +156,9 @@ if [ "$IS_PVE_HOST" = true ]; then
   "
 
   # Create Systemd Service for Auto-start
+  echo -e "${YW}--> Konfiguracja usługi autostartu systemd...${CL}"
   pct exec "$CT_ID" -- bash -c "
-    NODE_BIN=\$(which node || echo /usr/bin/node)
-    cat << EOF > /etc/systemd/system/nexuspanel.service
+    cat << 'EOF' > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -167,19 +167,22 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/nexuspanel
-ExecStart=\$NODE_BIN server/index.js
+ExecStart=/usr/bin/node server/index.js
 Restart=always
-RestartSec=5
+RestartSec=3
 Environment=NODE_ENV=production
 Environment=PORT=3000
-Environment=JWT_SECRET=nexuspanel-prod-secret-\$(date +%s)
+Environment=JWT_SECRET=nexuspanel-prod-secret-12345
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
     systemctl daemon-reload
     systemctl enable --now nexuspanel.service
   "
+
+  sleep 2
 
   echo -e "\n${GN}======================================================${CL}"
   echo -e "${GN}🎉 NexusPanel został pomyślnie zainstalowany w Proxmox!${CL}"
@@ -207,29 +210,25 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo -e "${YW}--> Aktualizacja pakietów i instalacja Node.js 20...${CL}"
-apt-get update >/dev/null 2>&1 || true
-apt-get install -y curl git sudo ca-certificates >/dev/null 2>&1 || true
+apt-get update -y
+apt-get install -y curl git sudo ca-certificates
 
 if ! command -v node >/dev/null 2>&1; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
-  apt-get install -y nodejs >/dev/null 2>&1
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  apt-get install -y nodejs
 fi
 
 INSTALL_DIR="/opt/nexuspanel"
 rm -rf "$INSTALL_DIR"
-mkdir -p "$INSTALL_DIR"
+git clone --depth 1 https://github.com/MarauTech/NexusPanel.git "$INSTALL_DIR"
 cd "$INSTALL_DIR"
-
-echo -e "${YW}--> Pobieranie najnowszego wydania NexusPanel...${CL}"
-git clone --depth 1 https://github.com/MarauTech/NexusPanel.git .
 
 echo -e "${YW}--> Budowanie aplikacji...${CL}"
 npm install
 npm run build
 
 echo -e "${YW}--> Konfiguracja usługi systemowej autostartu (systemd)...${CL}"
-NODE_BIN=$(which node || echo /usr/bin/node)
-cat << EOF > /etc/systemd/system/nexuspanel.service
+cat << 'EOF' > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -238,9 +237,9 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/nexuspanel
-ExecStart=$NODE_BIN server/index.js
+ExecStart=/usr/bin/node server/index.js
 Restart=always
-RestartSec=5
+RestartSec=3
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=JWT_SECRET=nexuspanel-prod-secret-prod
