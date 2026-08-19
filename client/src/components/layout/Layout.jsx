@@ -1,16 +1,10 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import { useSettings } from '../../hooks/useSettings';
-import { useServices } from '../../hooks/useServices';
 
 export default function Layout() {
   const { settings } = useSettings();
-  const { services, loading } = useServices();
-  const location = useLocation();
-  
-  // Hide top header on first-run empty startpage so user has a 100% clean onboarding experience
-  const isDashboardEmpty = location.pathname === '/' && !loading && services.length === 0;
 
   const bgStyle = settings?.background_url ? {
     backgroundImage: `url(${settings.background_url})`,
@@ -40,8 +34,8 @@ export default function Layout() {
         />
       )}
 
-      {/* Floating Header (Hidden on fresh onboarding startpage) */}
-      {!isDashboardEmpty && <Header />}
+      {/* Seamless Minimalist Top Navigation Header */}
+      <Header />
 
       {/* Main Content Area */}
       <main className="flex-1 w-full relative z-10">
