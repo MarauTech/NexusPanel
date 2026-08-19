@@ -1,0 +1,41 @@
+# ============================================
+# NexusPanel - Docker Compose
+# ============================================
+# Usage:
+#   cp .env.example .env
+#   # Edit .env and set JWT_SECRET
+#   docker compose up -d
+# ============================================
+
+version: '3.8'
+
+services:
+  nexuspanel:
+    build: .
+    container_name: nexuspanel
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - nexuspanel_data:/app/data
+      - nexuspanel_uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-secret-key}
+      - JWT_EXPIRY=${JWT_EXPIRY:-7d}
+      - DB_PATH=/app/data/nexuspanel.db
+      - HEALTH_CHECK_INTERVAL=${HEALTH_CHECK_INTERVAL:-60}
+      - SEED_DEMO_DATA=${SEED_DEMO_DATA:-false}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  nexuspanel_data:
+    driver: local
+  nexuspanel_uploads:
+    driver: local
