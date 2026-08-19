@@ -102,8 +102,8 @@ app.use((err, req, res, next) => {
 const healthChecker = new HealthCheckService(db);
 healthChecker.start();
 
-app.listen(config.PORT, () => {
-  console.log(`NexusPanel server is running on port ${config.PORT}`);
+app.listen(config.PORT, '0.0.0.0', () => {
+  console.log(`NexusPanel server is running on port ${config.PORT} (0.0.0.0)`);
 });
 
 export default app;
