@@ -7,8 +7,9 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import ColorPicker from '../common/ColorPicker';
 import IconPicker from '../common/IconPicker';
+import BrandIcon from '../common/BrandIcon';
 import {
-  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors
 } from '@dnd-kit/core';
 import {
   arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable
@@ -16,14 +17,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import * as LucideIcons from 'lucide-react';
-
-function getLucideIcon(iconName) {
-  if (!iconName) return null;
-  if (LucideIcons[iconName]) return LucideIcons[iconName];
-  const pascal = iconName.replace(/(^|[-_])(\w)/g, (_, __, c) => c.toUpperCase());
-  return LucideIcons[pascal] || null;
-}
 
 function SortableCategory({ id, category, onEdit, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -34,7 +27,6 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
     zIndex: isDragging ? 10 : 0,
   };
 
-  const CategoryIcon = getLucideIcon(category.icon) || Folder;
   const catColor = category.color || '#6366f1';
 
   return (
@@ -58,7 +50,7 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/15 pointer-events-none" />
-        <CategoryIcon className="w-5 h-5 relative z-10" />
+        <BrandIcon name={category.icon || 'folder'} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={category.name} />
       </div>
       
       <div className="flex-1 min-w-0">
@@ -73,14 +65,14 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
       <div className="flex items-center gap-1">
         <button 
           onClick={() => onEdit(category)} 
-          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
+          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
           title="Edytuj kategorię"
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button 
           onClick={() => onDelete(category)} 
-          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95"
+          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
           title="Usuń kategorię"
         >
           <Trash2 className="w-4 h-4" />
@@ -226,6 +218,7 @@ export default function CategoryManager() {
         </div>
       )}
 
+      {/* Category Add/Edit Modal */}
       {isFormOpen && (
         <Modal 
           title={editingCat ? `Edytuj: ${editingCat.name}` : '+ Nowa kategoria'} 
@@ -233,7 +226,7 @@ export default function CategoryManager() {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Nazwa kategorii"
+              label="Nazwa kategorii *"
               value={formData.name}
               onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
               required
@@ -245,12 +238,18 @@ export default function CategoryManager() {
               <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
                 Ikona kategorii
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm relative overflow-hidden"
+                  style={{ backgroundColor: formData.color || '#6366f1' }}
+                >
+                  <BrandIcon name={formData.icon || 'folder'} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={formData.name} />
+                </div>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => setShowIconPicker(true)}
-                  className="flex-1 text-xs py-2"
+                  className="flex-1 text-xs py-2 font-bold"
                 >
                   Wybierz ikonę z biblioteki
                 </Button>
@@ -276,6 +275,7 @@ export default function CategoryManager() {
         </Modal>
       )}
 
+      {/* Icon Picker Popup Modal */}
       {showIconPicker && (
         <IconPicker
           selectedIcon={formData.icon}
