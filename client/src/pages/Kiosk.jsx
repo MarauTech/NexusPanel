@@ -5,13 +5,35 @@ import { useCategories } from '../hooks/useCategories';
 import { useSettings } from '../hooks/useSettings';
 import ServiceCard from '../components/dashboard/ServiceCard';
 import CategorySection from '../components/dashboard/CategorySection';
+import NetworkDiscoveryModal from '../components/scanner/NetworkDiscoveryModal';
+import SearchModal from '../components/search/SearchModal';
 import BrandIcon from '../components/common/BrandIcon';
 import api from '../services/api';
 import { 
   Maximize2, Minimize2, ArrowLeft, Moon, Sun, Cpu, HardDrive, 
-  Activity, ShieldCheck, Clock, RefreshCw, Zap, CloudSun, Wind,
-  Droplets, LayoutGrid, Layers, Star, Search, Wifi, Server, Sparkles
+  Activity, ShieldCheck, Clock, RefreshCw, Zap, CloudSun, CloudRain,
+  CloudLightning, Snowflake, CloudFog, Wind, Droplets, LayoutGrid, 
+  Layers, Star, Search, Wifi, Server, Sparkles, Radar, CheckCircle2,
+  AlertTriangle, ExternalLink
 } from 'lucide-react';
+
+function WeatherIcon({ name }) {
+  switch (name) {
+    case 'cloud-sun':
+      return <CloudSun className="w-6 h-6 text-amber-400" />;
+    case 'cloud-rain':
+      return <CloudRain className="w-6 h-6 text-sky-400" />;
+    case 'cloud-lightning':
+      return <CloudLightning className="w-6 h-6 text-purple-400" />;
+    case 'snowflake':
+      return <Snowflake className="w-6 h-6 text-cyan-300" />;
+    case 'cloud-fog':
+      return <CloudFog className="w-6 h-6 text-slate-400" />;
+    case 'sun':
+    default:
+      return <Sun className="w-6 h-6 text-amber-400" />;
+  }
+}
 
 export default function Kiosk() {
   const { services, refresh: refreshServices } = useServices();
@@ -24,8 +46,9 @@ export default function Kiosk() {
   const [systemStats, setSystemStats] = useState(null);
   const [weather, setWeather] = useState(null);
   const [selectedCat, setSelectedCat] = useState('all');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'categories' | 'detailed'
-  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'categories' | 'dashboard'
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [scanModalOpen, setScanModalOpen] = useState(false);
 
   // 1. Live Clock
   useEffect(() => {
@@ -104,17 +127,8 @@ export default function Kiosk() {
 
   // Filter and enrich services
   const enrichedServices = useMemo(() => {
-    let list = services.filter(s => s.enabled !== 0 && s.enabled !== false);
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(s => 
-        s.name.toLowerCase().includes(q) ||
-        (s.url && s.url.toLowerCase().includes(q)) ||
-        (s.category_name && s.category_name.toLowerCase().includes(q))
-      );
-    }
-    return list;
-  }, [services, searchQuery]);
+    return services.filter(s => s.enabled !== 0 && s.enabled !== false);
+  }, [services]);
 
   const onlineCount = enrichedServices.filter(s => s.health_status === 'online').length;
   const totalCount = enrichedServices.length;
@@ -122,7 +136,7 @@ export default function Kiosk() {
   // Calculate average response time
   const avgPing = useMemo(() => {
     const pings = enrichedServices.map(s => s.health_response_time).filter(Boolean);
-    if (pings.length === 0) return 6;
+    if (pings.length === 0) return 8;
     return Math.round(pings.reduce((a, b) => a + b, 0) / pings.length);
   }, [enrichedServices]);
 
@@ -174,14 +188,14 @@ export default function Kiosk() {
         <div className="absolute top-[40%] -right-[10%] w-[600px] h-[600px] rounded-full bg-indigo-500/10 blur-[140px] animate-aurora-2" />
       </div>
 
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-5">
         
         {/* ============================================================
             1. COMMAND CENTER HERO HEADER: CLOCK, WEATHER, TELEMETRY
            ============================================================ */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center p-4 sm:p-6 rounded-[28px] glass-card border border-black/[0.08] dark:border-white/10 shadow-2xl">
           
-          {/* Left: Giant Futuristic Wall Clock */}
+          {/* Left: Giant Wall Clock & Polish Date */}
           <div className="lg:col-span-4 flex items-center gap-4">
             <div className="flex items-baseline font-mono tracking-tight">
               <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white">
@@ -192,43 +206,45 @@ export default function Kiosk() {
               </span>
             </div>
             
-            <div className="border-l border-black/[0.08] dark:border-white/10 pl-3">
+            <div className="border-l border-black/[0.08] dark:border-white/10 pl-3.5">
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/25">
                   KIOSK
                 </span>
                 {systemStats?.system?.uptimeFormatted && (
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                     Up: {systemStats.system.uptimeFormatted}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 capitalize mt-1 font-semibold">
+              <p className="text-xs text-slate-600 dark:text-slate-300 capitalize mt-1 font-bold">
                 {dateString}
               </p>
             </div>
           </div>
 
-          {/* Center: Live Weather Widget & Host Identity */}
-          <div className="lg:col-span-4 flex items-center justify-start lg:justify-center gap-4">
+          {/* Center: Live Weather Widget */}
+          <div className="lg:col-span-4 flex items-center justify-start lg:justify-center">
             {weather ? (
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl glass-pill bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0 shadow-sm text-xl">
-                  {weather.icon || '☀️'}
+              <div className="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl glass-pill bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/10">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <WeatherIcon name={weather.icon} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-base text-slate-900 dark:text-white font-mono">
+                    <span className="font-black text-lg text-slate-900 dark:text-white font-mono">
                       {weather.temperature}°C
                     </span>
-                    <span className="text-xs text-slate-500 font-medium capitalize">
+                    <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold capitalize">
                       {weather.city || 'Lokalna'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
-                    <span className="flex items-center gap-0.5"><Droplets className="w-3 h-3 text-sky-400" /> {weather.humidity || 52}%</span>
+                  <div className="flex items-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                    <span className="flex items-center gap-1"><Droplets className="w-3 h-3 text-sky-400" /> {weather.humidity || 52}%</span>
                     <span>·</span>
-                    <span className="flex items-center gap-0.5"><Wind className="w-3 h-3 text-emerald-400" /> {weather.windSpeed || 10} km/h</span>
+                    <span className="flex items-center gap-1"><Wind className="w-3 h-3 text-emerald-400" /> {weather.windSpeed || 10} km/h</span>
+                    <span>·</span>
+                    <span className="text-slate-400 capitalize">{weather.condition}</span>
                   </div>
                 </div>
               </div>
@@ -250,7 +266,7 @@ export default function Kiosk() {
                 onlineCount === totalCount ? 'bg-emerald-500' : 'bg-amber-500'
               }`} />
               <div className="text-left">
-                <span className="text-[9px] uppercase font-bold text-slate-400 block leading-tight">Stan sieci</span>
+                <span className="text-[9px] uppercase font-bold text-slate-400 block leading-tight">Stan usług</span>
                 <span className="text-xs font-black text-slate-900 dark:text-white font-mono">
                   {onlineCount}/{totalCount} Online
                 </span>
@@ -286,6 +302,14 @@ export default function Kiosk() {
             {/* Control Buttons */}
             <div className="flex items-center gap-1.5 pl-1 border-l border-black/[0.08] dark:border-white/10">
               <button
+                onClick={() => setScanModalOpen(true)}
+                className="p-2.5 rounded-2xl glass-pill text-slate-500 hover:text-accent dark:hover:text-white transition-all cursor-pointer"
+                title="Skanuj sieć LAN"
+              >
+                <Radar className="w-4 h-4" />
+              </button>
+
+              <button
                 onClick={() => setIsDimmed(!isDimmed)}
                 className="p-2.5 rounded-2xl glass-pill text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                 title={isDimmed ? 'Rozjaśnij ekran' : 'Tryb nocny / Przyciemnij'}
@@ -315,7 +339,7 @@ export default function Kiosk() {
         </div>
 
         {/* ============================================================
-            2. INTERACTIVE SUB-BAR: CATEGORIES, SEARCH, VIEW MODES
+            2. INTERACTIVE SUB-BAR: CATEGORIES & VIEW MODES
            ============================================================ */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-1">
           
@@ -375,7 +399,7 @@ export default function Kiosk() {
             })}
           </div>
 
-          {/* Right: Layout View Switcher */}
+          {/* Right: View Mode Switcher */}
           <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill self-end sm:self-auto">
             <button
               onClick={() => setViewMode('grid')}
@@ -383,7 +407,15 @@ export default function Kiosk() {
                 viewMode === 'grid' ? 'bg-accent text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Kompaktowy
+              Siatka Kafelków
+            </button>
+            <button
+              onClick={() => setViewMode('dashboard')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'dashboard' ? 'bg-accent text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Pulpit + NOC Monitor
             </button>
             <button
               onClick={() => setViewMode('categories')}
@@ -393,26 +425,136 @@ export default function Kiosk() {
             >
               Sekcje
             </button>
-            <button
-              onClick={() => setViewMode('detailed')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'detailed' ? 'bg-accent text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Szczegółowy
-            </button>
           </div>
 
         </div>
-      </div>
 
-      {/* ============================================================
-          3. MAIN HOMELAB SERVICES GRID (RESPONSIVE WALL TILES)
-         ============================================================ */}
-      <div className="relative z-10 flex-1 my-6">
-        
-        {viewMode === 'categories' ? (
-          <div className="space-y-6">
+        {/* ============================================================
+            3. MAIN CONTENT: ADAPTIVE HOMELAB GRID & TELEMETRY
+           ============================================================ */}
+        {viewMode === 'dashboard' ? (
+          /* =========================================================
+             NOC DASHBOARD MODE: TILES + LIVE SYSTEM ANALYTICS
+             ========================================================= */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 animate-in fade-in duration-300">
+            
+            {/* Left: Main Services Grid (8 cols) */}
+            <div className="lg:col-span-8 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+                {filteredList.map(service => (
+                  <ServiceCard 
+                    key={service.id} 
+                    service={service} 
+                    onFavoriteToggle={() => refreshServices()} 
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Live Homelab NOC & Hardware Status (4 cols) */}
+            <div className="lg:col-span-4 space-y-4">
+              
+              {/* Host Hardware Progress Bars */}
+              <div className="p-5 rounded-[24px] glass-card border border-black/[0.08] dark:border-white/10 space-y-4 shadow-xl">
+                <div className="flex items-center justify-between pb-2 border-b border-black/[0.06] dark:border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Server className="w-4 h-4 text-accent" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                      Zasoby Serwera Host
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-500 font-bold">● LIVE</span>
+                </div>
+
+                {/* CPU Bar */}
+                {systemStats?.cpu && (
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <span>Użycie Procesora (CPU)</span>
+                      <span className="font-mono text-accent">{systemStats.cpu.usagePercent}%</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-black/[0.06] dark:bg-white/10 overflow-hidden">
+                      <div 
+                        className="h-full bg-accent rounded-full transition-all duration-500" 
+                        style={{ width: `${Math.min(100, systemStats.cpu.usagePercent)}%` }}
+                      />
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-mono truncate">
+                      {systemStats.cpu.cores} rdzeni · {systemStats.cpu.model}
+                    </div>
+                  </div>
+                )}
+
+                {/* RAM Bar */}
+                {systemStats?.memory && (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
+                      <span>Pamięć RAM</span>
+                      <span className="font-mono text-sky-400">
+                        {systemStats.memory.usedGb} / {systemStats.memory.totalGb} GB ({systemStats.memory.percent}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-black/[0.06] dark:bg-white/10 overflow-hidden">
+                      <div 
+                        className="h-full bg-sky-400 rounded-full transition-all duration-500" 
+                        style={{ width: `${Math.min(100, systemStats.memory.percent)}%` }}
+                      />
+                    </div>
+                    <div className="text-[10px] text-slate-400 font-mono">
+                      Wolne: {(systemStats.memory.freeBytes / (1024**3)).toFixed(1)} GB
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* NOC Availability Table */}
+              <div className="p-5 rounded-[24px] glass-card border border-black/[0.08] dark:border-white/10 space-y-3 shadow-xl">
+                <div className="flex items-center justify-between pb-2 border-b border-black/[0.06] dark:border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-500" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                      Monitoring Dostępności (NOC)
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {onlineCount}/{totalCount}
+                  </span>
+                </div>
+
+                <div className="max-h-[28vh] overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                  {enrichedServices.map(svc => (
+                    <div 
+                      key={svc.id}
+                      className="flex items-center justify-between p-2 rounded-xl glass-pill text-xs hover:border-accent/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          svc.health_status === 'online' ? 'bg-emerald-500' : svc.health_status === 'offline' ? 'bg-rose-500' : 'bg-slate-400'
+                        }`} />
+                        <span className="font-bold text-slate-900 dark:text-white truncate text-[11px]">{svc.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 font-mono text-[10px]">
+                        <span className="text-slate-400">{svc.health_response_time ? `${svc.health_response_time}ms` : '—'}</span>
+                        <a 
+                          href={svc.url} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-accent hover:underline p-1"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        ) : viewMode === 'categories' ? (
+          /* Category Sections View */
+          <div className="space-y-6 animate-in fade-in duration-300">
             {categorizedGroups.map(({ category, services: catServices }) => (
               <CategorySection
                 key={category.id}
@@ -425,12 +567,12 @@ export default function Kiosk() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4.5">
+          /* Standard Responsive Full-Width Grid */
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4.5 animate-in fade-in duration-300">
             {filteredList.map(service => (
               <ServiceCard 
                 key={service.id} 
                 service={service} 
-                overrideSettings={viewMode === 'detailed' ? { tile_style: 'detailed' } : undefined}
                 onFavoriteToggle={() => refreshServices()} 
               />
             ))}
@@ -449,7 +591,9 @@ export default function Kiosk() {
             Monitoring aktywny
           </span>
           <span className="hidden sm:inline text-slate-500">·</span>
-          <span className="hidden sm:inline">Średni ping usług: <b className="text-slate-900 dark:text-white font-mono">{avgPing}ms</b></span>
+          <span className="hidden sm:inline text-slate-600 dark:text-slate-400">
+            Średni ping usług: <b className="text-slate-900 dark:text-white font-mono">{avgPing}ms</b>
+          </span>
         </div>
 
         <div className="flex items-center gap-3 font-mono text-[11px] opacity-80">
@@ -458,6 +602,21 @@ export default function Kiosk() {
           <span>Ekran zawsze włączony (WakeLock)</span>
         </div>
       </div>
+
+      {/* Dialog Modals for Kiosk */}
+      {scanModalOpen && (
+        <NetworkDiscoveryModal
+          onClose={() => setScanModalOpen(false)}
+          onSuccess={() => {
+            setScanModalOpen(false);
+            refreshServices();
+          }}
+        />
+      )}
+
+      {searchOpen && (
+        <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      )}
 
     </div>
   );
