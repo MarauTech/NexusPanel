@@ -10,7 +10,6 @@ import { fileURLToPath } from 'url';
 
 import config from './config/index.js';
 import db from './db/index.js';
-import { HealthCheckService } from './services/healthCheck.js';
 
 import authRoutes from './routes/auth.js';
 import servicesRoutes from './routes/services.js';
@@ -25,46 +24,45 @@ import systemRoutes from './routes/system.js';
 import uploadRoutes from './routes/upload.js';
 import scannerRoutes from './routes/scanner.js';
 
+import HealthCheckService from './services/healthCheck.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure uploads folder exists
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 const app = express();
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "http:", "https:", "blob:"],
-      connectSrc: ["'self'", "http:", "https:"],
-    }
-  }
-}));
+// Trust proxy for accurate client IP detection behind reverse proxies
+app.set('trust proxy', true);
+
+// Permissive CSP for self-hosted dashboards
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+  })
+);
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Serve uploaded media
+// Static uploads directory
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 app.use('/uploads', express.static(uploadsDir));
 
-// Custom simple cookie parser middleware
+// Cookie Parser Middleware
 app.use((req, res, next) => {
   req.cookies = {};
   const cookieHeader = req.headers.cookie;
   if (cookieHeader) {
     cookieHeader.split(';').forEach(cookie => {
       const parts = cookie.split('=');
-      const name = parts.shift().trim();
-      const value = decodeURI(parts.join('='));
-      req.cookies[name] = value;
+      if (parts.length === 2) {
+        req.cookies[parts[0].trim()] = decodeURIComponent(parts[1].trim());
+      }
     });
   }
   next();
@@ -84,11 +82,13 @@ app.use('/api/system', systemRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/scanner', scannerRoutes);
 
-// Static files handling for production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+// Static frontend build handling
+const distPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
@@ -105,3 +105,5 @@ healthChecker.start();
 app.listen(config.PORT, () => {
   console.log(`NexusPanel server is running on port ${config.PORT}`);
 });
+
+export default app;
