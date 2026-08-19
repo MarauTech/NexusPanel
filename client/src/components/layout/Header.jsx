@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard } from 'lucide-react';
+import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import SearchModal from '../search/SearchModal';
@@ -62,6 +62,16 @@ export default function Header() {
                 ⌘K
               </kbd>
             </button>
+
+            {/* Kiosk Mode Button */}
+            <Link
+              to="/kiosk"
+              className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all text-xs font-medium border border-black/[0.06] dark:border-white/10"
+              title="Tryb Kiosk / Panel ścienny"
+            >
+              <Tv className="w-3.5 h-3.5 text-accent" />
+              <span className="hidden md:inline">Kiosk</span>
+            </Link>
 
             {/* Theme Toggle */}
             <button
