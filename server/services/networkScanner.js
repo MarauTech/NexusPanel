@@ -9,12 +9,12 @@ const COMMON_HOMELAB_PORTS = [
   { port: 9000, name: 'Portainer CE', category: 'Services', icon: 'portainer', color: '#0ea5e9', defaultProto: 'http', path: '' },
   { port: 9443, name: 'Portainer SSL', category: 'Services', icon: 'portainer', color: '#0ea5e9', defaultProto: 'https', path: '' },
   { port: 3001, name: 'Uptime Kuma', category: 'Monitoring', icon: 'uptime-kuma', color: '#10b981', defaultProto: 'http', path: '' },
-  { port: 3000, name: 'Grafana / Dashboard', category: 'Monitoring', icon: 'grafana', color: '#f97316', defaultProto: 'http', path: '' },
+  { port: 3000, name: 'NexusPanel / Dashboard', category: 'Monitoring', icon: 'grafana', color: '#6366f1', defaultProto: 'http', path: '' },
   { port: 8096, name: 'Jellyfin Media', category: 'Media', icon: 'jellyfin', color: '#8b5cf6', defaultProto: 'http', path: '' },
   { port: 32400, name: 'Plex Media Server', category: 'Media', icon: 'plex', color: '#eab308', defaultProto: 'http', path: '/web' },
-  { port: 80, name: 'Router / Web Gateway', category: 'Infrastructure', icon: 'globe', color: '#6366f1', defaultProto: 'http', path: '' },
-  { port: 443, name: 'Secure Web Server', category: 'Infrastructure', icon: 'shield', color: '#6366f1', defaultProto: 'https', path: '' },
-  { port: 8080, name: 'Web App (8080)', category: 'Services', icon: 'server', color: '#6366f1', defaultProto: 'http', path: '' },
+  { port: 80, name: 'Serwer WWW (HTTP)', category: 'Infrastructure', icon: 'globe', color: '#6366f1', defaultProto: 'http', path: '' },
+  { port: 443, name: 'Serwer WWW (HTTPS)', category: 'Infrastructure', icon: 'shield', color: '#6366f1', defaultProto: 'https', path: '' },
+  { port: 8080, name: 'Aplikacja Web (8080)', category: 'Services', icon: 'server', color: '#6366f1', defaultProto: 'http', path: '' },
   { port: 8443, name: 'Nextcloud Hub', category: 'Services', icon: 'nextcloud', color: '#0284c7', defaultProto: 'https', path: '' },
   { port: 8001, name: 'ASUSTOR NAS', category: 'Infrastructure', icon: 'asustor', color: '#3b82f6', defaultProto: 'https', path: '' },
   { port: 5000, name: 'Synology DSM', category: 'Infrastructure', icon: 'synology', color: '#0284c7', defaultProto: 'http', path: '' },
@@ -66,9 +66,9 @@ export function getNetworkInfo() {
 }
 
 /**
- * Fast TCP probe with 300ms timeout
+ * Fast TCP probe with 350ms timeout
  */
-function probePort(host, port, timeout = 300) {
+function probePort(host, port, timeout = 350) {
   return new Promise((resolve) => {
     const start = Date.now();
     const socket = new net.Socket();
@@ -100,7 +100,7 @@ function probePort(host, port, timeout = 300) {
 async function probeHttpTitle(url) {
   try {
     const res = await axios.get(url, {
-      timeout: 800,
+      timeout: 1000,
       httpsAgent,
       headers: { 'User-Agent': 'NexusPanel-Scanner/1.0' },
       maxRedirects: 2,
@@ -109,7 +109,8 @@ async function probeHttpTitle(url) {
     if (res.data && typeof res.data === 'string') {
       const match = res.data.match(/<title[^>]*>([^<]+)<\/title>/i);
       if (match && match[1]) {
-        return match[1].trim();
+        const title = match[1].trim();
+        if (title && title.length < 50) return title;
       }
     }
   } catch (e) {
@@ -119,22 +120,28 @@ async function probeHttpTitle(url) {
 }
 
 /**
- * Parallel concurrent network scanner
+ * Parallel concurrent network scanner without duplicate loopbacks
  */
 export async function scanLocalNetwork(targetHosts = []) {
   const netInfo = getNetworkInfo();
 
   if (!targetHosts || targetHosts.length === 0) {
-    targetHosts = ['127.0.0.1', 'localhost', netInfo.localIp, netInfo.gatewayIp];
+    // Only real network IPs (no 127.0.0.1 or localhost duplicates)
+    targetHosts = [netInfo.gatewayIp, netInfo.localIp];
     
     // Add common homelab candidate addresses in the detected subnet (e.g. 192.168.10.x or 192.168.1.x)
-    const candidates = [2, 10, 20, 30, 50, 100, 200, 254];
+    const candidates = [2, 3, 5, 10, 20, 30, 50, 66, 70, 78, 83, 90, 91, 92, 93, 94, 95, 96, 100, 200, 231, 254];
     for (const c of candidates) {
       targetHosts.push(`${netInfo.subnetPrefix}${c}`);
     }
   }
 
-  const hosts = Array.from(new Set(targetHosts));
+  // Deduplicate hosts and filter out raw loopbacks if multiple hosts exist
+  let hosts = Array.from(new Set(targetHosts));
+  if (hosts.length > 2) {
+    hosts = hosts.filter(h => h !== '127.0.0.1' && h !== 'localhost');
+  }
+
   const tasks = [];
 
   for (const host of hosts) {
@@ -144,16 +151,28 @@ export async function scanLocalNetwork(targetHosts = []) {
           if (result.open) {
             const url = `${item.defaultProto}://${host}:${item.port}${item.path}`;
             const pageTitle = await probeHttpTitle(url);
+            
+            let displayName = item.name;
+            if (pageTitle) {
+              displayName = pageTitle;
+            } else if (host === netInfo.gatewayIp && (item.port === 80 || item.port === 443)) {
+              displayName = 'Router Gateway / Brama';
+            } else if (item.port === 80) {
+              displayName = `Serwer HTTP (${host})`;
+            } else if (item.port === 443) {
+              displayName = `Serwer HTTPS (${host})`;
+            }
+
             return {
               id: `scan-${host}-${item.port}`,
-              name: pageTitle || (host === netInfo.gatewayIp && item.port === 80 ? 'Router Gateway' : item.name),
+              name: displayName,
               url,
               host,
               port: item.port,
               category_name: item.category,
               icon: item.icon,
               color: item.color,
-              custom_badge: host === netInfo.gatewayIp ? 'Gateway' : `Port ${item.port}`,
+              custom_badge: host === netInfo.gatewayIp ? 'Brama' : `Port ${item.port}`,
               responseTime: result.responseTime || 5,
               health_status: 'online'
             };
@@ -165,8 +184,10 @@ export async function scanLocalNetwork(targetHosts = []) {
   }
 
   const results = await Promise.all(tasks);
+  const discovered = results.filter(Boolean);
+
   return {
     netInfo,
-    discovered: results.filter(Boolean)
+    discovered
   };
 }

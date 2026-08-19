@@ -14,14 +14,14 @@ import BackupSettings from '../components/admin/BackupSettings';
 import ProxmoxSettings from '../components/admin/ProxmoxSettings';
 
 const tabs = [
-  { id: 'general', label: 'General', icon: Settings, path: 'general' },
-  { id: 'appearance', label: 'Appearance & Themes', icon: Palette, path: 'appearance' },
-  { id: 'proxmox', label: 'Proxmox VE Node', icon: Server, path: 'proxmox' },
-  { id: 'services', label: 'Services Manager', icon: LayoutGrid, path: 'services' },
-  { id: 'categories', label: 'Categories', icon: FolderTree, path: 'categories' },
-  { id: 'tags', label: 'Tags', icon: Tags, path: 'tags' },
-  { id: 'security', label: 'Security & Access', icon: Shield, path: 'security' },
-  { id: 'backup', label: 'Backup & Restore', icon: Download, path: 'backup' }
+  { id: 'general', label: 'Ogólne', icon: Settings, path: 'general' },
+  { id: 'appearance', label: 'Wygląd i Motywy', icon: Palette, path: 'appearance' },
+  { id: 'proxmox', label: 'Węzeł Proxmox VE', icon: Server, path: 'proxmox' },
+  { id: 'services', label: 'Zarządzanie Usługami', icon: LayoutGrid, path: 'services' },
+  { id: 'categories', label: 'Kategorie', icon: FolderTree, path: 'categories' },
+  { id: 'tags', label: 'Tagi', icon: Tags, path: 'tags' },
+  { id: 'security', label: 'Bezpieczeństwo i Dostęp', icon: Shield, path: 'security' },
+  { id: 'backup', label: 'Kopia Zapasowa i Reset', icon: Download, path: 'backup' }
 ];
 
 export default function Admin() {
@@ -34,13 +34,13 @@ export default function Admin() {
         
         {/* Mobile nav toggle */}
         <div className="md:hidden p-4 rounded-2xl glass-card flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-text-primary">
+          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
             <Settings className="w-5 h-5 text-accent" />
-            <span>Settings Menu</span>
+            <span>Menu Ustawień</span>
           </div>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-            className="p-2 rounded-xl glass-pill text-text-secondary hover:text-text-primary"
+            className="p-2 rounded-xl glass-pill text-slate-500 hover:text-slate-900 dark:hover:text-white"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -48,9 +48,9 @@ export default function Admin() {
 
         {/* Apple Style Glass Sidebar (Navigation Dock) */}
         <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-64 flex-shrink-0 space-y-3`}>
-          <div className="p-3 rounded-[24px] glass-card space-y-1 shadow-xl">
-            <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-text-secondary/70">
-              Preferences
+          <div className="p-3 rounded-[24px] glass-card space-y-1 shadow-xl border border-black/[0.08] dark:border-white/10">
+            <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Preferencje
             </div>
             
             {tabs.map((tab) => {
@@ -66,7 +66,7 @@ export default function Admin() {
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 font-medium text-xs sm:text-sm ${
                     isActive 
                       ? 'bg-accent text-white shadow-md shadow-accent/25 font-bold scale-[1.02]' 
-                      : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />
@@ -79,16 +79,16 @@ export default function Admin() {
           {/* Quick Back to Dashboard Button */}
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[18px] glass-pill text-text-secondary hover:text-text-primary text-xs font-semibold transition-all hover:scale-[1.02]"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[18px] glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all hover:scale-[1.02]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Dashboard</span>
+            <span>Wróć do Pulpitu</span>
           </Link>
         </div>
 
         {/* Content Pane in iOS Liquid Glass Card */}
         <div className="flex-1 overflow-x-hidden">
-          <div className="glass-card rounded-[28px] p-6 sm:p-8 min-h-full shadow-2xl transition-all duration-300">
+          <div className="glass-card rounded-[28px] p-6 sm:p-8 min-h-full shadow-2xl transition-all duration-300 border border-black/[0.08] dark:border-white/10">
             <Routes>
               <Route path="/" element={<Navigate to="general" replace />} />
               <Route path="general" element={<GeneralSettings />} />

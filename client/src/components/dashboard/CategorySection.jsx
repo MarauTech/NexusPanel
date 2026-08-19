@@ -20,13 +20,13 @@ export default function CategorySection({ category, services, gridCols = '4', gr
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: `repeat(auto-fill, minmax(320px, 1fr))`,
+    gridTemplateColumns: `repeat(auto-fill, minmax(280px, 1fr))`,
     gap: `${gridGap}px`,
   };
 
   return (
     <section className="space-y-3">
-      {/* Minimalist Clean Category Header */}
+      {/* Minimalist Clean Category Header with High Contrast */}
       <div 
         className="flex items-center gap-2.5 cursor-pointer group select-none py-1"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -42,22 +42,22 @@ export default function CategorySection({ category, services, gridCols = '4', gr
         </div>
 
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-black uppercase tracking-wider text-slate-300 group-hover:text-white transition-colors">
+          <h2 className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
             {category.name}
           </h2>
-          <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-white/[0.06] text-slate-400">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/[0.06] dark:bg-white/[0.08] text-slate-600 dark:text-slate-300">
             {services.length}
           </span>
         </div>
 
-        <div className="flex-1 h-[1px] bg-white/[0.06] ml-2" />
+        <div className="flex-1 h-[1px] bg-black/[0.06] dark:bg-white/[0.06] ml-2" />
 
-        <div className="p-1 text-slate-500 group-hover:text-slate-300 transition-colors">
+        <div className="p-1 text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
           {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
         </div>
       </div>
 
-      {/* Grid of Minimalist Cards */}
+      {/* Grid of Balanced Cards */}
       {isExpanded && (
         <div style={gridStyle} className="transition-all duration-300 animate-in fade-in-50 duration-200">
           {services.map(service => (

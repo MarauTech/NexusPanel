@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import { useServices } from '../../hooks/useServices';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -8,9 +8,9 @@ import { DEFAULT_COLORS, TILE_STYLES, TILE_SIZES } from '../../utils/constants';
 import ServiceCard from '../dashboard/ServiceCard';
 import api from '../../services/api';
 import { 
-  Sparkles, Eye, CheckCircle2, AlertTriangle, XCircle, RefreshCw, 
-  Palette, Sliders, Image, Activity, Globe, Upload, Code2, Layers, Check
+  Sparkles, Palette, Sliders, Image, Code2, Check, Upload
 } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 const THEME_PRESETS = [
   {
@@ -19,7 +19,7 @@ const THEME_PRESETS = [
     accent: '#6366f1',
     theme: 'dark',
     tileStyle: 'default',
-    radius: '20',
+    radius: '18',
     css: ''
   },
   {
@@ -28,7 +28,7 @@ const THEME_PRESETS = [
     accent: '#4f46e5',
     theme: 'light',
     tileStyle: 'default',
-    radius: '20',
+    radius: '18',
     css: ''
   },
   {
@@ -37,7 +37,7 @@ const THEME_PRESETS = [
     accent: '#f43f5e',
     theme: 'dark',
     tileStyle: 'detailed',
-    radius: '8',
+    radius: '12',
     css: '.glass-card { border-color: rgba(244, 63, 94, 0.4) !important; box-shadow: 0 0 20px rgba(244, 63, 94, 0.15) !important; }'
   },
   {
@@ -60,96 +60,62 @@ const THEME_PRESETS = [
   }
 ];
 
-const PRESET_SAMPLE_SERVICES = [
-  {
-    id: 'preview-proxmox',
-    name: 'Proxmox VE',
-    description: 'Virtualization management platform for VMs and LXC containers.',
-    url: 'https://192.168.1.10:8006',
-    icon: 'proxmox',
-    category_name: 'Infrastructure',
-    tags: [{ id: 1, name: 'hypervisor', color: '#e57000' }],
-    custom_badge: 'Node 01',
-    uptime_percentage: '99.9',
-    history: [{ status: 'online', responseTime: 14 }, { status: 'online', responseTime: 18 }, { status: 'online', responseTime: 12 }]
-  },
-  {
-    id: 'preview-ha',
-    name: 'Home Assistant',
-    description: 'Open source home automation that puts local control and privacy first.',
-    url: 'http://192.168.1.30:8123',
-    icon: 'home-assistant',
-    category_name: 'Smart Home',
-    tags: [{ id: 3, name: 'zigbee', color: '#0284c7' }],
-    custom_badge: 'Hub',
-    uptime_percentage: '100.0',
-    history: [{ status: 'online', responseTime: 22 }, { status: 'online', responseTime: 20 }]
-  }
-];
+const PRESET_SAMPLE_SERVICE = {
+  id: 'preview-proxmox',
+  name: 'Proxmox VE',
+  description: 'Główny węzeł wirtualizacji dla maszyn wirtualnych i kontenerów LXC.',
+  url: 'https://192.168.1.10:8006',
+  icon: 'proxmox',
+  category_name: 'Infrastruktura',
+  tags: [{ id: 1, name: 'hypervisor', color: '#e57000' }],
+  custom_badge: 'Node 01',
+  uptime_percentage: '99.9',
+  health_status: 'online',
+  health_response_time: 14,
+  favorite: 1
+};
 
 export default function AppearanceSettings() {
   const { settings, updateSettings, loading } = useSettings();
-  const { services: userServices } = useServices();
   const { theme, toggleTheme, setTheme, accentColor, setAccentColor } = useTheme();
+  const { addToast } = useToast();
   
   const [formData, setFormData] = useState({
     tile_style: 'default',
     tile_size: 'medium',
-    tile_border_radius: '20',
+    tile_border_radius: '18',
     grid_gap: '16',
     grid_columns: '4',
     background_url: '',
-    background_opacity: '0',
+    background_opacity: '100',
     background_blur: '0',
     custom_css: '',
-    theme_preset: 'umbrel-dark'
+    theme_preset: 'nexus-dark'
   });
-  
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-
-  // Live Auto Health Probe State
-  const [previewSampleIndex, setPreviewSampleIndex] = useState(0);
-  const [liveStatus, setLiveStatus] = useState('online');
-  const [liveLatency, setLiveLatency] = useState(14);
-  const [probing, setProbing] = useState(false);
-
-  const activeSample = PRESET_SAMPLE_SERVICES[previewSampleIndex];
 
   useEffect(() => {
     if (settings) {
       setFormData({
         tile_style: settings.tile_style || 'default',
         tile_size: settings.tile_size || 'medium',
-        tile_border_radius: settings.tile_border_radius || '20',
+        tile_border_radius: settings.tile_border_radius || '18',
         grid_gap: settings.grid_gap || '16',
         grid_columns: settings.grid_columns || '4',
         background_url: settings.background_url || '',
-        background_opacity: settings.background_opacity || '0',
+        background_opacity: settings.background_opacity || '100',
         background_blur: settings.background_blur || '0',
         custom_css: settings.custom_css || '',
-        theme_preset: settings.theme_preset || 'umbrel-dark'
+        theme_preset: settings.theme_preset || 'nexus-dark'
       });
     }
   }, [settings]);
 
-  // Handle Custom CSS Live Injection
-  useEffect(() => {
-    let styleTag = document.getElementById('nexuspanel-custom-css');
-    if (!styleTag) {
-      styleTag = document.createElement('style');
-      styleTag.id = 'nexuspanel-custom-css';
-      document.head.appendChild(styleTag);
-    }
-    styleTag.innerHTML = formData.custom_css || '';
-  }, [formData.custom_css]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const applyPreset = (preset) => {
@@ -157,11 +123,12 @@ export default function AppearanceSettings() {
     setAccentColor(preset.accent);
     setFormData(prev => ({
       ...prev,
-      theme_preset: preset.id,
       tile_style: preset.tileStyle,
       tile_border_radius: preset.radius,
-      custom_css: preset.css
+      custom_css: preset.css,
+      theme_preset: preset.id
     }));
+    addToast(`Zastosowano motyw ${preset.name}`, 'info');
   };
 
   const handleFileUpload = async (e) => {
@@ -170,15 +137,14 @@ export default function AppearanceSettings() {
 
     const data = new FormData();
     data.append('file', file);
-    setUploading(true);
 
+    setUploading(true);
     try {
-      const res = await api.upload.uploadImage(data);
-      if (res.data?.url) {
-        setFormData(prev => ({ ...prev, background_url: res.data.url }));
-      }
+      const res = await api.upload.uploadFile(data);
+      setFormData(prev => ({ ...prev, background_url: res.data.url }));
+      addToast('Tapeta została przesłana pomyślnie', 'success');
     } catch (err) {
-      alert('Upload failed: ' + (err.response?.data?.error || err.message));
+      addToast('Błąd przesyłania tapety: ' + (err.response?.data?.error || err.message), 'error');
     } finally {
       setUploading(false);
     }
@@ -187,15 +153,21 @@ export default function AppearanceSettings() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await updateSettings({ ...formData, theme, accent_color: accentColor });
-    setSaving(false);
+    try {
+      await updateSettings({ ...formData, theme, accent_color: accentColor });
+      addToast('Zapisano ustawienia wyglądu i motywów', 'success');
+    } catch (err) {
+      addToast('Błąd zapisywania ustawień', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const livePreviewService = {
-    ...activeSample,
+    ...PRESET_SAMPLE_SERVICE,
     color: accentColor,
-    health_status: liveStatus,
-    health_response_time: liveLatency,
+    health_status: 'online',
+    health_response_time: 14,
     health_check_enabled: 1,
     favorite: 1,
     open_new_tab: 1
@@ -208,14 +180,14 @@ export default function AppearanceSettings() {
     show_status_indicators: 'true'
   };
 
-  if (loading) return <div className="p-8 text-center text-text-secondary">Loading settings...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500">Ładowanie ustawień...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       <div>
-        <h2 className="text-2xl font-extrabold text-text-primary tracking-tight">Wygląd, Motywy i Custom CSS</h2>
-        <p className="text-sm text-text-secondary mt-1">
-          Dostosuj styl kafelków, gotowe motywy, własne reguły CSS oraz tapetę dashboardu.
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Wygląd, Motywy i Custom CSS</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          Dostosuj styl kafelków, gotowe motywy, własne reguły CSS oraz tapetę pulpitu.
         </p>
       </div>
       
@@ -227,10 +199,10 @@ export default function AppearanceSettings() {
         <form onSubmit={handleSubmit} className="xl:col-span-7 space-y-6">
           
           {/* Theme Presets */}
-          <div className="p-5 rounded-2xl glass-card space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-              <Sparkles className="w-5 h-5 text-accent" />
-              <h3 className="text-base font-bold text-text-primary">Gotowe Motywy Systemowe</h3>
+          <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+            <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Gotowe Motywy Systemowe</h3>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -239,51 +211,56 @@ export default function AppearanceSettings() {
                   key={preset.id}
                   type="button"
                   onClick={() => applyPreset(preset)}
-                  className={`p-3 rounded-2xl text-left transition-all border ${
+                  className={`p-3 rounded-2xl text-left transition-all border cursor-pointer ${
                     formData.theme_preset === preset.id 
                       ? 'border-accent bg-accent/15 shadow-md shadow-accent/20 scale-[1.02]' 
-                      : 'border-white/10 glass-pill hover:border-white/20'
+                      : 'border-black/[0.08] dark:border-white/10 glass-pill hover:border-accent/40'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: preset.accent }} />
                     {formData.theme_preset === preset.id && <Check className="w-3.5 h-3.5 text-accent" />}
                   </div>
-                  <span className="font-bold text-xs text-text-primary block truncate">{preset.name}</span>
-                  <span className="text-[10px] text-text-secondary block capitalize">{preset.theme} mode</span>
+                  <span className="font-bold text-xs text-slate-900 dark:text-white block truncate">{preset.name}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block capitalize">
+                    {preset.theme === 'dark' ? 'Tryb Ciemny' : 'Tryb Jasny'}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Color & Mode Toggle */}
-          <div className="p-5 rounded-2xl glass-card space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-              <Palette className="w-5 h-5 text-accent" />
-              <h3 className="text-base font-bold text-text-primary">Paleta Kolorów i Tryb</h3>
+          <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+            <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <Palette className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Paleta Kolorów i Tryb</h3>
             </div>
             
             <div className="flex items-center justify-between p-3.5 rounded-xl glass-pill">
               <div>
-                <span className="font-bold text-xs sm:text-sm text-text-primary block">Tryb Kolorystyczny</span>
-                <span className="text-xs text-text-secondary">Aktualny: {theme === 'dark' ? 'Tryb Ciemny' : 'Tryb Jasny'}</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">Tryb Kolorystyczny</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">Aktualny: {theme === 'dark' ? 'Tryb Ciemny' : 'Tryb Jasny'}</span>
               </div>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/25 hover:scale-105 active:scale-95 transition-all"
+                className="px-4 py-2 rounded-xl bg-accent text-white text-xs font-bold shadow-md shadow-accent/25 hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                Przełącz na {theme === 'dark' ? 'Jasny' : 'Ciemny'}
+                Przełącz na {theme === 'dark' ? 'Jasny ☀️' : 'Ciemny 🌙'}
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            {/* Symmetrical 2x7 color palette */}
+            <div className="grid grid-cols-7 gap-2.5 max-w-sm">
               {DEFAULT_COLORS.map(color => (
                 <button
                   key={color}
                   type="button"
-                  className={`w-9 h-9 rounded-full border-2 transition-all hover:scale-110 active:scale-95 shadow-md ${
-                    accentColor === color ? 'border-white ring-4 ring-accent/30 scale-110' : 'border-transparent'
+                  className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 active:scale-95 shadow-md cursor-pointer ${
+                    accentColor?.toLowerCase() === color.toLowerCase() 
+                      ? 'border-slate-900 dark:border-white ring-4 ring-accent/30 scale-110' 
+                      : 'border-transparent opacity-90 hover:opacity-100'
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setAccentColor(color)}
@@ -293,35 +270,50 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Dimensions & Grid */}
-          <div className="p-5 rounded-2xl glass-card space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-              <Sliders className="w-5 h-5 text-accent" />
-              <h3 className="text-base font-bold text-text-primary">Tile Layout & Dimensions</h3>
+          <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+            <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <Sliders className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Układ Kafelków i Wymiary</h3>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Tile Style Variant"
-                name="tile_style"
-                type="select"
-                value={formData.tile_style}
-                onChange={handleChange}
-                options={Object.entries(TILE_STYLES).map(([val, label]) => ({ value: val, label }))}
-              />
-              <Input
-                label="Tile Size"
-                name="tile_size"
-                type="select"
-                value={formData.tile_size}
-                onChange={handleChange}
-                options={Object.entries(TILE_SIZES).map(([val, label]) => ({ value: val, label }))}
-              />
+              <div>
+                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                  Styl Kafelka
+                </label>
+                <select
+                  name="tile_style"
+                  value={formData.tile_style}
+                  onChange={handleChange}
+                  className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                >
+                  <option value="default">Domyślny (Zrównoważony)</option>
+                  <option value="compact">Kompaktowy (Mini Pigułka)</option>
+                  <option value="detailed">Szczegółowy (Rozszerzony)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                  Rozmiar Kafelka
+                </label>
+                <select
+                  name="tile_size"
+                  value={formData.tile_size}
+                  onChange={handleChange}
+                  className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                >
+                  <option value="small">Mały</option>
+                  <option value="medium">Średni</option>
+                  <option value="large">Duży</option>
+                </select>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div className="p-3 rounded-xl glass-pill space-y-1.5">
-                <div className="flex justify-between text-xs font-bold text-text-primary">
-                  <span>Corner Radius</span>
+                <div className="flex justify-between text-xs font-bold text-slate-900 dark:text-white">
+                  <span>Zaokrąglenie narożników</span>
                   <span className="text-accent font-mono">{formData.tile_border_radius}px</span>
                 </div>
                 <input
@@ -335,8 +327,8 @@ export default function AppearanceSettings() {
               </div>
 
               <div className="p-3 rounded-xl glass-pill space-y-1.5">
-                <div className="flex justify-between text-xs font-bold text-text-primary">
-                  <span>Grid Gap Spacing</span>
+                <div className="flex justify-between text-xs font-bold text-slate-900 dark:text-white">
+                  <span>Odstępy między kafelkami (Gap)</span>
                   <span className="text-accent font-mono">{formData.grid_gap}px</span>
                 </div>
                 <input
@@ -352,26 +344,26 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Wallpaper Upload & URL */}
-          <div className="p-5 rounded-2xl glass-card space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-              <Image className="w-5 h-5 text-accent" />
-              <h3 className="text-base font-bold text-text-primary">Wallpaper & Background Upload</h3>
+          <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+            <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <Image className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Własna Tapeta Pulpitu</h3>
             </div>
             
             <div className="flex gap-2">
               <div className="flex-1">
                 <Input
-                  label="Wallpaper Image URL / File Path"
+                  label="Adres URL tapety / Ścieżka pliku"
                   name="background_url"
                   value={formData.background_url}
                   onChange={handleChange}
-                  placeholder="/uploads/wallpaper.png or https://..."
+                  placeholder="/uploads/wallpaper.png lub https://..."
                 />
               </div>
               <div className="pt-6">
-                <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl glass-pill hover:bg-white/10 text-xs font-bold text-text-primary shadow-sm hover:scale-105 active:scale-95 transition-all">
+                <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl glass-pill hover:bg-black/[0.04] dark:hover:bg-white/10 text-xs font-bold text-slate-900 dark:text-white shadow-sm hover:scale-105 active:scale-95 transition-all">
                   <Upload className="w-4 h-4 text-accent" />
-                  <span>{uploading ? 'Uploading...' : 'Upload'}</span>
+                  <span>{uploading ? 'Wysyłanie...' : 'Wgraj plik'}</span>
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </label>
               </div>
@@ -379,10 +371,10 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Custom CSS Code Editor */}
-          <div className="p-5 rounded-2xl glass-card space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-              <Code2 className="w-5 h-5 text-accent" />
-              <h3 className="text-base font-bold text-text-primary">Custom CSS Rules (Live Inject)</h3>
+          <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+            <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <Code2 className="w-4 h-4 text-accent" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Własne reguły Custom CSS</h3>
             </div>
             
             <Input
@@ -390,13 +382,13 @@ export default function AppearanceSettings() {
               type="textarea"
               value={formData.custom_css}
               onChange={handleChange}
-              placeholder="/* Add custom CSS rules here (e.g. .glass-card { filter: contrast(1.1); }) */"
-              helperText="Changes are injected live into the page without requiring a reload."
+              placeholder="/* Wpisz własne reguły CSS (np. .glass-card { filter: contrast(1.1); }) */"
+              helperText="Zmiany są wstrzykiwane na żywo na pulpicie bez konieczności przeładowania strony."
             />
           </div>
 
-          <Button type="submit" isLoading={saving} className="px-6 py-3 text-sm font-bold shadow-lg shadow-accent/25">
-            Save Appearance & Themes
+          <Button type="submit" isLoading={saving} className="px-6 py-3 text-xs font-bold shadow-lg shadow-accent/25">
+            Zapisz ustawienia wyglądu
           </Button>
         </form>
 
@@ -404,13 +396,13 @@ export default function AppearanceSettings() {
             RIGHT: REAL-TIME PREVIEW STAGE (5 cols)
             ============================================ */}
         <div className="xl:col-span-5 sticky top-20 space-y-4">
-          <div className="p-5 rounded-[28px] glass-card space-y-4 border border-white/20 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <h3 className="text-sm font-extrabold text-text-primary tracking-tight">Podgląd kafelka na żywo</h3>
-              <span className="text-[11px] font-mono text-emerald-400 font-bold">● LIVE 14ms</span>
+          <div className="p-5 rounded-[28px] glass-card space-y-4 border border-black/[0.08] dark:border-white/15 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-black/[0.06] dark:border-white/10">
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">Podgląd kafelka na żywo</h3>
+              <span className="text-[11px] font-mono text-emerald-500 font-bold">● LIVE 14ms</span>
             </div>
 
-            <div className="p-4 rounded-[20px] bg-black/30 border border-white/10 backdrop-blur-md">
+            <div className="p-4 rounded-[20px] bg-black/[0.03] dark:bg-black/30 border border-black/[0.06] dark:border-white/10 backdrop-blur-md">
               <ServiceCard 
                 service={livePreviewService} 
                 overrideSettings={liveOverrideSettings}

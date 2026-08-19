@@ -1,14 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { Download, Upload, AlertTriangle, Check, RotateCcw, Trash2, ShieldAlert } from 'lucide-react';
+import { Download, Upload, AlertTriangle, RotateCcw, Trash2 } from 'lucide-react';
 import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
-import { useNavigate } from 'react-router-dom';
 
 export default function BackupSettings() {
   const { addToast } = useToast();
-  const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   const [importing, setImporting] = useState(false);
@@ -100,8 +98,8 @@ export default function BackupSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-text-primary tracking-tight">Kopia Zapasowa i Reset</h2>
-        <p className="text-sm text-text-secondary mt-1">
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kopia Zapasowa i Reset</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Eksportuj konfigurację do pliku, przywracaj kopie zapasowe lub zresetuj NexusPanel do stanu fabrycznego.
         </p>
       </div>
@@ -109,14 +107,14 @@ export default function BackupSettings() {
       <div className="max-w-3xl space-y-6">
         
         {/* 1. Export Section */}
-        <section className="p-6 glass-card border border-white/10 rounded-2xl">
+        <section className="p-6 glass-card border border-black/[0.08] dark:border-white/10 rounded-2xl">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-accent/15 text-accent flex items-center justify-center flex-shrink-0 shadow-md">
               <Download className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-2">
-              <h3 className="text-base font-extrabold text-text-primary">Eksportuj konfigurację</h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Eksportuj konfigurację</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 Pobierz plik JSON zawierający wszystkie Twoje usługi, kategorie, tagi oraz ustawienia wyglądu. Hasła i konta użytkowników nie są eksportowane.
               </p>
               <Button onClick={handleExport} isLoading={exporting} icon={Download} size="sm">
@@ -127,18 +125,18 @@ export default function BackupSettings() {
         </section>
 
         {/* 2. Import Section */}
-        <section className="p-6 glass-card border border-white/10 rounded-2xl">
+        <section className="p-6 glass-card border border-black/[0.08] dark:border-white/10 rounded-2xl">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-400 flex items-center justify-center flex-shrink-0 shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
               <Upload className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-3">
-              <h3 className="text-base font-extrabold text-text-primary">Importuj konfigurację</h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Importuj konfigurację</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 Przywróć układ i usługi z wcześniej pobranego pliku JSON kopii zapasowej NexusPanel.
               </p>
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-300 text-xs">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-400" />
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-700 dark:text-amber-300 text-xs">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" />
                 <span>Uwaga: Import kopii zastąpi obecne usługi, kategorie i motyw zawartością pliku.</span>
               </div>
               
@@ -165,18 +163,18 @@ export default function BackupSettings() {
         {/* 3. Factory Reset (Danger Zone) */}
         <section className="p-6 glass-card border border-rose-500/30 bg-gradient-to-b from-rose-500/10 via-transparent to-transparent rounded-2xl">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0 shadow-md border border-rose-500/30">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-md border border-rose-500/30">
               <RotateCcw className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-rose-300">Przywrócenie ustawień fabrycznych</h3>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                <h3 className="text-base font-extrabold text-rose-600 dark:text-rose-300">Przywrócenie ustawień fabrycznych</h3>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30">
                   Strefa niebezpieczna
                 </span>
               </div>
               
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 Całkowicie czyści bazę danych i przywraca NexusPanel do stanu czystej instalacji. Wszystkie usługi, kategorie, tagi i personalizacje zostaną trwale usunięte.
               </p>
 

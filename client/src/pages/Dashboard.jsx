@@ -9,7 +9,7 @@ import CategorySection from '../components/dashboard/CategorySection';
 import SkeletonCard from '../components/common/SkeletonCard';
 import ServiceForm from '../components/admin/ServiceForm';
 import NetworkDiscoveryModal from '../components/scanner/NetworkDiscoveryModal';
-import { Filter, Star, LayoutGrid, Layers, Plus, Server, Search, Sparkles, Zap, Radar, ArrowUpRight, X } from 'lucide-react';
+import { LayoutGrid, Star, Plus, Radar } from 'lucide-react';
 import Button from '../components/common/Button';
 
 export default function Dashboard() {
@@ -43,7 +43,7 @@ export default function Dashboard() {
       ...svc,
       category: svc.category_id ? { 
         id: svc.category_id, 
-        name: svc.category_name || 'Uncategorized' 
+        name: svc.category_name || 'Bez kategorii' 
       } : null,
       status: svc.health_status || 'unknown',
       openInNewTab: svc.open_new_tab === 1 || svc.open_new_tab === true,
@@ -83,7 +83,7 @@ export default function Dashboard() {
         catMap[svc.category_id].services.push(svc);
       } else if (svc.category_id) {
         catMap[svc.category_id] = {
-          category: { id: svc.category_id, name: svc.category_name || 'Category', color: svc.color || '#6366f1' },
+          category: { id: svc.category_id, name: svc.category_name || 'Kategoria', color: svc.color || '#6366f1' },
           services: [svc]
         };
       } else {
@@ -104,27 +104,12 @@ export default function Dashboard() {
     refreshServices();
   };
 
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter' && filteredServicesList.length > 0) {
-      e.preventDefault();
-      const first = filteredServicesList[0];
-      if (first.open_new_tab !== 0) {
-        window.open(first.url, '_blank', 'noopener,noreferrer');
-      } else {
-        window.location.href = first.url;
-      }
-    } else if (e.key === 'Escape') {
-      setSearchQuery('');
-      searchInputRef.current?.blur();
-    }
-  };
-
   if (servicesLoading || categoriesLoading) {
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
         <div className="h-16 rounded-[24px] glass-card animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       </div>
     );
@@ -174,25 +159,25 @@ export default function Dashboard() {
     <div className="p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
       
       {/* 1. Sleek Startpage Speed-Dial Hero Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-2">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-2 border-b border-black/[0.05] dark:border-white/[0.06] pb-4">
         
-        {/* Title / Subtitle */}
+        {/* Title / Subtitle with High-Contrast Theming */}
         <div className="text-left">
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             {settings?.user_name ? `Witaj, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 mt-0.5 font-medium">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">
             {t('dashboard.subtitle', 'Twój szybki ekran startowy — przechodź natychmiast do swoich aplikacji i usług.')}
           </p>
         </div>
 
         {/* Right: Quick Action Buttons */}
-        <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap sm:flex-nowrap">
           <Button
             variant="secondary"
             icon={Radar}
             onClick={() => setIsScanModalOpen(true)}
-            className="flex-1 sm:flex-none glass-card hover:border-accent/40 text-xs font-bold"
+            className="flex-1 sm:flex-none glass-card hover:border-accent/40 text-xs font-bold text-slate-800 dark:text-slate-200"
           >
             Skanuj sieć LAN ⚡
           </Button>
@@ -200,7 +185,7 @@ export default function Dashboard() {
           <Button
             icon={Plus}
             onClick={() => setIsAddModalOpen(true)}
-            className="flex-1 sm:flex-none shadow-lg shadow-accent/25 text-xs font-bold"
+            className="flex-1 sm:flex-none shadow-lg shadow-accent/25 text-xs font-bold text-white bg-accent hover:bg-accent-hover"
           >
             {t('dashboard.add_app', '+ Dodaj aplikację')}
           </Button>
@@ -208,17 +193,17 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Segmented Category Filter Capsule Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
         <button
           onClick={() => setSelectedFilter('all')}
           className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
             selectedFilter === 'all'
               ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-[1.02]'
-              : 'glass-pill text-slate-300 hover:text-white'
+              : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <LayoutGrid className="w-3.5 h-3.5" />
-          <span>{t('dashboard.all_services', 'Wszystkie')}</span>
+          <span>{t('dashboard.all_services', 'Wszystkie aplikacje')}</span>
           <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
             {enrichedServices.filter(s => s.enabled !== 0).length}
           </span>
@@ -230,7 +215,7 @@ export default function Dashboard() {
             className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
               selectedFilter === 'favorites'
                 ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/25 scale-[1.02]'
-                : 'glass-pill text-slate-300 hover:text-white'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Star className="w-3.5 h-3.5 fill-current" />
@@ -248,50 +233,72 @@ export default function Dashboard() {
             className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
               selectedFilter === String(category.id)
                 ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-[1.02]'
-                : 'glass-pill text-slate-300 hover:text-white'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: category.color || '#6366f1' }} />
             <span>{category.name}</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
               {catServices.length}
             </span>
           </button>
         ))}
-      </div>
 
-      {/* 3. App Sections Grid */}
-      <div className="space-y-8">
-        {/* Pinned Favorites Section */}
-        {showFavorites && (
-          <FavoritesSection 
-            services={favorites}
-            favorites={favorites} 
-            onFavoriteToggle={handleFavoriteToggle} 
-          />
-        )}
-
-        {/* Categorized Sections */}
-        {filteredCategories.map(({ category, services: catServices }) => (
-          <CategorySection
-            key={category.id}
-            category={category}
-            services={catServices}
-            onFavoriteToggle={handleFavoriteToggle}
-          />
-        ))}
-
-        {/* Uncategorized Other Section */}
-        {showOther && (
-          <CategorySection
-            category={{ name: 'Inne usługi', color: '#64748b' }}
-            services={other}
-            onFavoriteToggle={handleFavoriteToggle}
-          />
+        {other.length > 0 && (
+          <button
+            onClick={() => setSelectedFilter('other')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
+              selectedFilter === 'other'
+                ? 'bg-accent text-white shadow-lg shadow-accent/25 scale-[1.02]'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>{t('dashboard.other_services', 'Inne')}</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
+              {other.length}
+            </span>
+          </button>
         )}
       </div>
 
-      {/* 4. Quick Add Service Modal */}
+      {/* 3. Favorites Section (if any & selected) */}
+      {showFavorites && (
+        <FavoritesSection 
+          favorites={favorites} 
+          gridCols={settings?.grid_columns || '4'}
+          gridGap={settings?.grid_gap || '16'}
+          onFavoriteToggle={handleFavoriteToggle}
+        />
+      )}
+
+      {/* 4. Categorized Service Sections */}
+      {filteredCategories.map(({ category, services: catServices }) => (
+        <CategorySection
+          key={category.id}
+          category={category}
+          services={catServices}
+          gridCols={settings?.grid_columns || '4'}
+          gridGap={settings?.grid_gap || '16'}
+          onFavoriteToggle={handleFavoriteToggle}
+        />
+      ))}
+
+      {/* 5. Uncategorized Services Section */}
+      {showOther && (
+        <CategorySection
+          category={{ 
+            id: 'other', 
+            name: t('dashboard.other_services', 'Inne usługi'), 
+            icon: 'folder', 
+            color: '#6366f1' 
+          }}
+          services={other}
+          gridCols={settings?.grid_columns || '4'}
+          gridGap={settings?.grid_gap || '16'}
+          onFavoriteToggle={handleFavoriteToggle}
+        />
+      )}
+
+      {/* Modal Dialogs */}
       {isAddModalOpen && (
         <ServiceForm
           onClose={() => setIsAddModalOpen(false)}
@@ -302,7 +309,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* 5. Network Auto-Discovery Setup Wizard Modal */}
       {isScanModalOpen && (
         <NetworkDiscoveryModal
           onClose={() => setIsScanModalOpen(false)}
@@ -312,6 +318,7 @@ export default function Dashboard() {
           }}
         />
       )}
+
     </div>
   );
 }

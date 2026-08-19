@@ -7,7 +7,6 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import ColorPicker from '../common/ColorPicker';
 import IconPicker from '../common/IconPicker';
-import BrandIcon from '../common/BrandIcon';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay
 } from '@dnd-kit/core';
@@ -45,10 +44,10 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
       className={`flex items-center gap-3.5 p-3.5 rounded-2xl glass-card transition-all ${
         isDragging 
           ? 'shadow-2xl border-accent opacity-90 scale-[1.02]' 
-          : 'hover:border-white/20'
+          : 'hover:border-black/[0.15] dark:hover:border-white/20'
       }`}
     >
-      <div {...attributes} {...listeners} className="cursor-grab text-text-secondary/50 hover:text-text-primary p-1 -ml-1">
+      <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 -ml-1">
         <GripVertical className="w-5 h-5" />
       </div>
       
@@ -63,24 +62,26 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className="font-bold text-sm text-text-primary block truncate">{category.name}</span>
-        <span className="text-[11px] text-text-secondary">
-          {category.service_count !== undefined ? `${category.service_count} services assigned` : 'Category'}
+        <span className="font-extrabold text-sm text-slate-900 dark:text-white block truncate">{category.name}</span>
+        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          {category.service_count !== undefined 
+            ? `${category.service_count} ${category.service_count === 1 ? 'przypisana usługa' : category.service_count >= 2 && category.service_count <= 4 ? 'przypisane usługi' : 'przypisanych usług'}`
+            : 'Kategoria'}
         </span>
       </div>
 
       <div className="flex items-center gap-1">
         <button 
           onClick={() => onEdit(category)} 
-          className="p-2 text-text-secondary hover:text-accent hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
-          title="Edit category"
+          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
+          title="Edytuj kategorię"
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button 
           onClick={() => onDelete(category)} 
-          className="p-2 text-text-secondary hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95"
-          title="Delete category"
+          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95"
+          title="Usuń kategorię"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -95,185 +96,201 @@ export default function CategoryManager() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const { addToast } = useToast();
-  const [activeId, setActiveId] = useState(null);
-
-  // Form State
-  const [formData, setFormData] = useState({ name: '', icon: 'folder', color: '#6366f1' });
-  const [formLoading, setFormLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const { addToast } = useToast();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    icon: 'folder',
+    color: '#6366f1'
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   React.useEffect(() => {
     setLocalItems(categories);
   }, [categories]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  const handleDragStart = (e) => setActiveId(e.active.id);
-
   const handleDragEnd = async (event) => {
     const { active, over } = event;
-    setActiveId(null);
-    if (!over) return;
-    
-    if (active.id !== over.id) {
-      const oldIndex = localItems.findIndex(i => i.id === active.id);
-      const newIndex = localItems.findIndex(i => i.id === over.id);
-      
-      const newArray = arrayMove(localItems, oldIndex, newIndex);
-      setLocalItems(newArray);
-      
-      try {
-        await api.categories.reorderCategories({ 
-          items: newArray.map((c, index) => ({ id: c.id, sort_order: index })) 
-        });
-        addToast('Category order updated', 'info');
-      } catch (err) {
-        addToast('Failed to reorder categories', 'error');
-      }
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = localItems.findIndex(item => item.id === active.id);
+    const newIndex = localItems.findIndex(item => item.id === over.id);
+
+    const reordered = arrayMove(localItems, oldIndex, newIndex);
+    setLocalItems(reordered);
+
+    try {
+      const itemsPayload = reordered.map((item, index) => ({ id: item.id, sort_order: index }));
+      await api.categories.reorderCategories({ items: itemsPayload });
+      addToast('Zaktualizowano kolejność kategorii', 'success');
+      refresh();
+    } catch (err) {
+      addToast('Nie udało się zapisać kolejności', 'error');
+      setLocalItems(categories);
     }
   };
 
-  const handleAdd = () => {
+  const handleOpenAdd = () => {
     setEditingCat(null);
     setFormData({ name: '', icon: 'folder', color: '#6366f1' });
     setIsFormOpen(true);
   };
 
-  const handleEdit = (cat) => {
+  const handleOpenEdit = (cat) => {
     setEditingCat(cat);
     setFormData({ name: cat.name, icon: cat.icon || 'folder', color: cat.color || '#6366f1' });
     setIsFormOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      addToast('Nazwa kategorii jest wymagana', 'error');
+      return;
+    }
+
     try {
-      await api.categories.deleteCategory(deleteConfirm.id);
-      addToast(`Deleted category "${deleteConfirm.name}"`, 'success');
+      if (editingCat) {
+        await api.categories.updateCategory(editingCat.id, formData);
+        addToast(`Zaktualizowano kategorię "${formData.name}"`, 'success');
+      } else {
+        await api.categories.createCategory(formData);
+        addToast(`Utworzono kategorię "${formData.name}"`, 'success');
+      }
+      setIsFormOpen(false);
       refresh();
     } catch (err) {
-      addToast('Failed to delete category', 'error');
+      addToast(err.response?.data?.error || 'Błąd zapisywania kategorii', 'error');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await api.categories.deleteCategory(deleteConfirm.id);
+      addToast(`Usunięto kategorię "${deleteConfirm.name}"`, 'success');
+      refresh();
+    } catch (err) {
+      addToast('Nie udało się usunąć kategorii', 'error');
     } finally {
       setDeleteConfirm(null);
     }
   };
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      addToast('Category name is required', 'error');
-      return;
-    }
-
-    setFormLoading(true);
-    try {
-      if (editingCat) {
-        await api.categories.updateCategory(editingCat.id, formData);
-        addToast(`Updated category "${formData.name}"`, 'success');
-      } else {
-        await api.categories.createCategory(formData);
-        addToast(`Created category "${formData.name}"`, 'success');
-      }
-      setIsFormOpen(false);
-      refresh();
-    } catch (err) {
-      addToast(err.response?.data?.error || 'Error saving category', 'error');
-    } finally {
-      setFormLoading(false);
-    }
-  };
-
-  if (loading) return <div className="p-8 text-center text-text-secondary animate-pulse">Loading categories...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">Ładowanie kategorii...</div>;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold text-text-primary tracking-tight">Category Manager</h2>
-          <p className="text-xs sm:text-sm text-text-secondary mt-0.5">
-            Organize homelab tiles into sections and custom categories.
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Zarządzanie Kategoriami</h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Grupuj kafelki w sekcje (np. Infrastruktura, Smart Home, Media).
           </p>
         </div>
-        <Button icon={Plus} onClick={handleAdd}>Add Category</Button>
+        <Button icon={Plus} onClick={handleOpenAdd} className="shadow-lg shadow-accent/25 text-xs font-bold">
+          + Dodaj kategorię
+        </Button>
       </div>
 
-      {localItems.length === 0 ? (
-        <div className="text-center py-16 text-text-secondary border border-dashed border-white/15 rounded-[24px] glass-card p-6">
-          <p className="font-bold text-base text-text-primary mb-1">No categories created</p>
-          <p className="text-xs text-text-secondary max-w-sm mx-auto mb-4">
-            Categories help you group services (e.g. Infrastructure, Smart Home, Media).
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={localItems.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2.5">
+            {localItems.map(category => (
+              <SortableCategory
+                key={category.id}
+                id={category.id}
+                category={category}
+                onEdit={handleOpenEdit}
+                onDelete={setDeleteConfirm}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {localItems.length === 0 && (
+        <div className="py-12 text-center text-slate-500 border border-dashed border-black/[0.1] dark:border-white/10 rounded-[24px] glass-card p-6">
+          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">Brak utworzonych kategorii</p>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
+            Kategorie pozwalają dzielić usługi na logiczne bloki na pulpicie.
           </p>
-          <Button icon={Plus} size="sm" onClick={handleAdd}>Add First Category</Button>
+          <Button icon={Plus} size="sm" onClick={handleOpenAdd}>
+            + Dodaj pierwszą kategorię
+          </Button>
         </div>
-      ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <SortableContext items={localItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2.5">
-              {localItems.map(cat => (
-                <SortableCategory key={cat.id} id={cat.id} category={cat} onEdit={handleEdit} onDelete={setDeleteConfirm} />
-              ))}
-            </div>
-          </SortableContext>
-          <DragOverlay>
-            {activeId ? <div className="h-16 rounded-2xl glass-card border-2 border-accent opacity-90 shadow-2xl" /> : null}
-          </DragOverlay>
-        </DndContext>
       )}
 
       {isFormOpen && (
-        <Modal title={editingCat ? `Edit "${formData.name}"` : 'Add New Category'} onClose={() => setIsFormOpen(false)}>
-          <form onSubmit={handleFormSubmit} className="space-y-4">
-            <Input 
-              label="Category Name" 
-              value={formData.name} 
-              onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))} 
-              required 
-              placeholder="e.g. Infrastructure, Storage, Smart Home"
+        <Modal 
+          title={editingCat ? `Edytuj: ${editingCat.name}` : '+ Nowa kategoria'} 
+          onClose={() => setIsFormOpen(false)}
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Nazwa kategorii"
+              value={formData.name}
+              onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              required
+              placeholder="np. Infrastruktura, Media, Smart Home"
               autoFocus
             />
+
             <div>
-              <label className="block text-xs font-bold text-text-primary mb-1.5 tracking-tight">Category Color</label>
-              <ColorPicker color={formData.color} onChange={c => setFormData(prev => ({ ...prev, color: c }))} />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-text-primary mb-1.5 tracking-tight">Category Icon</label>
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md flex-shrink-0"
-                  style={{ backgroundColor: formData.color }}
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                Ikona kategorii
+              </label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowIconPicker(true)}
+                  className="flex-1 text-xs py-2"
                 >
-                  {getLucideIcon(formData.icon) ? 
-                    React.createElement(getLucideIcon(formData.icon), { className: "w-5 h-5" }) : 
-                    <Folder className="w-5 h-5" />
-                  }
-                </div>
-                <Button type="button" variant="secondary" size="sm" onClick={() => setShowIconPicker(true)}>
-                  Choose Icon
+                  Wybierz ikonę z biblioteki
                 </Button>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-white/10">
-              <Button type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>Cancel</Button>
-              <Button type="submit" isLoading={formLoading}>Save Category</Button>
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 tracking-tight">
+                Kolor kategorii
+              </label>
+              <ColorPicker color={formData.color} onChange={c => setFormData(prev => ({ ...prev, color: c }))} />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t border-black/[0.06] dark:border-white/10">
+              <Button type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>
+                Anuluj
+              </Button>
+              <Button type="submit">
+                {editingCat ? 'Zapisz zmiany' : 'Utwórz kategorię'}
+              </Button>
             </div>
           </form>
         </Modal>
       )}
 
       {showIconPicker && (
-        <Modal title="Select Category Icon" onClose={() => setShowIconPicker(false)}>
-          <IconPicker onSelect={(icon) => { setFormData(prev => ({ ...prev, icon })); setShowIconPicker(false); }} />
-        </Modal>
+        <IconPicker
+          selectedIcon={formData.icon}
+          onSelect={icon => {
+            setFormData(prev => ({ ...prev, icon }));
+            setShowIconPicker(false);
+          }}
+          onClose={() => setShowIconPicker(false)}
+        />
       )}
 
       {deleteConfirm && (
         <ConfirmDialog
-          title={`Delete Category "${deleteConfirm.name}"?`}
-          message={`Services inside this category will not be deleted, but will become Uncategorized.`}
+          title={`Usunąć kategorię "${deleteConfirm.name}"?`}
+          message="Usługi przypisane do tej kategorii zostaną przeniesione do grupy 'Inne usługi'. Żadna usługa nie zostanie skasowana."
           onConfirm={handleDelete}
           onCancel={() => setDeleteConfirm(null)}
         />

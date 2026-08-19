@@ -31,12 +31,14 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
         res = await api.scanner.discover();
       }
 
-      const items = res.data?.discovered || [];
+      const rawItems = res.data?.discovered || [];
+      // Filter loopbacks
+      const items = rawItems.filter(item => item.host !== '127.0.0.1' && item.host !== 'localhost');
+
       if (res.data?.netInfo) {
         setNetInfo(res.data.netInfo);
       }
       setDiscovered(items);
-      // Pre-select all discovered items by default
       setSelectedIds(new Set(items.map(item => item.id)));
       
       if (items.length > 0) {
@@ -103,21 +105,21 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
       onClose={onClose}
       maxWidth="max-w-2xl"
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         
         {/* Banner with radar explanation & detected subnet info */}
-        <div className="p-4 rounded-2xl glass-card border border-white/20 space-y-3">
+        <div className="p-4 rounded-2xl glass-card border border-black/[0.08] dark:border-white/20 space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/25 flex-shrink-0">
-                <Radar className={`w-6 h-6 ${scanning ? 'animate-spin' : ''}`} />
+              <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white shadow-md flex-shrink-0">
+                <Radar className={`w-5 h-5 ${scanning ? 'animate-spin' : ''}`} />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm sm:text-base text-text-primary">
-                  {scanning ? 'Wyszukiwanie usług w sieci LAN...' : `Znaleziono ${discovered.length} usług`}
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                  {scanning ? 'Skanowanie podsieci LAN w toku...' : `Znaleziono ${discovered.length} aktywnych usług`}
                 </h3>
-                <p className="text-xs text-text-secondary mt-0.5">
-                  Automatycznie bada porty Proxmox, Home Assistant, Docker, NAS, Plex, Grafana itp.
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Bada porty Proxmox, Home Assistant, Docker, Portainer, NAS, Plex, Grafana itp.
                 </p>
               </div>
             </div>
@@ -125,146 +127,155 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => runScan()}
+              icon={RefreshCw}
               isLoading={scanning}
-              className="flex-shrink-0"
+              onClick={() => runScan()}
+              className="text-xs"
             >
-              <RefreshCw className="w-3.5 h-3.5 mr-1" />
-              <span>Skanuj ponownie</span>
+              Skanuj ponownie
             </Button>
           </div>
 
-          {/* Subnet & Gateway Live Badge */}
           {netInfo && (
-            <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/10 text-xs">
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl glass-pill font-mono font-bold text-text-primary">
-                <Network className="w-3.5 h-3.5 text-accent" />
-                <span>Podsieć: <strong className="text-accent">{netInfo.subnet}</strong></span>
+            <div className="flex items-center gap-2 pt-1 flex-wrap text-xs">
+              <span className="px-2.5 py-1 rounded-xl glass-pill font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Network className="w-3 h-3 text-accent" />
+                Podsieć: <b className="text-slate-900 dark:text-white">{netInfo.subnet}</b>
               </span>
-
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl glass-pill font-mono font-bold text-text-primary">
-                <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Brama / Router: <strong className="text-emerald-400">{netInfo.gatewayIp}</strong></span>
+              <span className="px-2.5 py-1 rounded-xl glass-pill font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Globe className="w-3 h-3 text-emerald-500" />
+                Brama: <b className="text-slate-900 dark:text-white">{netInfo.gatewayIp}</b>
               </span>
-
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl glass-pill font-mono font-bold text-text-primary">
-                <Cpu className="w-3.5 h-3.5 text-purple-400" />
-                <span>Twój IP: <strong className="text-purple-400">{netInfo.localIp}</strong></span>
+              <span className="px-2.5 py-1 rounded-xl glass-pill font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Cpu className="w-3 h-3 text-purple-400" />
+                Twój IP: <b className="text-slate-900 dark:text-white">{netInfo.localIp}</b>
               </span>
             </div>
           )}
         </div>
 
-        {/* Custom Host / Subnet IP input */}
+        {/* Custom target scan input */}
         <form onSubmit={handleCustomScan} className="flex gap-2">
           <input
             type="text"
             value={customIp}
             onChange={(e) => setCustomIp(e.target.value)}
-            placeholder={netInfo ? `np. ${netInfo.subnetPrefix}10, ${netInfo.subnetPrefix}20 (lub wpisz inny adres)` : 'np. 192.168.10.10, 192.168.1.10'}
-            className="flex-1 bg-black/40 border border-white/10 text-white placeholder:text-slate-500 rounded-xl px-3.5 py-2 text-xs font-medium focus:outline-none focus:border-accent"
+            placeholder="np. 192.168.10.10, 192.168.10.20 (lub wpisz inny adres IP)"
+            className="flex-1 bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400"
           />
           <Button type="submit" variant="secondary" size="sm" isLoading={scanning}>
             Skanuj IP
           </Button>
         </form>
 
-        {/* Select All Bar */}
+        {/* Action bar: Select all / Selected count */}
         {discovered.length > 0 && (
           <div className="flex items-center justify-between px-1 text-xs">
             <button
-              type="button"
               onClick={toggleSelectAll}
-              className="flex items-center gap-1.5 font-bold text-accent hover:underline"
+              className="flex items-center gap-2 font-bold text-accent hover:underline cursor-pointer"
             >
-              {selectedIds.size === discovered.length ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-              <span>{selectedIds.size === discovered.length ? 'Odznacz wszystkie' : 'Zaznacz wszystkie'}</span>
+              {selectedIds.size === discovered.length ? (
+                <>
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Odznacz wszystkie</span>
+                </>
+              ) : (
+                <>
+                  <Square className="w-4 h-4" />
+                  <span>Zaznacz wszystkie</span>
+                </>
+              )}
             </button>
-
-            <span className="text-text-secondary font-mono font-bold">
-              Wybrano {selectedIds.size} z {discovered.length}
+            <span className="font-semibold text-slate-500 dark:text-slate-400">
+              Wybrano: <b className="text-slate-900 dark:text-white">{selectedIds.size}</b> z {discovered.length}
             </span>
           </div>
         )}
 
-        {/* Discovered Items List */}
-        <div className="space-y-2.5 max-h-[48vh] overflow-y-auto custom-scrollbar pr-1">
-          {scanning ? (
-            <div className="p-12 text-center space-y-3">
-              <div className="w-10 h-10 border-3 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-text-secondary font-medium">Błyskawiczne badanie podsieci i otwartych portów w Twoim homelabie...</p>
+        {/* Discovered items list (Compact, balanced) */}
+        <div className="max-h-[42vh] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+          {scanning && discovered.length === 0 ? (
+            <div className="p-8 text-center space-y-2">
+              <RefreshCw className="w-6 h-6 animate-spin text-accent mx-auto" />
+              <p className="text-xs text-slate-500 font-medium">Badałem urządzenia w sieci LAN...</p>
             </div>
           ) : discovered.length === 0 ? (
-            <div className="p-8 text-center glass-card rounded-2xl text-xs text-text-secondary">
-              Nie wykryto otwartych portów homelabu. Wpisz powyżej adres IP swojego serwera lub dodaj usługę ręcznie.
+            <div className="p-8 text-center border border-dashed border-black/[0.1] dark:border-white/10 rounded-2xl">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">Nie wykryto aktywnych portów w podsieci</p>
+              <p className="text-xs text-slate-400 mt-1">Użyj pola powyżej, aby przeskanować konkretny adres IP hosta.</p>
             </div>
           ) : (
             discovered.map((item) => {
-              const isChecked = selectedIds.has(item.id);
+              const isSelected = selectedIds.has(item.id);
+              const color = item.color || '#6366f1';
+
               return (
                 <div
                   key={item.id}
                   onClick={() => toggleSelect(item.id)}
-                  className={`p-3.5 rounded-2xl glass-card flex items-center justify-between gap-3 cursor-pointer transition-all duration-200 border ${
-                    isChecked 
-                      ? 'border-accent/50 bg-accent/10 shadow-md shadow-accent/15 scale-[1.01]' 
-                      : 'border-white/10 hover:border-white/20'
+                  className={`flex items-center gap-3 p-2.5 sm:p-3 rounded-xl transition-all cursor-pointer border ${
+                    isSelected 
+                      ? 'bg-accent/10 border-accent/40 shadow-sm' 
+                      : 'glass-card border-black/[0.06] dark:border-white/[0.08] hover:border-accent/30'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <button
-                      type="button"
-                      className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-all ${
-                        isChecked ? 'bg-accent text-white' : 'border border-white/20 glass-pill'
-                      }`}
-                    >
-                      {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    </button>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => {}}
+                    className="w-4 h-4 rounded accent-accent pointer-events-none flex-shrink-0"
+                  />
 
-                    <div 
-                      className="w-10 h-10 rounded-[12px] flex items-center justify-center text-white flex-shrink-0 shadow-md relative overflow-hidden"
-                      style={{ backgroundColor: item.color || '#6366f1' }}
-                    >
-                      <BrandIcon name={item.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={item.name} />
-                    </div>
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm text-white relative overflow-hidden"
+                    style={{ backgroundColor: color }}
+                  >
+                    <BrandIcon name={item.icon} color="#ffffff" className="w-4 h-4 relative z-10" fallbackText={item.name} />
+                  </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-sm text-text-primary truncate">{item.name}</span>
-                        {item.custom_badge && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-white/10 text-text-primary">
-                            {item.custom_badge}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[11px] text-text-secondary font-mono truncate block mt-0.5">
-                        {item.url} · <span className="text-accent">{item.category_name}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+                        {item.name}
                       </span>
+                      {item.custom_badge && (
+                        <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-accent/15 text-accent">
+                          {item.custom_badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                      <span className="truncate">{item.url}</span>
+                      <span className="text-slate-400">·</span>
+                      <span className="font-sans text-[10px] text-accent truncate">{item.category_name}</span>
                     </div>
                   </div>
 
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 flex-shrink-0 font-mono">
-                    ● {item.responseTime || 8}ms
-                  </span>
+                  {item.responseTime && (
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                      ● {item.responseTime}ms
+                    </span>
+                  )}
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
+        {/* Footer with confirmation button */}
+        <div className="flex items-center justify-between pt-3 border-t border-black/[0.06] dark:border-white/10">
           <Button variant="ghost" onClick={onClose}>
-            Zamknij
+            Anuluj
           </Button>
 
           <Button
             onClick={handleAddSelected}
             isLoading={saving}
             disabled={selectedIds.size === 0}
-            className="px-6 py-2.5 shadow-lg shadow-accent/25"
+            className="px-6 py-2.5 shadow-lg shadow-accent/25 text-xs font-bold"
           >
-            Dodaj wybrane ({selectedIds.size}) do ekranu startowego 🚀
+            Dodaj wybrane ({selectedIds.size}) do pulpitu ➔
           </Button>
         </div>
 

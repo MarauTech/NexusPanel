@@ -3,7 +3,7 @@ import { useSettings } from '../../hooks/useSettings';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { useToast } from '../../contexts/ToastContext';
-import { Settings, Globe, Clock, Sliders, ShieldCheck, GitBranch, RefreshCw, Terminal, CheckCircle2 } from 'lucide-react';
+import { Settings, Sliders, GitBranch, CheckCircle2 } from 'lucide-react';
 
 export default function GeneralSettings() {
   const { settings, updateSettings, loading } = useSettings();
@@ -57,23 +57,23 @@ export default function GeneralSettings() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-text-secondary animate-pulse">Ładowanie ustawień...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">Ładowanie ustawień...</div>;
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-text-primary tracking-tight">Ustawienia Ogólne</h2>
-        <p className="text-sm text-text-secondary mt-1">
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Ustawienia Ogólne</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Dostosuj podstawowe opcje panelu, personalizację powitania oraz funkcje ekranu startowego.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
         {/* Core Identity */}
-        <div className="p-5 rounded-2xl glass-card space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+        <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+          <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
             <Settings className="w-4 h-4 text-accent" />
-            <h3 className="text-sm font-bold text-text-primary">Tożsamość i Powitanie</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Tożsamość i Powitanie</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -83,7 +83,7 @@ export default function GeneralSettings() {
               value={formData.user_name}
               onChange={handleChange}
               placeholder="np. Maciej"
-              helper="Wyświetlane w powitaniu na pulpicie: 'Witaj <NAZWA>'"
+              helper="Wyświetlane w powitaniu na pulpicie: 'Witaj, <NAZWA>'"
             />
 
             <Input
@@ -98,17 +98,17 @@ export default function GeneralSettings() {
         </div>
 
         {/* Feature Toggles */}
-        <div className="p-5 rounded-2xl glass-card space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+        <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+          <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
             <Sliders className="w-4 h-4 text-accent" />
-            <h3 className="text-sm font-bold text-text-primary">Funkcje i Pasek Stanu</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Funkcje i Pasek Stanu</h3>
           </div>
 
           <div className="space-y-3">
             <label className="flex items-center justify-between p-3.5 rounded-xl glass-pill cursor-pointer">
               <div>
-                <span className="font-bold text-xs sm:text-sm text-text-primary block">Wskaźniki stanu i pingu (Health Status)</span>
-                <span className="text-[11px] text-text-secondary">Wyświetla zielone/żółte/czerwone kropki oraz czas odpowiedzi (ms) na kafelkach</span>
+                <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white block">Wskaźniki stanu i pingu (Health Status)</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">Wyświetla zielone/żółte/czerwone kropki oraz czas odpowiedzi (ms) na kafelkach</span>
               </div>
               <input
                 type="checkbox"
@@ -128,33 +128,33 @@ export default function GeneralSettings() {
         </div>
 
         {/* System Version & Update Guide Card */}
-        <div className="p-5 rounded-2xl glass-card border border-white/15 space-y-4 mt-8">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+        <div className="p-5 rounded-2xl glass-card border border-black/[0.08] dark:border-white/15 space-y-4 mt-8">
+          <div className="flex items-center justify-between pb-2 border-b border-black/[0.06] dark:border-white/10">
             <div className="flex items-center gap-2">
               <GitBranch className="w-4 h-4 text-accent" />
-              <h3 className="text-sm font-bold text-text-primary">Wersja i Aktualizacje</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Wersja i Aktualizacje</h3>
             </div>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
               <CheckCircle2 className="w-3 h-3" />
               v1.0.0 (Wydanie stabilne)
             </span>
           </div>
 
-          <p className="text-xs text-text-secondary leading-relaxed">
-            NexusPanel został zaprojektowany z myślą o bezproblemowych aktualizacjach bez utraty danych. Wszystkie kafelki, kategorie i ustawienia są bezpiecznie przechowywane w trwałym wolumenie bazy danych.
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            NexusPanel został zaprojektowany z myślą o bezproblemowych aktualizacjach bez utraty danych. Wszystkie kafelki, kategorie i ustawienia są bezpiecznie przechowywane w trwałej bazie danych SQLite.
           </p>
 
           <div className="space-y-2">
-            <span className="text-xs font-bold text-text-primary block">Sposób 1: Aktualizacja przez Docker Compose (Zalecane)</span>
-            <div className="p-3 rounded-xl bg-black/50 border border-white/10 font-mono text-xs text-emerald-400 select-all">
-              docker compose pull && docker compose up -d --build
+            <span className="text-xs font-bold text-slate-900 dark:text-white block">Sposób 1: Aktualizacja kontenera Proxmox LXC</span>
+            <div className="p-3 rounded-xl bg-black/[0.04] dark:bg-black/50 border border-black/[0.08] dark:border-white/10 font-mono text-xs text-emerald-600 dark:text-emerald-400 select-all">
+              cd /opt/nexuspanel && git pull && npm run build && systemctl restart nexuspanel
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-bold text-text-primary block">Sposób 2: Aktualizacja z repozytorium Git (Node.js)</span>
-            <div className="p-3 rounded-xl bg-black/50 border border-white/10 font-mono text-xs text-sky-400 select-all">
-              git pull && npm install && npm run build && npm start
+            <span className="text-xs font-bold text-slate-900 dark:text-white block">Sposób 2: Aktualizacja przez Docker Compose</span>
+            <div className="p-3 rounded-xl bg-black/[0.04] dark:bg-black/50 border border-black/[0.08] dark:border-white/10 font-mono text-xs text-sky-600 dark:text-sky-400 select-all">
+              docker compose pull && docker compose up -d --build
             </div>
           </div>
         </div>

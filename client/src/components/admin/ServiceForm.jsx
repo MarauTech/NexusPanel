@@ -10,7 +10,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useToast } from '../../contexts/ToastContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { detectHomelabService } from '../../utils/homelabCatalog';
-import { Sparkles, Layers, Palette, Sliders, Activity, CheckCircle2, ChevronRight, Wand2, Radio } from 'lucide-react';
+import { Sparkles, Layers, Palette, Sliders, Activity, CheckCircle2, ChevronRight, ChevronLeft, Wand2, Radio } from 'lucide-react';
 
 export default function ServiceForm({ service, onClose, onSuccess }) {
   const isEdit = !!service;
@@ -18,7 +18,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
   const { addToast } = useToast();
   const { t } = useLanguage();
   
-  // Tab: 'basic' | 'appearance' | 'advanced'
+  // Tabs: 'basic' | 'appearance' | 'advanced'
   const [activeTab, setActiveTab] = useState('basic');
 
   const [formData, setFormData] = useState({
@@ -98,15 +98,10 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
       name: sug.name || prev.name,
       icon: sug.icon || prev.icon,
       color: sug.color || prev.color,
-      category_id: matchedCatId,
-      custom_badge: sug.customBadge || prev.custom_badge,
-      health_check_enabled: sug.healthCheck !== undefined ? sug.healthCheck : prev.health_check_enabled,
-      tags: sug.tags ? sug.tags.join(', ') : prev.tags,
-      url: prev.url ? prev.url : (sug.defaultPort ? `${sug.defaultProtocol || 'http'}://192.168.1.10:${sug.defaultPort}${sug.defaultPath || ''}` : '')
+      category_id: matchedCatId
     }));
-
     setSuggestion(null);
-    addToast(`Automatycznie skonfigurowano: ${sug.name}`, 'info');
+    addToast(`Automatycznie uzupełniono ikonę i styl dla ${sug.name}!`, 'info');
   };
 
   const handleChange = (e) => {
@@ -118,21 +113,19 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name.trim()) {
-      addToast(t('form.name_required', 'Wpisz nazwę aplikacji'), 'error');
-      return;
-    }
-    if (!formData.url.trim()) {
-      addToast(t('form.url_required', 'Wpisz poprawny adres URL'), 'error');
+    if (e) e.preventDefault();
+    if (!formData.name.trim() || !formData.url.trim()) {
+      addToast('Wprowadź nazwę usługi oraz poprawny adres URL', 'error');
+      setActiveTab('basic');
       return;
     }
 
     setLoading(true);
     try {
-      const tagList = formData.tags
-        ? formData.tags.split(',').map(t => t.trim()).filter(Boolean)
-        : [];
+      const tagsArray = formData.tags
+        .split(',')
+        .map(t => t.trim().toLowerCase().replace(/^#/, ''))
+        .filter(Boolean);
 
       const payload = {
         name: formData.name.trim(),
@@ -140,9 +133,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
         url: formData.url.trim(),
         category_id: formData.category_id ? parseInt(formData.category_id, 10) : null,
         icon: formData.icon || 'globe',
-        icon_type: 'lucide',
-        icon_url: '',
-        color: formData.color,
+        color: formData.color || '#6366f1',
         open_new_tab: formData.open_new_tab ? 1 : 0,
         enabled: formData.enabled ? 1 : 0,
         favorite: formData.favorite ? 1 : 0,
@@ -151,313 +142,386 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
         health_check_url: formData.health_check_url.trim(),
         health_check_interval: parseInt(formData.health_check_interval, 10) || 60,
         custom_badge: formData.custom_badge.trim(),
-        tags: tagList,
+        tags: tagsArray,
         notes: formData.notes.trim()
       };
 
       if (isEdit) {
         await api.services.updateService(service.id, payload);
-        addToast(t('form.saved', 'Zapisano zmiany'), 'success');
+        addToast(`Zaktualizowano ${payload.name}`, 'success');
       } else {
         await api.services.createService(payload);
-        addToast(t('form.created', 'Dodano nową aplikację'), 'success');
+        addToast(`Dodano usługę ${payload.name}`, 'success');
       }
-      onSuccess();
+      
+      if (onSuccess) onSuccess();
+      onClose();
     } catch (err) {
-      addToast(err.response?.data?.error || t('common.error', 'Wystąpił błąd podczas zapisu'), 'error');
+      addToast(err.response?.data?.error || 'Wystąpił błąd podczas zapisywania', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  const nextTab = () => {
+    if (activeTab === 'basic') setActiveTab('appearance');
+    else if (activeTab === 'appearance') setActiveTab('advanced');
+  };
+
+  const prevTab = () => {
+    if (activeTab === 'advanced') setActiveTab('appearance');
+    else if (activeTab === 'appearance') setActiveTab('basic');
+  };
+
   return (
-    <Modal 
-      title={isEdit ? `Edytuj "${formData.name || 'Aplikację'}"` : t('dashboard.add_app', 'Dodaj nową aplikację')} 
+    <Modal
+      title={isEdit ? `Edytuj: ${service?.name}` : '+ Dodaj aplikację'}
       onClose={onClose}
-      maxWidth="max-w-xl"
+      maxWidth="max-w-2xl"
     >
-      {/* Smart Auto-Detection Banner */}
-      {suggestion && (
-        <div className="p-3.5 rounded-2xl glass-pill bg-accent/15 border-accent/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm" style={{ backgroundColor: suggestion.color }}>
-              <BrandIcon name={suggestion.icon} color="#ffffff" className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <span className="font-bold text-xs text-text-primary block truncate">
-                Wykryto: {suggestion.name}
-              </span>
-              <span className="text-[10px] text-text-secondary">
-                Automatycznie ustawia ikonę, port {suggestion.defaultPort || ''}, kolor i health check
-              </span>
-            </div>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        
+        {/* Modern 3-Step Pill Tab Bar with Clear Active Contrast */}
+        <div className="flex items-center p-1.5 rounded-2xl bg-black/[0.04] dark:bg-black/40 border border-black/[0.08] dark:border-white/10 gap-1.5">
           <button
             type="button"
-            onClick={() => applySuggestion(suggestion)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-accent text-white font-bold text-xs shadow-md shadow-accent/25 hover:scale-105 active:scale-95 transition-all flex-shrink-0"
+            onClick={() => setActiveTab('basic')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'basic'
+                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+            }`}
           >
-            <Wand2 className="w-3.5 h-3.5" />
-            <span>Zastosuj</span>
+            <Layers className="w-3.5 h-3.5" />
+            <span>1. Podstawowe</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('appearance')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'appearance'
+                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+            }`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            <span>2. Wygląd i Kolor</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('advanced')}
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              activeTab === 'advanced'
+                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>3. Monitoring & Opcje</span>
           </button>
         </div>
-      )}
 
-      {/* Tabs Selector */}
-      <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill">
-        <button
-          type="button"
-          onClick={() => setActiveTab('basic')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'basic' 
-              ? 'bg-accent text-white shadow-md shadow-accent/25' 
-              : 'text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          <Layers className="w-3.5 h-3.5" />
-          <span>{t('form.tab_basic', 'Podstawowe')}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('appearance')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'appearance' 
-              ? 'bg-accent text-white shadow-md shadow-accent/25' 
-              : 'text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          <Palette className="w-3.5 h-3.5" />
-          <span>{t('form.tab_appearance', 'Wygląd')}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('advanced')}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'advanced' 
-              ? 'bg-accent text-white shadow-md shadow-accent/25' 
-              : 'text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          <Activity className="w-3.5 h-3.5" />
-          <span>{t('form.tab_advanced', 'Zaawansowane')}</span>
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* ============================================
-            TAB 1: BASIC SETTINGS
-            ============================================ */}
+        {/* =========================================================
+            TAB 1: PODSTAWOWE
+           ========================================================= */}
         {activeTab === 'basic' && (
           <div className="space-y-4 animate-in fade-in duration-200">
+            {/* Auto Catalog Suggestion Pill */}
+            {suggestion && (
+              <div className="p-3 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1">
+                <div className="flex items-center gap-2.5">
+                  <Sparkles className="w-4 h-4 text-accent animate-pulse" />
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    Rozpoznano: <b>{suggestion.name}</b> (Katalog Homelabu)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => applySuggestion(suggestion)}
+                  className="px-3 py-1 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer"
+                >
+                  Użyj ikony i stylu ➔
+                </button>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input 
-                label={t('form.name', 'Nazwa')}
-                name="name" 
-                value={formData.name} 
-                onChange={handleNameChange} 
-                required 
-                placeholder="np. Proxmox VE, Plex, Home Assistant" 
-              />
-              <Input 
-                label={t('form.url', 'Adres URL')}
-                name="url" 
-                value={formData.url} 
-                onChange={handleChange} 
-                required 
-                placeholder="https://192.168.1.10:8006" 
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input 
-                label={t('form.category', 'Kategoria')}
-                name="category_id" 
-                type="select" 
-                value={formData.category_id} 
-                onChange={handleChange}
-                options={[
-                  { value: '', label: 'Bez kategorii (Inne)' },
-                  ...categories.map(c => ({ value: c.id, label: c.name }))
-                ]}
+              <Input
+                label="Nazwa usługi *"
+                name="name"
+                value={formData.name}
+                onChange={handleNameChange}
+                placeholder="np. Proxmox VE, Plex, Home Assistant"
+                required
+                autoFocus
               />
 
+              <Input
+                label="Adres URL / IP *"
+                name="url"
+                value={formData.url}
+                onChange={handleChange}
+                placeholder="https://192.168.1.10:8006 lub http://pve.lan"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-text-primary mb-1.5 tracking-tight">Ikona aplikacji</label>
-                <div className="flex items-center gap-2.5">
+                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                  Kategoria
+                </label>
+                <select
+                  name="category_id"
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                >
+                  <option value="">Bez kategorii (Inne)</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                  Ikona aplikacji
+                </label>
+                <div className="flex items-center gap-2">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-md flex-shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm relative overflow-hidden"
                     style={{ backgroundColor: formData.color }}
                   >
-                    <BrandIcon name={formData.icon} color="#ffffff" className="w-5 h-5" fallbackText={formData.name} />
+                    <BrandIcon name={formData.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={formData.name} />
                   </div>
-                  <Button type="button" variant="secondary" size="sm" onClick={() => setShowIconPicker(true)} className="flex-1">
-                    {formData.icon ? `Ikona: ${formData.icon}` : 'Wybierz ikonę'}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowIconPicker(true)}
+                    className="flex-1 text-xs py-2"
+                  >
+                    Wybierz ikonę z biblioteki
                   </Button>
                 </div>
               </div>
             </div>
 
-            <Input 
-              label={t('form.description', 'Krótki opis (opcjonalnie)')}
-              name="description" 
-              type="textarea" 
-              value={formData.description} 
-              onChange={handleChange} 
-              placeholder="np. Główny węzeł wirtualizacji dla maszyn wirtualnych i kontenerów"
-            />
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                Krótki opis
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={2}
+                placeholder="np. Główny hiperwizor dla maszyn wirtualnych i kontenerów LXC"
+                className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none resize-none"
+              />
+            </div>
           </div>
         )}
 
-        {/* ============================================
-            TAB 2: APPEARANCE & DISPLAY
-            ============================================ */}
+        {/* =========================================================
+            TAB 2: WYGLĄD I KOLOR
+           ========================================================= */}
         {activeTab === 'appearance' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             <div>
-              <label className="block text-xs font-bold text-text-primary mb-1.5 tracking-tight">Kolor kafelka</label>
-              <ColorPicker color={formData.color} onChange={(c) => setFormData(prev => ({ ...prev, color: c }))} />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input 
-                label="Własna plakietka / Badge (opcjonalnie)" 
-                name="custom_badge" 
-                value={formData.custom_badge} 
-                onChange={handleChange} 
-                placeholder="np. Node 01, DMZ, v2.0" 
-              />
-              <Input 
-                label="Tagi (oddzielone przecinkami)" 
-                name="tags" 
-                value={formData.tags} 
-                onChange={handleChange} 
-                placeholder="docker, monitoring, nas" 
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 tracking-tight">
+                Kolor kafelka (Wybierz z palety lub podaj HEX)
+              </label>
+              <ColorPicker
+                color={formData.color}
+                onChange={(c) => setFormData(prev => ({ ...prev, color: c }))}
               />
             </div>
 
-            <div className="p-4 rounded-2xl glass-pill space-y-3">
-              <span className="font-bold text-xs text-text-primary block">Opcje wyświetlania</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <Input
+                label="Własna plakietka / Badge (opcjonalnie)"
+                name="custom_badge"
+                value={formData.custom_badge}
+                onChange={handleChange}
+                placeholder="np. Node 01, DMZ, v2.0, Prod"
+              />
+
+              <Input
+                label="Tagi (oddzielone przecinkami)"
+                name="tags"
+                value={formData.tags}
+                onChange={handleChange}
+                placeholder="docker, monitoring, nas, pve"
+              />
+            </div>
+
+            {/* iOS Style Switches for display options */}
+            <div className="p-4 rounded-2xl glass-card space-y-3 mt-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Opcje wyświetlania
+              </h4>
+              
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox" name="enabled" checked={formData.enabled} onChange={handleChange} className="rounded accent-accent" />
-                  <span className="text-xs font-semibold text-text-primary">Włączona</span>
+                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Włączona</span>
+                  <input
+                    type="checkbox"
+                    name="enabled"
+                    checked={formData.enabled}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded accent-accent cursor-pointer"
+                  />
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox" name="favorite" checked={formData.favorite} onChange={handleChange} className="rounded accent-accent" />
-                  <span className="text-xs font-semibold text-text-primary">Ulubiona ⭐</span>
+
+                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Ulubiona ⭐</span>
+                  <input
+                    type="checkbox"
+                    name="favorite"
+                    checked={formData.favorite}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                  />
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox" name="open_new_tab" checked={formData.open_new_tab} onChange={handleChange} className="rounded accent-accent" />
-                  <span className="text-xs font-semibold text-text-primary">W nowej karcie</span>
+
+                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">W nowej karcie</span>
+                  <input
+                    type="checkbox"
+                    name="open_new_tab"
+                    checked={formData.open_new_tab}
+                    onChange={handleChange}
+                    className="w-4 h-4 rounded accent-accent cursor-pointer"
+                  />
                 </label>
               </div>
             </div>
           </div>
         )}
 
-        {/* ============================================
-            TAB 3: HEALTH CHECK & ADVANCED
-            ============================================ */}
+        {/* =========================================================
+            TAB 3: MONITORING & NOTATKI
+           ========================================================= */}
         {activeTab === 'advanced' && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="p-4 rounded-2xl glass-card space-y-3.5 border border-white/15">
+            {/* Health Check Card */}
+            <div className="p-4 rounded-2xl glass-card space-y-3.5 border border-black/[0.08] dark:border-white/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-text-primary block">Automatyczny Health Check (Monitoring)</span>
-                  <p className="text-[11px] text-text-secondary">Bada dostępność hosta w tle i wyświetla czas odpowiedzi ms</p>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                    Automatyczny Health Check (Monitoring pingu)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Bada dostępność hosta w tle i wyświetla czas odpowiedzi w milisekundach (ms).
+                  </p>
                 </div>
+                
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    name="health_check_enabled" 
-                    checked={formData.health_check_enabled} 
-                    onChange={handleChange} 
-                    className="rounded accent-accent w-4 h-4"
+                  <input
+                    type="checkbox"
+                    name="health_check_enabled"
+                    checked={formData.health_check_enabled}
+                    onChange={handleChange}
+                    className="sr-only peer"
                   />
-                  <span className="ml-2 text-xs font-bold text-text-primary">
-                    {formData.health_check_enabled ? 'Aktywny' : 'Wyłączony'}
-                  </span>
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                 </label>
               </div>
 
               {formData.health_check_enabled && (
-                <div className="space-y-3 pt-2 border-t border-white/10">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Input 
-                      label="Protokół sprawdzania" 
-                      name="health_check_type" 
-                      type="select" 
-                      value={formData.health_check_type} 
-                      onChange={handleChange}
-                      options={[
-                        { value: 'http', label: 'Żądanie HTTP / HTTPS (Strona WWW)' },
-                        { value: 'ping', label: 'Ping TCP / Socket (np. switch, kamera, IP)' }
-                      ]}
-                    />
-                    <Input 
-                      label="Interwał badania (sekundy)" 
-                      name="health_check_interval" 
-                      type="number"
-                      min="10"
-                      max="3600"
-                      value={formData.health_check_interval} 
-                      onChange={handleChange} 
-                    />
-                  </div>
-
-                  <Input 
-                    label="Opcjonalny własny adres probe URL / IP" 
-                    name="health_check_url" 
-                    value={formData.health_check_url} 
-                    onChange={handleChange} 
-                    placeholder="Pozostaw puste, aby badać główny adres URL" 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-black/[0.05] dark:border-white/10 animate-in fade-in">
+                  <Input
+                    label="Alternatywny URL Health Check"
+                    name="health_check_url"
+                    value={formData.health_check_url}
+                    onChange={handleChange}
+                    placeholder="Domyślnie używa adresu usługi"
                   />
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                      Częstotliwość sprawdzania
+                    </label>
+                    <select
+                      name="health_check_interval"
+                      value={formData.health_check_interval}
+                      onChange={handleChange}
+                      className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                    >
+                      <option value={30}>Co 30 sekund</option>
+                      <option value={60}>Co 1 minutę</option>
+                      <option value={120}>Co 2 minuty</option>
+                      <option value={300}>Co 5 minut</option>
+                    </select>
+                  </div>
                 </div>
               )}
             </div>
 
-            <Input 
-              label="Prywatne notatki administratora (opcjonalnie)" 
-              name="notes" 
-              type="textarea"
-              value={formData.notes} 
-              onChange={handleChange} 
-              placeholder="np. Domyślny login, podsieć VLAN, data ostatniej aktualizacji" 
-            />
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                Prywatne notatki administratora (opcjonalnie)
+              </label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                rows={3}
+                placeholder="np. Domyślny login, podsieć VLAN, data ostatniej aktualizacji, klucze referencyjne"
+                className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none resize-none"
+              />
+            </div>
           </div>
         )}
 
-        {/* Modal Action Buttons */}
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10">
-          <div className="text-xs text-text-secondary">
-            {activeTab === 'basic' && 'Krok 1 z 3 · Podstawowe'}
-            {activeTab === 'appearance' && 'Krok 2 z 3 · Wygląd'}
-            {activeTab === 'advanced' && 'Krok 3 z 3 · Monitoring i Notatki'}
+        {/* Footer Navigation & Submit */}
+        <div className="flex items-center justify-between pt-3 border-t border-black/[0.06] dark:border-white/10">
+          <div>
+            {activeTab !== 'basic' ? (
+              <Button type="button" variant="ghost" size="sm" onClick={prevTab} className="text-xs">
+                <ChevronLeft className="w-4 h-4 mr-1" /> Wstecz
+              </Button>
+            ) : (
+              <Button type="button" variant="ghost" size="sm" onClick={onClose} className="text-xs">
+                Anuluj
+              </Button>
+            )}
           </div>
 
-          <div className="flex gap-2">
-            <Button type="button" variant="ghost" onClick={onClose}>
-              Anuluj
-            </Button>
-            <Button type="submit" isLoading={loading}>
+          <div className="flex items-center gap-2">
+            {activeTab !== 'advanced' && (
+              <Button type="button" variant="secondary" size="sm" onClick={nextTab} className="text-xs font-bold">
+                Dalej <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            )}
+
+            <Button
+              type="submit"
+              isLoading={loading}
+              className="px-6 py-2 shadow-lg shadow-accent/25 text-xs font-bold"
+            >
               {isEdit ? 'Zapisz zmiany' : 'Utwórz aplikację'}
             </Button>
           </div>
         </div>
+
       </form>
 
-      {/* Nested Icon Picker Modal */}
+      {/* Icon Picker Dialog */}
       {showIconPicker && (
-        <Modal title="Wybierz ikonę aplikacji" onClose={() => setShowIconPicker(false)}>
-          <IconPicker 
-            onSelect={(icon) => {
-              setFormData(prev => ({ ...prev, icon }));
-              setShowIconPicker(false);
-            }} 
-          />
-        </Modal>
+        <IconPicker
+          selectedIcon={formData.icon}
+          onSelect={(icon) => {
+            setFormData(prev => ({ ...prev, icon }));
+            setShowIconPicker(false);
+          }}
+          onClose={() => setShowIconPicker(false)}
+        />
       )}
     </Modal>
   );
