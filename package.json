@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "One dashboard for your entire homelab.",
   "private": true,
+  "type": "module",
   "workspaces": [
     "client",
     "server"
@@ -12,8 +13,22 @@
     "dev:server": "npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
     "build": "npm run build --workspace=client",
-    "start": "npm run start --workspace=server",
-    "seed": "npm run seed --workspace=server"
+    "start": "node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-validator": "^7.2.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "sql.js": "^1.11.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
