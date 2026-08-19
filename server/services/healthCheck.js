@@ -132,3 +132,5 @@ export class HealthCheckService {
     }
   }
 }
+
+export default HealthCheckService;
