@@ -1,8 +1,8 @@
 <p align="center">
   <h1 align="center">🔗 NexusPanel</h1>
-  <p align="center"><strong>Nowoczesny, szybki i w pełni konfigurowalny ekran startowy dla Twojego homelabu.</strong></p>
+  <p align="center"><strong>Nowoczesny, błyskawiczny i w pełni konfigurowalny ekran startowy dla Twojego homelabu.</strong></p>
   <p align="center">
-    Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping
+    Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping • Tryb Kiosk
   </p>
 </p>
 
@@ -46,7 +46,7 @@ cd nexuspanel
 docker compose up -d --build
 
 # 3. Otwórz w przeglądarce
-# http://localhost:3000 (lub IP serwera:3000)
+# http://localhost:3000 (lub IP_SERWERA:3000)
 ```
 
 ---
@@ -55,9 +55,10 @@ docker compose up -d --build
 
 - [O projekcie](#-o-projekcie)
 - [Główne funkcje](#-główne-funkcje)
+- [📺 Tryb Kiosk i Panel Ścienny](#-tryb-kiosk-i-panel-ścienny-wall-dashboard)
 - [Wymagania systemowe](#-wymagania-systemowe)
 - [Pierwszy start i kreator powitalny](#-pierwszy-start-i-kreator-powitalny)
-- [Dodawanie usług i Skaner LAN](#-dodawanie-usług-i-skaner-lan)
+- [Skaner Sieci LAN (Pełna podsieć 1..254)](#-skaner-sieci-lan-pełna-podsieć-1254)
 - [Panel administracyjny i konfiguracja](#-panel-administracyjny-i-konfiguracja)
 - [Kopia zapasowa i reset fabryczny](#-kopia-zapasowa-i-reset-fabryczny)
 - [Aktualizacja aplikacji](#-aktualizacja-aplikacji)
@@ -72,10 +73,11 @@ docker compose up -d --build
 
 Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przeglądarce, otrzymujesz czysty, responsywny panel ze statusem dostępności każdej usługi w czasie rzeczywistym.
 
-- ⚡ **Auto-Discovery**: Automatyczne wykrywanie podsieci LAN (`192.168.10.x`, `192.168.1.x`, `10.0.0.x`) i skanowanie popularnych portów homelabu (Proxmox, Home Assistant, Portainer, NAS, Plex, Grafana).
-- 🟢 **Live Health Check & Ping**: Monitorowanie dostępności usług co określony czas z historią SLA (ms).
-- 🎨 **Minimalistyczny Design**: Czysty interfejs z trybem ciemnym/jasnym, płynnymi animacjami i pełną personalizacją.
-- 🔒 **Self-contained**: Wszystko działa w jednym lekkim procesie z bazą SQLite — zero zewnętrznych zależności.
+- ⚡ **Auto-Discovery**: Automatyczne wykrywanie podsieci LAN (`192.168.10.x`, `192.168.1.x`, `10.0.0.x`) i równoległe skanowanie wszystkich 254 adresów IP na popularnych portach homelabu (Proxmox, Home Assistant, Portainer, NAS, Plex, Grafana, Jellyfin, Webmin).
+- 🟢 **Live Health Check & Ping**: Monitorowanie dostępności usług w czasie rzeczywistym z historią SLA (ms).
+- 📺 **Tryb Kiosk / Ekran Ścienny**: Dedykowany widok na tablet/iPad powieszony na ścianie bez konieczności przewijania strony.
+- 🎨 **Liquid Glassmorphism**: Czysty interfejs z trybem ciemnym/jasnym, płynnymi animacjami i pełną personalizacją.
+- 🔒 **Self-contained**: Wszystko działa w jednym procesie z bazą SQLite — zero zewnętrznych zależności.
 
 ---
 
@@ -83,16 +85,30 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 ### 🖥️ Ekran Startowy (Speed-Dial)
 - 🔲 **Nowoczesne kafelki usług**: Dedykowane logotypy marek, hosty, plakietki portów i wskaźniki SLA.
-- ⭐ **Przypięte Ulubione**: Twoje najważniejsze serwisy na samej górze.
+- ⭐ **Przypięte Ulubione**: Błyskawiczne oznaczanie gwiazdką i sekcja ulubionych na samej górze.
 - 🔍 **Wyszukiwarka Spotlight**: Błyskawiczne szukanie i filtrowanie pod skrótem `Ctrl + K` (lub `⌘K`).
-- ⛅ **Lokalna Pogoda & Geodekcja**: Pogoda na żywo dopasowana do Twojego adresu IP.
+- ⛅ **Lokalna Pogoda & Geodekcja**: Pogoda na żywo dopasowana do Twojego adresu IP z temperaturą, wilgotnością i wiatrem.
 - 📱 **100% Responsywność**: Idealny widok na komputerze, tablecie i smartfonie.
 
 ### ⚙️ Panel Administracyjny
-- ➕ **Formularz usług**: Ponad 50 wbudowanych ikon (Proxmox, Docker, Jellyfin, Pi-hole itd.) i paleta kolorów.
+- ➕ **Wybór ikon z biblioteki**: Ponad 60 wbudowanych ikon homelabowych i pełna biblioteka Lucide z wyszukiwarką.
 - 📁 **Kategorie i tagi**: Własne grupowanie usług z filtrami segmentowymi.
 - 🖱️ **Drag & Drop**: Zmiana kolejności kafelków i kategorii metodą przeciągnij i upuść.
 - 💾 **Kopia zapasowa i Przywracanie fabryczne**: Eksport/import do pliku JSON oraz bezpieczny 1-klikowy Factory Reset.
+
+---
+
+## 📺 Tryb Kiosk i Panel Ścienny (Wall Dashboard)
+
+Dedykowany widok pod adresem **`/kiosk`** stworzony z myślą o tabletach (iPad, Android), Raspberry Pi z dotykowym ekranem lub drugim monitorze.
+
+- **🚫 Zero Scroll (100vh)**: Cały panel mieści się w wysokości ekranu bez konieczności przewijania strony.
+- **🕒 Duży Zegar Ścienny & Data**: Czytelny zegar cyfrowy z pulsującymi sekundami i pełną polską datą.
+- **📊 Telemetria Serwera Host na żywo**: Paski obciążenia procesora (**CPU %**) i pamięci (**RAM %**) w czasie rzeczywistym.
+- **📈 Tabela Monitoringu Dostępności (NOC)**: Lista wszystkich usług z dokładnym czasem odpowiedzi (ping w ms).
+- **📷 Podgląd Kamery CCTV / Drukarki 3D**: Kafelek z odświeżanym na żywo obrazem ze snapshotu kamery IP, OctoPrint, BambuLab, Frigate lub Home Assistant z możliwością powiększenia na pełny ekran.
+- **🌙 Głęboki Sen (0% OLED Blackout)**: Przycisk ⏻, który całkowicie wygasza ekran do czerni (idealne na noc), a dotknięcie w dowolnym miejscu natychmiast wybudza panel.
+- **🔒 Screen Wake Lock API**: Zapobiega samoczynnemu wygaszaniu ekranu tabletu.
 
 ---
 
@@ -105,13 +121,13 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 ---
 
-## 🚀 Pierwszy start i kreator powitalny
+## 📡 Skaner Sieci LAN (Pełna podsieć 1..254)
 
-Po otwarciu panelu po raz pierwszy (`http://IP:3000`):
-1. Widzisz czysty ekran powitalny bez zbędnych pasków.
-2. Wybierasz **⚡ Skaner Sieci LAN** lub **➕ Dodaj ręcznie**.
-3. Podajesz swoje imię w kroku personalizacji (*„Jak mamy się do Ciebie zwracać?”*).
-4. Twój pulpit wita Cię spersonalizowanym nagłówkiem: **`Witaj, <Twoje Imię>`**!
+Wbudowany skaner automatycznie rozpoznaje Twoją podsieć (np. `192.168.10.x`) i skanuje równolegle w paczkach po 160 połączeń socket wszystkie 254 adresy IP pod kątem popularnych usług:
+- **Wirtualizacja & Zarządzanie**: Proxmox VE (8006), Portainer (9000/9443), Webmin (10000), Docker (2375).
+- **Smart Home & Monitoring**: Home Assistant (8123), Uptime Kuma (3001), Grafana (3000), Netdata (19999), Prometheus (9090).
+- **Multimedia & Storage**: Plex (32400), Jellyfin (8096), Synology DSM (5000/5001), ASUSTOR (8001), Nextcloud (8443), qBittorrent (8085), Transmission (9091), Sonarr/Radarr (8989/7878).
+- **Sieć & Bezpieczeństwo**: Router Gateway (80/443), Nginx Proxy Manager (8181), Syncthing (8384), WireGuard.
 
 ---
 
