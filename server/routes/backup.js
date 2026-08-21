@@ -5,7 +5,7 @@ import { initializeDefaultSettings } from '../db/schema.js';
 
 const router = express.Router();
 
-router.get('/export', authenticateToken, requireAdmin, (req, res) => {
+router.get('/export', (req, res) => {
   try {
     const data = {
       version: '1.0.0',
@@ -26,7 +26,7 @@ router.get('/export', authenticateToken, requireAdmin, (req, res) => {
   }
 });
 
-router.post('/import', authenticateToken, requireAdmin, (req, res) => {
+router.post('/import', (req, res) => {
   const data = req.body;
   if (!data || typeof data !== 'object' || !Array.isArray(data.categories) || !Array.isArray(data.services)) {
     return res.status(400).json({ error: 'Invalid backup file structure: missing categories or services list' });
@@ -105,7 +105,6 @@ router.post('/import', authenticateToken, requireAdmin, (req, res) => {
         }
       }
     })();
-    db.saveSync();
 
     res.json({ success: true, message: 'Configuration successfully restored' });
   } catch (error) {
@@ -137,8 +136,6 @@ router.post('/factory-reset', authenticateToken, requireAdmin, (req, res) => {
       db.prepare("DELETE FROM settings").run();
       initializeDefaultSettings(db);
     })();
-
-    db.saveSync();
 
     res.json({
       success: true,

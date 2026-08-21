@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Sparkles, Server, Shield, Layers, LayoutGrid, Radar, ArrowRight, Network, Compass, User, Wand2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, FolderUp, Radar, ArrowRight, Network, Compass, User, FileCode } from 'lucide-react';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import api from '../../services/api';
@@ -16,24 +16,40 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState(settings?.user_name || '');
   const [savingName, setSavingName] = useState(false);
-  const [seedingTemplate, setSeedingTemplate] = useState(false);
+  const [importingJson, setImportingJson] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   const handleSelectOption = (mode) => {
     setChosenMode(mode);
     setShowNameModal(true);
   };
 
-  const handleSeedTemplate = async () => {
-    setSeedingTemplate(true);
-    try {
-      await api.services.seedDemo({ language });
-      addToast(t('empty.template_loaded', 'Szablon demonstracyjny został załadowany'), 'success');
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      addToast(t('common.error', 'Wystąpił błąd podczas ładowania szablonu'), 'error');
-    } finally {
-      setSeedingTemplate(false);
-    }
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      setImportingJson(true);
+      try {
+        const json = JSON.parse(event.target.result);
+        if (!json || typeof json !== 'object') {
+          throw new Error('Invalid JSON structure');
+        }
+        await api.backup.importBackup(json);
+        addToast(t('empty.import_success', 'Konfiguracja została pomyślnie zaimportowana'), 'success');
+        if (refreshSettings) refreshSettings();
+        if (onRefresh) onRefresh();
+      } catch (err) {
+        console.error('Import error:', err);
+        addToast(t('empty.import_invalid', 'Nieprawidłowy plik szablonu JSON') + (err.response?.data?.error ? `: ${err.response.data.error}` : ''), 'error');
+      } finally {
+        setImportingJson(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleConfirmName = async (e) => {
@@ -61,6 +77,15 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
   return (
     <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-8 text-center max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-300">
       
+      {/* Hidden File Input for JSON template import */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".json,application/json"
+        className="hidden"
+      />
+
       {/* Top Language Toggle Switcher */}
       <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill mb-6 border border-white/10 shadow-sm">
         <button
@@ -132,31 +157,31 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
           </div>
         </div>
 
-        {/* Option 2: Pre-made Homelab Template */}
+        {/* Option 2: Import .JSON Backup / Template File */}
         <div 
-          onClick={handleSeedTemplate}
-          className="group relative p-6 rounded-3xl glass-card border border-purple-500/30 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent hover:border-purple-500 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-xl flex flex-col justify-between"
+          onClick={() => fileInputRef.current?.click()}
+          className="group relative p-6 rounded-3xl glass-card border border-sky-500/30 bg-gradient-to-b from-sky-500/10 via-transparent to-transparent hover:border-sky-500 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-xl flex flex-col justify-between"
         >
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/30">
-                <Wand2 className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-sky-600 flex items-center justify-center text-white shadow-lg shadow-sky-600/30">
+                <FolderUp className="w-6 h-6" />
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30">
-                Template
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-mono">
+                .JSON
               </span>
             </div>
 
-            <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-purple-500 transition-colors">
-              {t('empty.template_title', 'Wczytaj gotowy szablon')}
+            <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-sky-500 transition-colors">
+              {t('empty.import_title', 'Wczytaj szablon / plik JSON')}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {t('empty.template_desc', 'Załaduj przykładowy zestaw popularnych usług homelabu (Infrastruktura, Smart Home, Media, Monitoring).')}
+              {t('empty.import_desc', 'Wgraj wcześniej wyeksportowany plik .json, aby błyskawicznie przywrócić wszystkie kafelki i ustawienia.')}
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 pt-5 mt-2">
-            <span>{seedingTemplate ? t('common.loading', 'Ładowanie...') : t('empty.template_btn', 'Wczytaj szablon')}</span>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600 dark:text-sky-400 pt-5 mt-2">
+            <span>{importingJson ? t('common.loading', 'Importowanie...') : t('empty.import_btn', 'Wybierz plik JSON')}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
@@ -211,7 +236,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
 
         <div className="p-3 rounded-2xl glass-pill flex items-center gap-3">
           <div className="w-7 h-7 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 flex-shrink-0">
-            <Sparkles className="w-3.5 h-3.5" />
+            <FileCode className="w-3.5 h-3.5" />
           </div>
           <div>
             <span className="font-extrabold text-xs text-slate-900 dark:text-white block">{t('empty.badge_status', 'Live Status & Ping')}</span>
