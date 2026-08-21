@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import { useSettings } from '../../hooks/useSettings';
+import { useServices } from '../../hooks/useServices';
 
 export default function Layout() {
   const { settings } = useSettings();
+  const { services, loading: servicesLoading } = useServices();
   const location = useLocation();
 
-  // Only hide header on the /setup route — never hide it on the dashboard
   const isSetupPage = location.pathname === '/setup';
+  const isDashboard = location.pathname === '/' || location.pathname === '';
+  
+  // Hide top header if on /setup OR if on empty dashboard welcome/config screen
+  const isEmptyDashboard = isDashboard && services.length === 0;
+  const shouldShowHeader = !isSetupPage && !isEmptyDashboard;
 
   const bgStyle = settings?.background_url ? {
     backgroundImage: `url(${settings.background_url})`,
@@ -38,11 +44,11 @@ export default function Layout() {
         />
       )}
 
-      {/* Top Navigation Header — visible everywhere except /setup */}
-      {!isSetupPage && <Header />}
+      {/* Top Navigation Header - hidden on welcome/config screen, shown immediately once configured */}
+      {shouldShowHeader && <Header />}
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full relative z-10">
+      <main className="flex-1 w-full relative z-10 flex flex-col">
         <Outlet />
       </main>
     </div>

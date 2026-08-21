@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import { LanguageProvider } from './contexts/LanguageContext.jsx'
+import { ServicesProvider } from './contexts/ServicesContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
-              <App />
+              <ServicesProvider>
+                <App />
+              </ServicesProvider>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
