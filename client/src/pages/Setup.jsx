@@ -44,8 +44,8 @@ export default function Setup() {
       addToast(t('setup.passwords_mismatch', 'Hasła nie są identyczne'), 'error');
       return;
     }
-    if (formData.password.length < 12) {
-      addToast(t('setup.password_too_short', 'Hasło musi mieć co najmniej 12 znaków'), 'error');
+    if (formData.password.length < 6) {
+      addToast(t('setup.password_too_short', 'Hasło musi mieć co najmniej 6 znaków'), 'error');
       return;
     }
     setLoading(true);
@@ -175,7 +175,7 @@ export default function Setup() {
               />
 
               <Input
-                label={t('setup.password', 'Hasło (min. 12 znaków)')}
+                label={t('setup.password', 'Hasło (min. 6 znaków)')}
                 type="password"
                 name="password"
                 value={formData.password}
