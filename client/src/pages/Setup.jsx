@@ -53,9 +53,9 @@ export default function Setup() {
       await api.auth.setup({
         username: formData.username,
         password: formData.password,
-        dashboardName: formData.dashboardName
+        dashboardName: formData.dashboardName,
+        language: selectedLang
       });
-      await api.settings.updateSettings({ language: selectedLang });
       await login(formData.username, formData.password);
       addToast(t('setup.success', 'Konfiguracja zakończona pomyślnie!'), 'success');
       navigate('/');

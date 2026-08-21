@@ -20,9 +20,6 @@ export function LanguageProvider({ children }) {
   const changeLanguage = (lang) => {
     setLanguage(lang);
     localStorage.setItem('nexuspanel_language', lang);
-    if (updateSettings) {
-      updateSettings({ language: lang }).catch(() => {});
-    }
   };
 
   const t = (key, defaultText = '') => {

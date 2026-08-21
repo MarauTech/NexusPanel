@@ -39,14 +39,14 @@ router.get('/status', (req, res) => {
  * Atomic first-run administrator account creation with strong password policy (12-128 chars)
  */
 router.post('/setup', async (req, res) => {
-  const { username, password, dashboardName } = req.body;
+  const { username, password, dashboardName, language } = req.body;
 
   if (!username || typeof username !== 'string' || username.trim().length < 3 || username.trim().length > 50) {
     return res.status(400).json({ error: 'Username must be between 3 and 50 characters long' });
   }
 
-  if (!password || typeof password !== 'string' || password.length < 12 || password.length > 128) {
-    return res.status(400).json({ error: 'Password must be between 12 and 128 characters long' });
+  if (!password || typeof password !== 'string' || password.length < 6 || password.length > 128) {
+    return res.status(400).json({ error: 'Password must be between 6 and 128 characters long' });
   }
 
   try {
@@ -91,6 +91,13 @@ router.post('/setup', async (req, res) => {
           INSERT INTO settings (key, value) VALUES ('dashboard_name', ?)
           ON CONFLICT(key) DO UPDATE SET value = excluded.value
         `).run(dashboardName.trim().slice(0, 100));
+      }
+
+      if (language && (language === 'pl' || language === 'en')) {
+        db.prepare(`
+          INSERT INTO settings (key, value) VALUES ('language', ?)
+          ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        `).run(language);
       }
     })();
 
