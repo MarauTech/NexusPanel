@@ -3,6 +3,7 @@ import { Search, X, ExternalLink } from 'lucide-react';
 import BrandIcon from '../common/BrandIcon';
 import { useServices } from '../../hooks/useServices';
 import { useSearch } from '../../hooks/useSearch';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 function HighlightText({ text = '', query = '' }) {
   if (!query || !text) return <span>{text}</span>;
@@ -28,6 +29,7 @@ function HighlightText({ text = '', query = '' }) {
 export default function SearchModal({ isOpen, onClose }) {
   const { services } = useServices();
   const { query, setQuery, results } = useSearch(services);
+  const { t } = useLanguage();
   const inputRef = useRef(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
@@ -87,7 +89,7 @@ export default function SearchModal({ isOpen, onClose }) {
             ref={inputRef}
             type="text"
             className="flex-1 bg-transparent border-none text-base sm:text-lg text-slate-900 dark:text-white focus:outline-none placeholder-slate-400 font-medium tracking-tight"
-            placeholder="Szukaj usług, kategorii, tagów, adresów IP... (Ctrl+K)"
+            placeholder={t('header.search', 'Szukaj usług, kategorii, tagów, adresów IP... (Ctrl+K)')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -169,14 +171,13 @@ export default function SearchModal({ isOpen, onClose }) {
             </div>
           ) : query ? (
             <div className="p-12 text-center text-slate-500 text-sm space-y-1">
-              <p className="font-bold text-slate-900 dark:text-white">Nie znaleziono usług dla zapytania „{query}”</p>
-              <p className="text-xs text-slate-400">Spróbuj wyszukać po adresie IP, porcie, kategorii lub tagu.</p>
+              <p className="font-bold text-slate-900 dark:text-white">{t('scanner.no_results', `No results found for "${query}"`)}</p>
             </div>
           ) : (
             <div className="p-8 text-center text-slate-400 text-xs flex items-center justify-center gap-4">
-              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">↑</kbd> <kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">↓</kbd> Wybierz</span>
-              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">Enter</kbd> Otwórz</span>
-              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">Esc</kbd> Zamknij</span>
+              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">↑</kbd> <kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">↓</kbd> {t('common.search', 'Navigate')}</span>
+              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">Enter</kbd> {t('dashboard.open', 'Open')}</span>
+              <span><kbd className="px-2 py-1 rounded-md glass-pill font-mono text-[10px] text-slate-800 dark:text-slate-200">Esc</kbd> {t('common.cancel', 'Close')}</span>
             </div>
           )}
         </div>
