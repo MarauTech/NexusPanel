@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db/index.js';
 import config from '../config/index.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, extractTokenInfo } from '../middleware/auth.js';
 import { loginLimiter } from '../middleware/rateLimit.js';
 import { recordAudit } from '../utils/audit.js';
 
@@ -61,8 +61,15 @@ router.post('/setup', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 12);
     let newUserId = 1;
 
-    // Run atomically in transaction
+    // Run atomically in transaction to prevent race conditions during concurrent setup calls
     db.transaction(() => {
+      const setupRow = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
+      const userCountRow = db.prepare("SELECT COUNT(*) as count FROM users").get();
+
+      if ((setupRow && (setupRow.value === '1' || setupRow.value === 'true')) || (userCountRow?.count > 0)) {
+        throw new Error('SETUP_ALREADY_COMPLETED');
+      }
+
       // Clear any stale user accounts during setup
       db.exec('DELETE FROM users');
       
@@ -106,6 +113,9 @@ router.post('/setup', async (req, res) => {
       user: { id: newUserId, username: cleanUsername, role: 'admin', display_name: cleanUsername }
     });
   } catch (err) {
+    if (err.message === 'SETUP_ALREADY_COMPLETED') {
+      return res.status(403).json({ error: 'Setup has already been completed' });
+    }
     console.error('Setup error:', err);
     res.status(500).json({ error: 'Setup failed: ' + err.message });
   }
@@ -160,9 +170,22 @@ router.post('/login', loginLimiter, async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * Clears authentication cookie
+ * Clears authentication cookie and revokes active token version
  */
 router.post('/logout', (req, res) => {
+  // If user is authenticated, revoke their active token version in database
+  const { token } = extractTokenInfo(req);
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, config.JWT_SECRET, { algorithms: ['HS256'] });
+      if (decoded && decoded.id) {
+        db.prepare("UPDATE users SET token_version = token_version + 1 WHERE id = ?").run(decoded.id);
+      }
+    } catch {
+      // Ignore if token is already expired or invalid
+    }
+  }
+
   res.clearCookie('nexuspanel_token', {
     httpOnly: true,
     secure: config.NODE_ENV === 'production',

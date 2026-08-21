@@ -96,6 +96,29 @@ function validateMagicBytes(filePath) {
   return null;
 }
 
+function validateImageDimensionsAndStructure(filePath, mimeType) {
+  const MAX_DIMENSION = 4096;
+  const buffer = Buffer.alloc(128);
+  const fd = fs.openSync(filePath, 'r');
+  const bytesRead = fs.readSync(fd, buffer, 0, 128, 0);
+  fs.closeSync(fd);
+
+  if (mimeType === 'image/png' && bytesRead >= 24) {
+    const width = buffer.readUInt32BE(16);
+    const height = buffer.readUInt32BE(20);
+    if (width === 0 || height === 0 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      throw new Error(`Wymiary obrazu PNG (${width}x${height}) przekraczają dozwolony limit (max ${MAX_DIMENSION}x${MAX_DIMENSION})`);
+    }
+  } else if (mimeType === 'image/gif' && bytesRead >= 10) {
+    const width = buffer.readUInt16LE(6);
+    const height = buffer.readUInt16LE(8);
+    if (width === 0 || height === 0 || width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      throw new Error(`Wymiary obrazu GIF (${width}x${height}) przekraczają dozwolony limit (max ${MAX_DIMENSION}x${MAX_DIMENSION})`);
+    }
+  }
+  return true;
+}
+
 const router = express.Router();
 
 router.post('/image', uploadLimiter, authenticateToken, requireAdmin, (req, res) => {
@@ -110,17 +133,18 @@ router.post('/image', uploadLimiter, authenticateToken, requireAdmin, (req, res)
 
     const uploadedPath = req.file.path;
 
-    // Verify magic bytes
+    // Verify magic bytes & dimensions
     try {
       const detectedMime = validateMagicBytes(uploadedPath);
       if (!detectedMime) {
-        // Discard malicious / unverified file
         fs.unlinkSync(uploadedPath);
         return res.status(400).json({ error: 'Nieprawidłowa zawartość pliku graficznego (niezgodny podpis binarny)' });
       }
+
+      validateImageDimensionsAndStructure(uploadedPath, detectedMime);
     } catch (readErr) {
       try { fs.unlinkSync(uploadedPath); } catch (e) {}
-      return res.status(500).json({ error: 'Błąd weryfikacji pliku' });
+      return res.status(400).json({ error: readErr.message || 'Błąd weryfikacji pliku' });
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;

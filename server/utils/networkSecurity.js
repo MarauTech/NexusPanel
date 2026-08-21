@@ -31,6 +31,7 @@ const BLOCKED_HOSTNAMES = new Set([
 
 // Normalize non-standard decimal, hex, or octal IP strings to canonical dotted-decimal
 export function normalizeIpString(rawHost) {
+  if (!rawHost || typeof rawHost !== 'string') return '';
   let host = rawHost.trim().toLowerCase().replace(/^\[|\]$/g, '');
 
   // If host contains userinfo (e.g. user:pass@127.0.0.1), strip it
@@ -77,9 +78,9 @@ export function normalizeIpString(rawHost) {
       } else if (/^\d+$/.test(p)) {
         val = parseInt(p, 10);
       } else {
-        return host; // Not an IP format
+        return host;
       }
-      if (val < 0 || val > 255) return host;
+      if (val < 0 || val > 255 || isNaN(val)) return host;
       normalizedParts.push(val);
     }
     return normalizedParts.join('.');
@@ -144,7 +145,7 @@ export function isDangerousOrReservedIp(rawIp) {
     return false;
   }
 
-  return true; // If not valid IPv4 or IPv6, treat as dangerous/invalid
+  return true; // If not recognized as valid IPv4 or IPv6, treat as invalid/restricted
 }
 
 // Check if IP is in RFC1918 private ranges (10.x, 172.16-31.x, 192.168.x)
@@ -158,7 +159,7 @@ export function isRfc1918PrivateIp(ip) {
   );
 }
 
-// Validate a target host / IP address
+// Validate a target host / IP address against SSRF
 export async function validateDestinationHost(rawHost, allowPrivateHomelab = true) {
   const host = normalizeIpString(rawHost);
 
@@ -205,7 +206,22 @@ export async function validateDestinationHost(rawHost, allowPrivateHomelab = tru
   return { host, resolvedIp: resolvedIps[0], allIps: resolvedIps };
 }
 
-// Safe HTTP client with strict timeouts, content size limits, and redirect inspection
+/**
+ * Custom secure DNS lookup function for HTTP agents to defeat DNS Rebinding
+ */
+export function createSecureLookup(allowPrivateHomelab = true) {
+  return async (hostname, options, callback) => {
+    try {
+      const { resolvedIp } = await validateDestinationHost(hostname, allowPrivateHomelab);
+      const family = net.isIPv6(resolvedIp) ? 6 : 4;
+      callback(null, resolvedIp, family);
+    } catch (err) {
+      callback(err);
+    }
+  };
+}
+
+// Safe HTTP client with strict timeouts, content size limits, DNS pinning and zero redirects
 export async function safeHttpRequest(targetUrl, options = {}) {
   let parsed;
   try {
@@ -224,22 +240,24 @@ export async function safeHttpRequest(targetUrl, options = {}) {
     parsed.password = '';
   }
 
-  // Validate hostname
+  // Pre-validate hostname
   await validateDestinationHost(parsed.hostname, true);
 
   const timeoutMs = options.timeout || 5000;
   const maxContentLength = options.maxContentLength || 5 * 1024 * 1024; // 5MB limit
   const verifySsl = options.verifySsl !== false; // Strict SSL by default
 
+  const secureLookup = createSecureLookup(true);
+
   const agent = parsed.protocol === 'https:'
-    ? new https.Agent({ rejectUnauthorized: verifySsl })
-    : new http.Agent();
+    ? new https.Agent({ rejectUnauthorized: verifySsl, lookup: secureLookup })
+    : new http.Agent({ lookup: secureLookup });
 
   const instance = axios.create({
     timeout: timeoutMs,
     maxContentLength,
     maxBodyLength: maxContentLength,
-    maxRedirects: 0, // Prevent uninspected redirect loops / open redirect SSRF
+    maxRedirects: 0, // Strict zero redirects prevents open redirect SSRF
     httpAgent: agent,
     httpsAgent: agent
   });

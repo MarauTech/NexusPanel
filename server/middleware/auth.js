@@ -3,22 +3,85 @@ import config from '../config/index.js';
 import db from '../db/index.js';
 
 /**
- * Extract token and source from request
+ * Extract token and source from request with strict header precedence
  */
-function extractTokenInfo(req) {
+export function extractTokenInfo(req) {
   const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7).trim();
-    if (token) return { token, source: 'header' };
+  if (authHeader && typeof authHeader === 'string') {
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7).trim();
+      return { token: token || 'INVALID_HEADER_TOKEN', source: 'header' };
+    }
+    // If an Authorization header is provided with unsupported scheme
+    return { token: 'INVALID_HEADER_TOKEN', source: 'header' };
   }
+
   if (req.cookies && req.cookies.nexuspanel_token) {
     return { token: req.cookies.nexuspanel_token, source: 'cookie' };
   }
+
   return { token: null, source: null };
 }
 
 /**
- * CSRF Protection Middleware for Cookie-Authenticated State-Changing Requests
+ * Check if origin matches expected server origin or configured CORS allowlist
+ * Note: CORS_ORIGINS with '*' is strictly ignored for credentialed CSRF checks
+ */
+function isAllowedOrigin(originStr, req) {
+  if (!originStr || typeof originStr !== 'string') return false;
+
+  try {
+    const parsed = new URL(originStr);
+    const origin = parsed.origin.toLowerCase();
+
+    // 1. Calculate expected origin based on request headers
+    const hostHeader = req.get('host');
+    if (!hostHeader) return false;
+
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const protocol = (typeof forwardedProto === 'string' ? forwardedProto.split(',')[0].trim() : req.protocol) || 'http';
+    const expectedOrigin = `${protocol}://${hostHeader}`.toLowerCase();
+
+    if (origin === expectedOrigin) {
+      return true;
+    }
+
+    // Also match http vs https on same host in dev environments if host matches
+    if (origin.split('://')[1] === expectedOrigin.split('://')[1]) {
+      return true;
+    }
+
+    // 2. Check against explicit CORS_ORIGINS allowlist (ignoring wildcard '*')
+    const corsList = Array.isArray(config.CORS_ORIGINS) ? config.CORS_ORIGINS : [];
+    for (const allowedEntry of corsList) {
+      if (!allowedEntry || allowedEntry === '*') continue;
+      try {
+        const allowedOrigin = new URL(allowedEntry).origin.toLowerCase();
+        if (origin === allowedOrigin) {
+          return true;
+        }
+      } catch {
+        if (origin === allowedEntry.toLowerCase()) return true;
+      }
+    }
+
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * CSRF Protection Middleware - Strict FAIL-CLOSED Architecture
+ * 
+ * Rules for state-changing requests (POST, PUT, PATCH, DELETE):
+ * 1. If explicit valid Authorization header is used -> ALLOW (immune to ambient browser cookies)
+ * 2. If cookie authentication is used:
+ *    - Valid Origin -> ALLOW
+ *    - Invalid Origin -> DENY (403)
+ *    - Missing Origin + Valid Referer -> ALLOW
+ *    - Missing Origin + Invalid Referer -> DENY (403)
+ *    - Missing Origin + Missing Referer -> DENY (403)
  */
 export function verifyCsrfOrigin(req, res, next) {
   const method = req.method.toUpperCase();
@@ -28,43 +91,50 @@ export function verifyCsrfOrigin(req, res, next) {
   }
 
   const { source } = extractTokenInfo(req);
-  
-  // If authorization header is explicitly provided, it's immune to browser ambient cookie CSRF
+
+  // If request uses Authorization header, it is immune to ambient-credential CSRF
   if (source === 'header') {
     return next();
   }
 
-  // If request uses cookie, verify Origin/Referer against allowed origins
+  // If request has cookie authentication (or uses cookie session)
   const origin = req.headers.origin;
   const referer = req.headers.referer;
-  const requestHost = req.headers.host;
 
   if (origin) {
-    try {
-      const parsedOrigin = new URL(origin);
-      if (parsedOrigin.host !== requestHost) {
-        const isAllowedCors = config.CORS_ORIGINS.includes(origin) || config.CORS_ORIGINS.includes('*');
-        if (!isAllowedCors) {
-          return res.status(403).json({ error: 'CSRF verification failed: Cross-Origin request denied', code: 'CSRF_BLOCKED' });
-        }
-      }
-    } catch (e) {
-      return res.status(403).json({ error: 'CSRF verification failed: Invalid Origin header', code: 'CSRF_BLOCKED' });
+    if (isAllowedOrigin(origin, req)) {
+      return next();
     }
-  } else if (referer) {
-    try {
-      const parsedReferer = new URL(referer);
-      if (parsedReferer.host !== requestHost) {
-        const isAllowedCors = config.CORS_ORIGINS.includes(parsedReferer.origin) || config.CORS_ORIGINS.includes('*');
-        if (!isAllowedCors) {
-          return res.status(403).json({ error: 'CSRF verification failed: Cross-Origin referer denied', code: 'CSRF_BLOCKED' });
-        }
-      }
-    } catch (e) {
-      return res.status(403).json({ error: 'CSRF verification failed: Invalid Referer header', code: 'CSRF_BLOCKED' });
-    }
+    return res.status(403).json({
+      error: 'CSRF verification failed: Cross-Origin request denied',
+      code: 'CSRF_BLOCKED'
+    });
   }
 
+  if (referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (isAllowedOrigin(refererOrigin, req)) {
+        return next();
+      }
+    } catch (e) {
+      // Invalid referer URL format
+    }
+    return res.status(403).json({
+      error: 'CSRF verification failed: Cross-Origin referer denied',
+      code: 'CSRF_BLOCKED'
+    });
+  }
+
+  // FAIL-CLOSED: Missing both Origin and Referer on cookie-authenticated mutating request
+  if (source === 'cookie') {
+    return res.status(403).json({
+      error: 'CSRF verification failed: Missing required Origin or Referer header for cookie-authenticated request',
+      code: 'CSRF_BLOCKED'
+    });
+  }
+
+  // Unauthenticated mutating request without origin or cookie
   next();
 }
 
@@ -88,7 +158,7 @@ export function authenticateToken(req, res, next) {
       return res.status(401).json({ error: 'Invalid authentication token', code: 'INVALID_TOKEN' });
     }
 
-    if (!decoded || typeof decoded !== 'object' || !decoded.id) {
+    if (!decoded || typeof decoded !== 'object' || !decoded.id || typeof decoded.id !== 'number' && typeof decoded.id !== 'string') {
       return res.status(401).json({ error: 'Malformed token payload', code: 'INVALID_TOKEN' });
     }
 
@@ -99,7 +169,7 @@ export function authenticateToken(req, res, next) {
         return res.status(401).json({ error: 'User no longer exists', code: 'USER_NOT_FOUND' });
       }
 
-      // Check token version to support instant token invalidation upon password change
+      // Check token version to support instant token invalidation upon logout / password change
       const userTokenVersion = user.token_version || 1;
       const decodedVersion = decoded.token_version || 1;
       if (decodedVersion !== userTokenVersion) {
@@ -171,13 +241,11 @@ export function requireAuthUnlessFirstRun(req, res, next) {
     const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
     const userRow = db.prepare("SELECT COUNT(*) as count FROM users").get();
     const setupDone = (row && (row.value === '1' || row.value === 'true')) && (userRow?.count > 0);
-    
+
     if (!setupDone) {
-      // First run mode - allow through
       return next();
     }
 
-    // Setup completed - enforce admin auth
     return authenticateToken(req, res, () => {
       requireAdmin(req, res, next);
     });

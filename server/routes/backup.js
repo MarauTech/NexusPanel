@@ -58,6 +58,27 @@ function hasDangerousKeys(obj) {
   return false;
 }
 
+function getObjectDepth(obj, currentDepth = 1) {
+  if (!obj || typeof obj !== 'object' || currentDepth > 10) return currentDepth;
+  let max = currentDepth;
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      const d = getObjectDepth(obj[key], currentDepth + 1);
+      if (d > max) max = d;
+    }
+  }
+  return max;
+}
+
+function hasExcessiveStrings(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === 'string' && obj[key].length > 10000) return true;
+    if (typeof obj[key] === 'object' && obj[key] !== null && hasExcessiveStrings(obj[key])) return true;
+  }
+  return false;
+}
+
 /**
  * POST /api/backup/import
  * Atomic, validated restore of dashboard configuration
@@ -70,12 +91,17 @@ router.post('/import', backupLimiter, requireAuthUnlessFirstRun, (req, res) => {
     return res.status(400).json({ error: 'Invalid backup file payload: malicious or malformed keys detected' });
   }
 
+  // Nesting depth and DoS checks
+  if (getObjectDepth(data) > 6 || hasExcessiveStrings(data)) {
+    return res.status(400).json({ error: 'Backup structure exceeds maximum allowed nesting depth or string size' });
+  }
+
   if (!Array.isArray(data.categories) || !Array.isArray(data.services)) {
     return res.status(400).json({ error: 'Invalid backup file structure: missing categories or services list' });
   }
 
   // Max entity limits to prevent memory exhaustion DoS
-  if (data.categories.length > 500 || data.services.length > 2000) {
+  if (data.categories.length > 200 || data.services.length > 500 || (Array.isArray(data.tags) && data.tags.length > 200) || (Array.isArray(data.settings) && data.settings.length > 100)) {
     return res.status(400).json({ error: 'Backup payload exceeds maximum entity limits' });
   }
 

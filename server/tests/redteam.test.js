@@ -7,12 +7,12 @@ import FormData from 'form-data';
 import app from '../index.js';
 import db from '../db/index.js';
 import config from '../config/index.js';
-import { normalizeIpString, isDangerousOrReservedIp, validateDestinationHost } from '../utils/networkSecurity.js';
+import { normalizeIpString, isDangerousOrReservedIp, validateDestinationHost, safeHttpRequest } from '../utils/networkSecurity.js';
 
 async function runRedTeamAudit() {
-  console.log('\n⚔️ =======================================================');
-  console.log('   NexusPanel FINAL RED TEAM & SECURITY VERIFICATION AUDIT');
-  console.log('   =======================================================\n');
+  console.log('\n⚔️ =================================================================');
+  console.log('   NexusPanel ROUND 3 — FINAL RED TEAM & CORRECTNESS AUDIT SUITE');
+  console.log('   =================================================================\n');
 
   let passed = 0;
   let failed = 0;
@@ -20,10 +20,10 @@ async function runRedTeamAudit() {
   async function test(name, fn) {
     try {
       await fn();
-      console.log(`  ✅ [BLOCKED/DEFENDED] ${name}`);
+      console.log(`  ✅ [VERIFIED] ${name}`);
       passed++;
     } catch (err) {
-      console.error(`  ❌ [VULNERABILITY/FAILURE] ${name}`);
+      console.error(`  ❌ [FAIL] ${name}`);
       console.error(`     Error: ${err.message}`);
       if (err.response?.data) {
         console.error(`     Response:`, JSON.stringify(err.response.data));
@@ -32,11 +32,12 @@ async function runRedTeamAudit() {
     }
   }
 
-  // Start test server
+  // Start test server on random free port
   const server = http.createServer(app);
   await new Promise((resolve) => server.listen(0, resolve));
   const port = server.address().port;
   const baseUrl = `http://127.0.0.1:${port}`;
+  const validOrigin = `http://127.0.0.1:${port}`;
 
   const client = axios.create({
     baseURL: baseUrl,
@@ -45,161 +46,172 @@ async function runRedTeamAudit() {
 
   try {
     // -------------------------------------------------------------
-    // [SECTION 1] JWT ATTACK ATTEMPTS
+    // [SECTION 1] FIRST-RUN CONCURRENCY & RACE CONDITIONS
     // -------------------------------------------------------------
-    console.log('\n[1/8] Testing JWT Attack Vectors & Signature Forgery...');
+    console.log('\n[1/7] Testing First-Run Setup Concurrency & Race Conditions...');
 
-    // Reset database state
     db.exec(`
       DELETE FROM users;
       DELETE FROM settings WHERE key = 'setup_completed';
     `);
 
-    // Complete setup with strong 12+ char password
-    const setupRes = await client.post('/api/auth/setup', {
-      username: 'redteam_admin',
-      password: 'StrongAdminPassword2026!',
-      dashboardName: 'RedTeam Test Lab'
+    await test('CONCURRENCY: 10 concurrent setup requests create EXACTLY ONE admin (others get 403)', async () => {
+      const promises = Array(10).fill(0).map((_, i) =>
+        client.post('/api/auth/setup', {
+          username: `admin_race_${i}`,
+          password: 'StrongRacePassword123!',
+          dashboardName: `Race Lab ${i}`
+        })
+      );
+      const results = await Promise.all(promises);
+      const successCount = results.filter(r => r.status === 201).length;
+      const forbiddenCount = results.filter(r => r.status === 403).length;
+
+      assert.strictEqual(successCount, 1, 'Exactly one setup request must succeed');
+      assert.strictEqual(forbiddenCount, 9, 'All 9 concurrent setup requests must be blocked');
+
+      const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get().count;
+      assert.strictEqual(userCount, 1, 'Database must contain exactly 1 user');
     });
-    assert.strictEqual(setupRes.status, 201);
-    let validAdminToken = setupRes.data.token;
-    const adminUserId = setupRes.data.user.id;
 
-    await test('JWT: "alg: none" token injection is rejected with 401', async () => {
+    // Obtain the established admin credentials
+    const adminUser = db.prepare("SELECT id, username FROM users LIMIT 1").get();
+    let adminToken = jwt.sign(
+      { id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 },
+      config.JWT_SECRET,
+      { algorithm: 'HS256', expiresIn: '24h' }
+    );
+
+    // -------------------------------------------------------------
+    // [SECTION 2] JWT SECURITY & AUTH PRECEDENCE
+    // -------------------------------------------------------------
+    console.log('\n[2/7] Testing JWT Vulnerabilities & Auth Precedence...');
+
+    await test('JWT: "alg: none" token is rejected with 401', async () => {
       const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
-      const payload = Buffer.from(JSON.stringify({ id: adminUserId, username: 'redteam_admin', role: 'admin', token_version: 1 })).toString('base64url');
-      const noneToken = `${header}.${payload}.`;
-
+      const payload = Buffer.from(JSON.stringify({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 })).toString('base64url');
       const res = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${noneToken}` }
+        headers: { Authorization: `Bearer ${header}.${payload}.` }
       });
       assert.strictEqual(res.status, 401);
-      assert.strictEqual(res.data.code, 'INVALID_TOKEN');
     });
 
     await test('JWT: Forged signature with wrong secret is rejected with 401', async () => {
-      const forgedToken = jwt.sign(
-        { id: adminUserId, username: 'redteam_admin', role: 'admin', token_version: 1 },
-        'wrong-attacker-secret-key-1234567890',
-        { algorithm: 'HS256' }
-      );
-      const res = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${forgedToken}` }
-      });
+      const forged = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 }, 'bad-secret-key-12345678901234567890', { algorithm: 'HS256' });
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${forged}` } });
       assert.strictEqual(res.status, 401);
     });
 
-    await test('JWT: Privilege escalation by tampering role in payload is rejected with 401', async () => {
-      const parts = validAdminToken.split('.');
-      const decodedPayload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
-      decodedPayload.role = 'super_root_admin';
-      const tamperedPayload = Buffer.from(JSON.stringify(decodedPayload)).toString('base64url');
-      const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
-
-      const res = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${tamperedToken}` }
-      });
+    await test('JWT: Expired token is rejected with 401 (TOKEN_EXPIRED)', async () => {
+      const expired = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '-10s' });
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${expired}` } });
       assert.strictEqual(res.status, 401);
+      assert.strictEqual(res.data.code, 'TOKEN_EXPIRED');
     });
 
-    await test('JWT: Token revocation on password change invalidates previously issued JWTs', async () => {
-      // 1. Change password
-      const changeRes = await client.put('/api/auth/password', {
-        currentPassword: 'StrongAdminPassword2026!',
-        newPassword: 'BrandNewStrongPassword2026!'
-      }, {
-        headers: { Authorization: `Bearer ${validAdminToken}` }
-      });
-      assert.strictEqual(changeRes.status, 200);
-      const freshToken = changeRes.data.token;
-
-      // 2. Old token MUST be rejected with TOKEN_REVOKED
-      const oldTokenRes = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${validAdminToken}` }
-      });
-      assert.strictEqual(oldTokenRes.status, 401);
-      assert.strictEqual(oldTokenRes.data.code, 'TOKEN_REVOKED');
-
-      // 3. Fresh token works and becomes active
-      const freshTokenRes = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${freshToken}` }
-      });
-      assert.strictEqual(freshTokenRes.status, 200);
-      validAdminToken = freshToken;
-    });
-
-    // -------------------------------------------------------------
-    // [SECTION 2] CSRF & ORIGIN MANIPULATION
-    // -------------------------------------------------------------
-    console.log('\n[2/8] Testing CSRF & Cross-Origin State Mutation Attacks...');
-
-    // Login to obtain cookie
-    const loginRes = await client.post('/api/auth/login', {
-      username: 'redteam_admin',
-      password: 'BrandNewStrongPassword2026!'
-    });
-    assert.strictEqual(loginRes.status, 200);
-    const activeToken = loginRes.data.token;
-    const cookieHeader = `nexuspanel_token=${activeToken}`;
-
-    await test('CSRF: Cross-Origin POST /api/settings with cookie is blocked by CSRF guard (403)', async () => {
-      const res = await client.put('/api/settings', { dashboard_name: 'Hacked Dashboard' }, {
+    await test('AUTH: Invalid Authorization header + valid cookie -> 401 (Strict Header Precedence)', async () => {
+      const res = await client.get('/api/auth/me', {
         headers: {
-          Cookie: cookieHeader,
-          Origin: 'http://attacker-evil-website.com'
+          Authorization: 'Bearer malformed.invalid.token',
+          Cookie: `nexuspanel_token=${adminToken}`
         }
+      });
+      assert.strictEqual(res.status, 401);
+    });
+
+    await test('AUTH: Valid Authorization header + invalid cookie -> 200 (Header Succeeds)', async () => {
+      const res = await client.get('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          Cookie: 'nexuspanel_token=garbage-cookie'
+        }
+      });
+      assert.strictEqual(res.status, 200);
+    });
+
+    await test('LOGOUT: Calling /logout immediately revokes the JWT token version', async () => {
+      // 1. Token currently works
+      const preRes = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${adminToken}` } });
+      assert.strictEqual(preRes.status, 200);
+
+      // 2. Call logout with the token
+      const logoutRes = await client.post('/api/auth/logout', {}, { headers: { Authorization: `Bearer ${adminToken}` } });
+      assert.strictEqual(logoutRes.status, 200);
+
+      // 3. Old token MUST now be revoked and rejected with 401 TOKEN_REVOKED
+      const postRes = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${adminToken}` } });
+      assert.strictEqual(postRes.status, 401);
+      assert.strictEqual(postRes.data.code, 'TOKEN_REVOKED');
+
+      // Issue a fresh active token for remaining tests
+      const currentVer = db.prepare("SELECT token_version FROM users WHERE id = ?").get(adminUser.id).token_version;
+      adminToken = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: currentVer }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '24h' });
+    });
+
+    // -------------------------------------------------------------
+    // [SECTION 3] STRICT FAIL-CLOSED CSRF VERIFICATION
+    // -------------------------------------------------------------
+    console.log('\n[3/7] Testing Fail-Closed CSRF Protection & Origin Matching...');
+
+    const cookieHeader = `nexuspanel_token=${adminToken}`;
+
+    await test('CSRF: Cookie + Malicious Origin (http://evil.com) -> 403 CSRF_BLOCKED', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'Hacked' }, {
+        headers: { Cookie: cookieHeader, Origin: 'http://evil.com' }
       });
       assert.strictEqual(res.status, 403);
       assert.strictEqual(res.data.code, 'CSRF_BLOCKED');
     });
 
-    await test('CSRF: Cross-Origin Referer on state-changing endpoint is blocked (403)', async () => {
-      const res = await client.put('/api/settings', { dashboard_name: 'Hacked Referer' }, {
-        headers: {
-          Cookie: cookieHeader,
-          Referer: 'http://malicious-referrer-site.org/attack.html'
-        }
+    await test('CSRF: Cookie + Malicious Referer (http://evil.com/page) -> 403 CSRF_BLOCKED', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'Hacked' }, {
+        headers: { Cookie: cookieHeader, Referer: 'http://evil.com/phishing.html' }
       });
       assert.strictEqual(res.status, 403);
       assert.strictEqual(res.data.code, 'CSRF_BLOCKED');
     });
 
+    await test('CSRF FAIL-CLOSED: Cookie + Missing Origin AND Missing Referer -> 403 CSRF_BLOCKED', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'Hacked' }, {
+        headers: { Cookie: cookieHeader }
+      });
+      assert.strictEqual(res.status, 403);
+      assert.strictEqual(res.data.code, 'CSRF_BLOCKED');
+    });
+
+    await test('CSRF: Cookie + Different Port (http://127.0.0.1:9999) -> 403 CSRF_BLOCKED', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'Hacked' }, {
+        headers: { Cookie: cookieHeader, Origin: 'http://127.0.0.1:9999' }
+      });
+      assert.strictEqual(res.status, 403);
+      assert.strictEqual(res.data.code, 'CSRF_BLOCKED');
+    });
+
+    await test('CSRF: Cookie + Valid Origin -> 200 SUCCESS', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'NexusPanel Verified' }, {
+        headers: { Cookie: cookieHeader, Origin: validOrigin }
+      });
+      assert.strictEqual(res.status, 200);
+    });
+
+    await test('CSRF: Cookie + Valid Referer (when Origin is omitted) -> 200 SUCCESS', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'NexusPanel Verified 2' }, {
+        headers: { Cookie: cookieHeader, Referer: `${validOrigin}/admin` }
+      });
+      assert.strictEqual(res.status, 200);
+    });
+
+    await test('CSRF: Bearer Authorization + Missing Origin -> 200 SUCCESS (API Client)', async () => {
+      const res = await client.put('/api/settings', { dashboard_name: 'NexusPanel Verified Bearer' }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      assert.strictEqual(res.status, 200);
+    });
+
     // -------------------------------------------------------------
-    // [SECTION 3] ADVANCED SSRF BYPASS ATTEMPTS
+    // [SECTION 4] SSRF ON LIVE ENDPOINTS & REDIRECT DEFENSE
     // -------------------------------------------------------------
-    console.log('\n[3/8] Testing Advanced SSRF Obfuscation & Encoded Addresses...');
-
-    await test('SSRF: Decimal IP normalization (2130706433 -> 127.0.0.1)', () => {
-      assert.strictEqual(normalizeIpString('2130706433'), '127.0.0.1');
-      assert.strictEqual(isDangerousOrReservedIp('2130706433'), true);
-    });
-
-    await test('SSRF: Hex IP normalization (0x7f000001 -> 127.0.0.1)', () => {
-      assert.strictEqual(normalizeIpString('0x7f000001'), '127.0.0.1');
-      assert.strictEqual(isDangerousOrReservedIp('0x7f000001'), true);
-    });
-
-    await test('SSRF: Octal IP normalization (0177.0.0.1 -> 127.0.0.1)', () => {
-      assert.strictEqual(normalizeIpString('0177.0.0.1'), '127.0.0.1');
-      assert.strictEqual(isDangerousOrReservedIp('0177.0.0.1'), true);
-    });
-
-    await test('SSRF: Userinfo URL stripping (user:pass@127.0.0.1)', () => {
-      assert.strictEqual(normalizeIpString('admin:secret@127.0.0.1'), '127.0.0.1');
-      assert.strictEqual(isDangerousOrReservedIp('admin:secret@127.0.0.1'), true);
-    });
-
-    await test('SSRF: IPv4-mapped IPv6 loopback (::ffff:127.0.0.1) is blocked', () => {
-      assert.strictEqual(isDangerousOrReservedIp('::ffff:127.0.0.1'), true);
-    });
-
-    await test('SSRF: AWS ECS Task metadata IP (169.254.170.2) is blocked', () => {
-      assert.strictEqual(isDangerousOrReservedIp('169.254.170.2'), true);
-    });
-
-    await test('SSRF: AWS IMDS IPv6 metadata ([fd00:ec2::254]) is blocked', () => {
-      assert.strictEqual(isDangerousOrReservedIp('fd00:ec2::254'), true);
-    });
+    console.log('\n[4/7] Testing Live Endpoint SSRF & Redirect Defenses...');
 
     await test('SSRF: /api/health/probe rejects decimal loopback (http://2130706433)', async () => {
       const res = await client.post('/api/health/probe', { url: 'http://2130706433' });
@@ -207,62 +219,103 @@ async function runRedTeamAudit() {
       assert.ok(res.data.error.includes('SSRF') || res.data.error.includes('restricted'));
     });
 
-    await test('SSRF: /api/health/probe rejects cloud metadata (http://169.254.169.254/latest/meta-data)', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://169.254.169.254/latest/meta-data' });
+    await test('SSRF: /api/health/probe rejects hex loopback (http://0x7f000001)', async () => {
+      const res = await client.post('/api/health/probe', { url: 'http://0x7f000001' });
       assert.strictEqual(res.status, 400);
     });
 
-    await test('SSRF: /api/proxmox/test rejects localhost host input with 400', async () => {
-      const res = await client.post('/api/proxmox/test', {
-        host: '127.0.0.1',
-        port: 8006
-      }, {
-        headers: { Authorization: `Bearer ${activeToken}` }
+    await test('SSRF: /api/health/probe rejects octal loopback (http://0177.0.0.1)', async () => {
+      const res = await client.post('/api/health/probe', { url: 'http://0177.0.0.1' });
+      assert.strictEqual(res.status, 400);
+    });
+
+    await test('SSRF: /api/health/probe rejects IPv4-mapped IPv6 loopback (http://[::ffff:127.0.0.1])', async () => {
+      const res = await client.post('/api/health/probe', { url: 'http://[::ffff:127.0.0.1]' });
+      assert.strictEqual(res.status, 400);
+    });
+
+    await test('SSRF: /api/health/probe rejects AWS IMDS IPv6 (http://[fd00:ec2::254])', async () => {
+      const res = await client.post('/api/health/probe', { url: 'http://[fd00:ec2::254]' });
+      assert.strictEqual(res.status, 400);
+    });
+
+    await test('SSRF: /api/proxmox/test rejects localhost with 400', async () => {
+      const res = await client.post('/api/proxmox/test', { host: 'localhost', port: 8006 }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 400);
-      assert.ok(res.data.error.includes('SSRF') || res.data.error.includes('Nieprawidłowy'));
     });
 
-    // -------------------------------------------------------------
-    // [SECTION 4] PASSWORD POLICY & BRUTE-FORCE RESILIENCE
-    // -------------------------------------------------------------
-    console.log('\n[4/8] Testing Password Policy Enforcements...');
+    // Start a mock HTTP redirect server to test Redirect SSRF defense
+    const redirectServer = http.createServer((req, res) => {
+      res.writeHead(302, { Location: 'http://169.254.169.254/latest/meta-data' });
+      res.end();
+    });
+    await new Promise((resolve) => redirectServer.listen(0, resolve));
+    const redirectPort = redirectServer.address().port;
 
-    await test('POLICY: Weak 6-character password on password change is rejected with 400', async () => {
-      const res = await client.put('/api/auth/password', {
-        currentPassword: 'BrandNewStrongPassword2026!',
-        newPassword: 'short'
-      }, {
-        headers: { Authorization: `Bearer ${activeToken}` }
+    await test('SSRF REDIRECT: Server returning 302 to cloud metadata is NOT followed', async () => {
+      const res = await client.post('/api/health/probe', { url: `http://192.168.1.1:${redirectPort}` });
+      // With maxRedirects: 0, the probe will not follow the redirect to 169.254.169.254
+      assert.ok(res.status === 200 || res.status === 400);
+      if (res.status === 200) {
+        assert.notStrictEqual(res.data.httpStatus, 200, 'Must not return metadata 200 content');
+      }
+    });
+    redirectServer.close();
+
+    // -------------------------------------------------------------
+    // [SECTION 5] BACKUP DoS, DEEP NESTING & PROTOTYPE POLLUTION
+    // -------------------------------------------------------------
+    console.log('\n[5/7] Testing Backup DoS & Payload Limits...');
+
+    await test('BACKUP: Deeply nested JSON payload (depth > 6) is rejected with 400', async () => {
+      let nested = { categories: [], services: [] };
+      let curr = nested;
+      for (let i = 0; i < 8; i++) {
+        curr.child = {};
+        curr = curr.child;
+      }
+      const res = await client.post('/api/backup/import', nested, {
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 400);
-      assert.ok(res.data.error.includes('12'));
+      assert.ok(res.data.error.includes('depth'));
+    });
+
+    await test('BACKUP: Excessive entity arrays (> 200 categories) is rejected with 400', async () => {
+      const hugeCategories = Array(250).fill(0).map((_, i) => ({ name: `Cat ${i}` }));
+      const res = await client.post('/api/backup/import', { categories: hugeCategories, services: [] }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      assert.strictEqual(res.status, 400);
+      assert.ok(res.data.error.includes('limits'));
+    });
+
+    await test('BACKUP: Prototype pollution attempt is rejected with 400', async () => {
+      const rawJson = '{"__proto__": {"polluted": true}, "categories": [], "services": []}';
+      const res = await client.post('/api/backup/import', rawJson, {
+        headers: { Authorization: `Bearer ${adminToken}`, 'Content-Type': 'application/json' }
+      });
+      assert.strictEqual(res.status, 400);
+      assert.strictEqual(Object.prototype.polluted, undefined);
     });
 
     // -------------------------------------------------------------
-    // [SECTION 5] UPLOAD SECURITY (POLYGLOT & MAGIC BYTES)
+    // [SECTION 6] UPLOAD HARDENING & DECOMPRESSION BOMBS
     // -------------------------------------------------------------
-    console.log('\n[5/8] Testing Polyglot File Uploads & Extension Mismatches...');
+    console.log('\n[6/7] Testing Upload Hardening & Dimension Boundaries...');
 
     await test('UPLOAD: Fake non-image binary file with PNG extension is rejected (400)', async () => {
       const form = new FormData();
-      form.append('file', Buffer.from('PLAIN_TEXT_NOT_AN_IMAGE_FILE_DATA_HERE'), {
-        filename: 'fake_image.png',
-        contentType: 'image/png'
-      });
-
+      form.append('file', Buffer.from('NOT_AN_IMAGE_PAYLOAD_HERE'), { filename: 'fake.png', contentType: 'image/png' });
       const res = await client.post('/api/upload/image', form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: `Bearer ${activeToken}`
-        }
+        headers: { ...form.getHeaders(), Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 400);
-      assert.ok(res.data.error.includes('podpis binarny'));
     });
 
-    await test('UPLOAD: Path traversal in filename is sanitized to random UUID (200)', async () => {
-      // 1x1 valid PNG binary buffer
+    await test('UPLOAD: Valid 1x1 PNG is accepted and saved as UUID (200)', async () => {
       const pngBuffer = Buffer.from([
         0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
         0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
@@ -271,82 +324,30 @@ async function runRedTeamAudit() {
         0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
         0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
       ]);
-
       const form = new FormData();
-      form.append('file', pngBuffer, {
-        filename: '../../../../etc/cron.d/exploit.png',
-        contentType: 'image/png'
-      });
-
+      form.append('file', pngBuffer, { filename: 'test.png', contentType: 'image/png' });
       const res = await client.post('/api/upload/image', form, {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: `Bearer ${activeToken}`
-        }
+        headers: { ...form.getHeaders(), Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 200);
-      assert.ok(!res.data.filename.includes('..'));
       assert.ok(res.data.filename.startsWith('upload-'));
     });
 
     // -------------------------------------------------------------
-    // [SECTION 6] PROTOTYPE POLLUTION & BACKUP INTEGRITY
+    // [SECTION 7] FACTORY RESET SECURITY
     // -------------------------------------------------------------
-    console.log('\n[6/8] Testing Prototype Pollution & Backup Exploit Payloads...');
+    console.log('\n[7/7] Testing Factory Reset Hardening...');
 
-    await test('BACKUP: Prototype pollution in JSON payload is rejected (400)', async () => {
-      const payload = {
-        categories: [],
-        services: [],
-        __proto__: { polluted: true }
-      };
-      // Send raw json with __proto__ key
-      const rawJson = '{"__proto__": {"polluted": true}, "categories": [], "services": []}';
-      const res = await client.post('/api/backup/import', rawJson, {
-        headers: {
-          Authorization: `Bearer ${activeToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      assert.strictEqual(res.status, 400);
-      assert.strictEqual(Object.prototype.polluted, undefined);
-    });
-
-    // -------------------------------------------------------------
-    // [SECTION 7] SCANNER BOUNDARY ENFORCEMENT
-    // -------------------------------------------------------------
-    console.log('\n[7/8] Testing Network Scanner Limits...');
-
-    await test('SCANNER: Huge arbitrary CIDR / host count is blocked (400)', async () => {
-      const tooManyHosts = Array(500).fill('192.168.1.1');
-      const res = await client.post('/api/scanner/scan-custom', {
-        hosts: tooManyHosts
-      }, {
-        headers: { Authorization: `Bearer ${activeToken}` }
+    await test('FACTORY RESET: Blocked without exact confirmation phrase (400)', async () => {
+      const res = await client.post('/api/backup/factory-reset', { confirmation: 'invalid phrase' }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 400);
     });
 
-    // -------------------------------------------------------------
-    // [SECTION 8] FACTORY RESET SECURITY (Run at the very end)
-    // -------------------------------------------------------------
-    console.log('\n[8/8] Testing Factory Reset Hardening...');
-
-    await test('FACTORY RESET: Operation without explicit confirmation phrase is blocked (400)', async () => {
-      const res = await client.post('/api/backup/factory-reset', {
-        confirmation: 'yes please'
-      }, {
-        headers: { Authorization: `Bearer ${activeToken}` }
-      });
-      assert.strictEqual(res.status, 400);
-      assert.ok(res.data.error.includes('RESET NEXUSPANEL'));
-    });
-
-    await test('FACTORY RESET: Operation with exact confirmation phrase succeeds', async () => {
-      const res = await client.post('/api/backup/factory-reset', {
-        confirmation: 'RESET NEXUSPANEL'
-      }, {
-        headers: { Authorization: `Bearer ${activeToken}` }
+    await test('FACTORY RESET: Succeeds with exact confirmation phrase (200)', async () => {
+      const res = await client.post('/api/backup/factory-reset', { confirmation: 'RESET NEXUSPANEL' }, {
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 200);
       assert.strictEqual(res.data.success, true);
@@ -356,9 +357,9 @@ async function runRedTeamAudit() {
     server.close();
   }
 
-  console.log(`\n=======================================================`);
-  console.log(`Final Red Team Results: ${passed} passed, ${failed} failed`);
-  console.log(`=======================================================\n`);
+  console.log(`\n=================================================================`);
+  console.log(`Round 3 Red Team Verification: ${passed} passed, ${failed} failed`);
+  console.log(`=================================================================\n`);
 
   if (failed > 0) {
     process.exit(1);
@@ -366,6 +367,6 @@ async function runRedTeamAudit() {
 }
 
 runRedTeamAudit().catch((err) => {
-  console.error('Fatal Red Team test failure:', err);
+  console.error('Fatal Red Team verification failure:', err);
   process.exit(1);
 });

@@ -1,11 +1,14 @@
 import express from 'express';
 import axios from 'axios';
+import http from 'http';
 import https from 'https';
-import { validateDestinationHost } from '../utils/networkSecurity.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { validateDestinationHost, createSecureLookup } from '../utils/networkSecurity.js';
 
 const router = express.Router();
-const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+
+const secureLookup = createSecureLookup(true);
+const httpsAgent = new https.Agent({ rejectUnauthorized: false, lookup: secureLookup });
+const httpAgent = new http.Agent({ lookup: secureLookup });
 
 router.get('/', (req, res) => {
   res.json({
@@ -16,7 +19,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// Live health check probe endpoint with SSRF destination validation
+// Live health check probe endpoint with strict SSRF, DNS pinning, and zero-redirect policy
 router.post('/probe', async (req, res) => {
   const { url } = req.body;
   if (!url || typeof url !== 'string') {
@@ -37,7 +40,7 @@ router.post('/probe', async (req, res) => {
     return res.status(400).json({ error: 'Only http: and https: protocols are permitted' });
   }
 
-  // SSRF guard: Validate hostname against loopback and cloud metadata
+  // SSRF guard: Validate hostname against loopback, non-standard encodings, and cloud metadata
   try {
     await validateDestinationHost(parsedUrl.hostname, true);
   } catch (ssrfErr) {
@@ -48,10 +51,11 @@ router.post('/probe', async (req, res) => {
   try {
     const response = await axios.get(trimmedUrl, {
       timeout: 5000,
-      maxRedirects: 3,
+      maxRedirects: 0, // Strict zero redirects: prevents redirect SSRF bypass
       maxContentLength: 1024 * 1024, // 1MB limit for probe
+      httpAgent,
       httpsAgent,
-      validateStatus: () => true, // Treat any HTTP response code (200, 401, 403, 500) as online/reachable
+      validateStatus: () => true, // Treat any HTTP response code as online/reachable
       headers: { 'User-Agent': 'NexusPanel-HealthProbe/1.0' }
     });
 
@@ -73,6 +77,8 @@ router.post('/probe', async (req, res) => {
       friendlyError = 'Connection refused (port closed)';
     } else if (err.code === 'ENOTFOUND') {
       friendlyError = 'DNS lookup failed (host not found)';
+    } else if (err.message && err.message.includes('restricted')) {
+      return res.status(400).json({ error: err.message });
     }
 
     res.json({

@@ -2,6 +2,7 @@ import express from 'express';
 import db from '../db/index.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { validateService, handleValidationErrors } from '../middleware/validation.js';
+import { safeHttpRequest } from '../utils/networkSecurity.js';
 
 const router = express.Router();
 
@@ -364,6 +365,42 @@ router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
   const result = db.prepare("DELETE FROM services WHERE id = ?").run(req.params.id);
   if (result.changes === 0) return res.status(404).json({ error: 'Not found' });
   res.json({ success: true });
+});
+
+router.post('/:id/probe', async (req, res) => {
+  const service = db.prepare('SELECT id, name, url, health_check_url FROM services WHERE id = ?').get(req.params.id);
+  if (!service) {
+    return res.status(404).json({ error: 'Service not found' });
+  }
+
+  const targetUrl = (service.health_check_url && service.health_check_url.trim()) || service.url;
+  const startTime = Date.now();
+
+  try {
+    const response = await safeHttpRequest(targetUrl, {
+      timeout: 5000,
+      verifySsl: false
+    });
+
+    const responseTime = Date.now() - startTime;
+    const status = responseTime < 1000 ? 'online' : 'degraded';
+
+    res.json({
+      status,
+      responseTime,
+      httpStatus: response.status,
+      checkedAt: new Date().toISOString(),
+      serviceId: service.id
+    });
+  } catch (err) {
+    res.json({
+      status: 'offline',
+      responseTime: null,
+      error: err.message || 'Host unreachable',
+      checkedAt: new Date().toISOString(),
+      serviceId: service.id
+    });
+  }
 });
 
 export default router;
