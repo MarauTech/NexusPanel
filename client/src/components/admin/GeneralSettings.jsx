@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
+import { useLanguage } from '../../contexts/LanguageContext';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { useToast } from '../../contexts/ToastContext';
-import { Settings, Sliders, GitBranch, CheckCircle2 } from 'lucide-react';
+import { Settings, Sliders, GitBranch, CheckCircle2, Globe } from 'lucide-react';
 
 export default function GeneralSettings() {
   const { settings, updateSettings, loading } = useSettings();
+  const { language, setLanguage, t } = useLanguage();
   const { addToast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -28,13 +30,13 @@ export default function GeneralSettings() {
         user_name: settings.user_name || '',
         logo_url: settings.logo_url || '',
         favicon_url: settings.favicon_url || '',
-        language: settings.language || 'pl',
+        language: settings.language || language || 'pl',
         timezone: settings.timezone || 'auto',
         show_header_clock: settings.show_header_clock !== undefined ? String(settings.show_header_clock) : 'true',
         show_status_indicators: settings.show_status_indicators !== undefined ? String(settings.show_status_indicators) : 'true'
       });
     }
-  }, [settings]);
+  }, [settings, language]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -49,9 +51,12 @@ export default function GeneralSettings() {
     setSaving(true);
     try {
       await updateSettings(formData);
-      addToast('Ustawienia ogólne zostały zapisane', 'success');
+      if (formData.language && setLanguage) {
+        setLanguage(formData.language);
+      }
+      addToast(t('settings.saved', 'Ustawienia ogólne zostały zapisane'), 'success');
     } catch (err) {
-      addToast('Nie udało się zapisać ustawień', 'error');
+      addToast(t('settings.error', 'Nie udało się zapisać ustawień'), 'error');
     } finally {
       setSaving(false);
     }
@@ -64,7 +69,7 @@ export default function GeneralSettings() {
       <div>
         <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Ustawienia Ogólne</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Dostosuj podstawowe opcje panelu, personalizację powitania oraz funkcje ekranu startowego.
+          Dostosuj podstawowe opcje panelu, wybór języka oraz personalizację powitania.
         </p>
       </div>
 
@@ -94,6 +99,23 @@ export default function GeneralSettings() {
               placeholder="np. NexusPanel"
               helper="Wyświetlana w nagłówku i na karcie przeglądarki"
             />
+          </div>
+
+          {/* Language Selector */}
+          <div className="pt-2">
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 text-accent" />
+              <span>Język interfejsu (Interface Language)</span>
+            </label>
+            <select
+              name="language"
+              value={formData.language}
+              onChange={handleChange}
+              className="w-full bg-black/[0.04] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 text-slate-900 dark:text-white text-xs sm:text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-accent cursor-pointer"
+            >
+              <option value="pl" className="bg-slate-900 text-white">🇵🇱 Polski (Polish)</option>
+              <option value="en" className="bg-slate-900 text-white">🇬🇧 English (Angielski)</option>
+            </select>
           </div>
         </div>
 

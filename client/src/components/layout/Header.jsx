@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv } from 'lucide-react';
+import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv, Globe } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
+import { useLanguage } from '../../contexts/LanguageContext';
 import SearchModal from '../search/SearchModal';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { settings } = useSettings();
+  const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -21,6 +23,11 @@ export default function Header() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = language === 'pl' ? 'en' : 'pl';
+    setLanguage(nextLang);
+  };
 
   const isAdmin = location.pathname.startsWith('/admin');
 
@@ -54,13 +61,23 @@ export default function Header() {
             <button
               onClick={() => setSearchOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all text-xs font-medium border border-black/[0.06] dark:border-white/10"
-              title="Wyszukiwarka (Ctrl+K)"
+              title={t('header.search', 'Wyszukiwarka (Ctrl+K)')}
             >
               <Search className="w-3.5 h-3.5 text-accent" />
-              <span className="hidden sm:inline">Szukaj</span>
+              <span className="hidden sm:inline">{t('header.spotlight', 'Szukaj')}</span>
               <kbd className="text-[10px] bg-black/[0.06] dark:bg-white/10 px-1 py-0.2 rounded text-slate-500 dark:text-slate-400 font-mono">
                 ⌘K
               </kbd>
+            </button>
+
+            {/* Language Switcher (PL / EN) */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all text-xs font-bold font-mono border border-black/[0.06] dark:border-white/10 cursor-pointer"
+              title={language === 'pl' ? 'Przełącz na język angielski (English)' : 'Przełącz na język polski (Polski)'}
+            >
+              <Globe className="w-3.5 h-3.5 text-accent" />
+              <span>{language.toUpperCase()}</span>
             </button>
 
             {/* Kiosk Mode Button */}
@@ -89,16 +106,16 @@ export default function Header() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/25 transition-all"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Pulpit</span>
+                <span className="hidden sm:inline">{t('header.dashboard', 'Pulpit')}</span>
               </Link>
             ) : (
               <Link
                 to="/admin"
                 className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all text-xs font-medium border border-black/[0.06] dark:border-white/10"
-                title="Ustawienia"
+                title={t('header.settings', 'Ustawienia')}
               >
                 <Settings className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 group-hover:rotate-45 transition-transform" />
-                <span className="hidden sm:inline">Ustawienia</span>
+                <span className="hidden sm:inline">{t('header.settings', 'Ustawienia')}</span>
               </Link>
             )}
           </div>
