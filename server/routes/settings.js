@@ -4,12 +4,20 @@ import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+const SENSITIVE_KEYS = ['proxmox_token_secret', 'jwt_secret'];
+
 router.get('/', (req, res) => {
   try {
     const rows = db.prepare("SELECT key, value FROM settings").all();
     const settings = {};
     for (const row of rows) {
-      settings[row.key] = row.value;
+      if (SENSITIVE_KEYS.includes(row.key)) {
+        // Mask secret if set, but indicate whether it exists
+        settings[row.key] = row.value ? '••••••••••••••••' : '';
+        settings[`${row.key}_configured`] = Boolean(row.value);
+      } else {
+        settings[row.key] = row.value;
+      }
     }
     res.json(settings);
   } catch (err) {
@@ -32,12 +40,16 @@ router.put('/', authenticateToken, requireAdmin, (req, res) => {
     db.transaction(() => {
       for (const [key, value] of Object.entries(settings)) {
         if (value !== undefined && value !== null) {
+          // Do NOT overwrite existing real secret if client sent back the masked placeholder
+          if (SENSITIVE_KEYS.includes(key) && String(value).startsWith('••••')) {
+            continue;
+          }
           stmt.run(key, String(value));
         }
       }
     })();
     
-    res.json({ success: true, settings });
+    res.json({ success: true, message: 'Settings saved successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

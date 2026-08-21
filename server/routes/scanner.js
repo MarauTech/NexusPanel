@@ -1,14 +1,27 @@
 import express from 'express';
 import { scanLocalNetwork, getNetworkInfo } from '../services/networkScanner.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import db from '../db/index.js';
 
 const router = express.Router();
 
+// Allow scanning without auth during initial setup, require admin auth otherwise
+function requireAuthUnlessFirstRun(req, res, next) {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
+    const setupDone = row && (row.value === '1' || row.value === 'true');
+    if (!setupDone) return next();
+    return authenticateToken(req, res, () => requireAdmin(req, res, next));
+  } catch (err) {
+    return next();
+  }
+}
+
 /**
  * GET /api/scanner/discover
- * Automatically detects local subnet (192.168.10.x vs 192.168.1.x), router gateway, and open ports
+ * Automatically detects local subnet, router gateway, and open ports
  */
-router.get('/discover', async (req, res) => {
+router.get('/discover', requireAuthUnlessFirstRun, async (req, res) => {
   try {
     const { netInfo, discovered } = await scanLocalNetwork();
 
@@ -49,7 +62,7 @@ router.get('/discover', async (req, res) => {
  * POST /api/scanner/scan-custom
  * Scan specific IP addresses or subnets
  */
-router.post('/scan-custom', async (req, res) => {
+router.post('/scan-custom', requireAuthUnlessFirstRun, async (req, res) => {
   try {
     const { hosts } = req.body;
     if (!Array.isArray(hosts) || hosts.length === 0) {
@@ -66,7 +79,7 @@ router.post('/scan-custom', async (req, res) => {
  * POST /api/scanner/add-batch
  * Batch insert discovered services into database
  */
-router.post('/add-batch', (req, res) => {
+router.post('/add-batch', requireAuthUnlessFirstRun, (req, res) => {
   try {
     const { services } = req.body;
     if (!Array.isArray(services) || services.length === 0) {
@@ -114,7 +127,6 @@ router.post('/add-batch', (req, res) => {
     });
 
     addAll(services);
-    db.saveSync();
 
     res.json({
       success: true,

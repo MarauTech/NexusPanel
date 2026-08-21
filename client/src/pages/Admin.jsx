@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useServices } from '../hooks/useServices';
 import GeneralSettings from '../components/admin/GeneralSettings';
 import AppearanceSettings from '../components/admin/AppearanceSettings';
 import ServiceManager from '../components/admin/ServiceManager';
@@ -18,6 +19,12 @@ export default function Admin() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { t } = useLanguage();
+  const { services, loading: servicesLoading } = useServices();
+
+  // SECURITY / UX GUARD: If dashboard is in empty setup state, do not allow direct access to /admin
+  if (!servicesLoading && services.length === 0) {
+    return <Navigate to="/" replace />;
+  }
 
   const tabs = [
     { id: 'general', label: t('admin.tab_general', 'Ogólne'), icon: Settings, path: 'general' },

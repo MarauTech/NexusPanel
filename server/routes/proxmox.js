@@ -2,6 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import https from 'https';
 import db from '../db/index.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -13,8 +14,8 @@ function getProxmoxSettings() {
   return settings;
 }
 
-// 1. Test Connection
-router.post('/test', async (req, res) => {
+// 1. Test Connection - requires admin authentication
+router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
   const { host, port, node, token_id, token_secret, verify_ssl } = req.body;
   
   if (!host) {
@@ -24,14 +25,26 @@ router.post('/test', async (req, res) => {
     });
   }
 
+  // Prevent SSRF to cloud metadata endpoints
+  if (host === '169.254.169.254' || host === 'metadata.google.internal' || host === '100.100.100.200') {
+    return res.status(403).json({ success: false, error: 'Restricted host' });
+  }
+
+  // If secret is masked or omitted, use existing saved secret from database
+  let secret = token_secret;
+  if (!secret || secret.startsWith('••••')) {
+    const saved = db.prepare("SELECT value FROM settings WHERE key = 'proxmox_token_secret'").get();
+    secret = saved?.value || '';
+  }
+
   const pvePort = port || 8006;
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
   const pveAgent = new https.Agent({ rejectUnauthorized: verify_ssl === 'true' || verify_ssl === true });
 
   try {
     const headers = {};
-    if (token_id && token_secret) {
-      headers['Authorization'] = `PVEAPIToken=${token_id}=${token_secret}`;
+    if (token_id && secret) {
+      headers['Authorization'] = `PVEAPIToken=${token_id}=${secret}`;
     }
 
     const versionRes = await axios.get(`${baseUrl}/version`, {
@@ -60,7 +73,6 @@ router.get('/node-status', async (req, res) => {
   const host = settings.proxmox_host;
   const isEnabled = settings.proxmox_enabled === 'true';
 
-  // Do NOT return fake data if Proxmox is not configured
   if (!isEnabled || !host) {
     return res.json({
       enabled: false,

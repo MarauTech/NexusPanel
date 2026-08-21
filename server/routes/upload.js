@@ -26,16 +26,18 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter (images only: PNG, JPG, SVG, WEBP, ICO, GIF)
+// File filter (images only: PNG, JPG, JPEG, WEBP, GIF, ICO) - strictly AND matched
 const fileFilter = (req, file, cb) => {
-  const allowed = /jpeg|jpg|png|gif|svg\+xml|svg|webp|x-icon|vnd\.microsoft\.icon/;
-  const isMimeValid = allowed.test(file.mimetype);
-  const isExtValid = /\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(file.originalname);
+  const allowedMime = /^(image\/jpeg|image\/png|image\/gif|image\/webp|image\/x-icon|image\/vnd\.microsoft\.icon)$/i;
+  const allowedExt = /\.(jpg|jpeg|png|gif|webp|ico)$/i;
   
-  if (isMimeValid || isExtValid) {
+  const isMimeValid = allowedMime.test(file.mimetype);
+  const isExtValid = allowedExt.test(file.originalname);
+  
+  if (isMimeValid && isExtValid) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files (PNG, JPG, SVG, WEBP, ICO, GIF) are permitted'));
+    cb(new Error('Dozwolone są wyłącznie bezpieczne pliki graficzne (PNG, JPG, WEBP, GIF, ICO)'));
   }
 };
 
@@ -49,7 +51,7 @@ const router = express.Router();
 
 router.post('/image', authenticateToken, requireAdmin, upload.single('file'), (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
+    return res.status(400).json({ error: 'Nie przesłano żadnego pliku' });
   }
 
   const fileUrl = `/uploads/${req.file.filename}`;
