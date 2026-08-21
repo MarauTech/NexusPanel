@@ -3,9 +3,6 @@ node_modules/
 client/node_modules/
 server/node_modules/
 
-# Production build (we can keep or build on the fly)
-client/dist/
-
 # Local databases & uploads
 data/
 uploads/
