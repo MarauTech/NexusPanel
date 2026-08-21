@@ -42,10 +42,15 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/mai
 git clone https://github.com/MarauTech/NexusPanel.git nexuspanel
 cd nexuspanel
 
-# 2. Uruchom w tle
+# 2. Skonfiguruj środowisko (.env)
+cp .env.example .env
+# Wygeneruj silny klucz JWT_SECRET poleceniem: openssl rand -hex 32
+# i wklej go do pliku .env
+
+# 3. Uruchom w tle
 docker compose up -d --build
 
-# 3. Otwórz w przeglądarce
+# 4. Otwórz w przeglądarce
 # http://localhost:3000 (lub IP_SERWERA:3000)
 ```
 
@@ -136,6 +141,7 @@ Wbudowany skaner automatycznie rozpoznaje Twoją podsieć (np. `192.168.10.x`) i
 ### Przez Proxmox / Linux (systemd):
 ```bash
 cd /opt/nexuspanel
+git checkout package-lock.json
 git pull
 npm install
 npm run build
@@ -144,7 +150,12 @@ systemctl restart nexuspanel
 
 ### Przez Docker:
 ```bash
-docker compose pull && docker compose up -d --build
+cd nexuspanel
+git checkout package-lock.json
+git pull
+docker compose down
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ---

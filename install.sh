@@ -4,7 +4,7 @@
 # NexusPanel - 1-Line Proxmox VE / Linux Installer
 # ============================================
 #
-# Usage in Proxmox VE Node Shell (Creates new LXC container):
+# Usage in Proxmox VE Node Shell (Creates new dedicated LXC container):
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"
 #
 # Usage inside existing Debian / Ubuntu / Alpine / Raspberry Pi:
@@ -141,7 +141,7 @@ if [ "$IS_PVE_HOST" = true ]; then
     echo 'nameserver 1.1.1.1' > /etc/resolv.conf
     echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
     apt-get update -y
-    apt-get install -y curl git sudo ca-certificates
+    apt-get install -y curl git sudo ca-certificates openssl
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y nodejs
   "
@@ -155,12 +155,16 @@ if [ "$IS_PVE_HOST" = true ]; then
     cd /opt/nexuspanel
     npm install
     npm run build
+    mkdir -p /opt/nexuspanel/data /opt/nexuspanel/uploads
   "
 
-  # Create Systemd Service for Auto-start
+  # Generate a cryptographically secure random JWT secret (64 hex characters)
+  GEN_SECRET=$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | xxd -p -c 32)
+
+  # Create Systemd Service for Auto-start with secure environment
   echo -e "${YW}--> Konfiguracja usługi autostartu systemd...${CL}"
   pct exec "$CT_ID" -- bash -c "
-    cat << 'EOF' > /etc/systemd/system/nexuspanel.service
+    cat << EOF > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -174,7 +178,9 @@ Restart=always
 RestartSec=3
 Environment=NODE_ENV=production
 Environment=PORT=3000
-Environment=JWT_SECRET=nexuspanel-prod-secret-12345
+Environment=JWT_SECRET=${GEN_SECRET}
+Environment=JWT_EXPIRY=24h
+Environment=DB_PATH=/opt/nexuspanel/data/nexuspanel.db
 
 [Install]
 WantedBy=multi-user.target
@@ -213,7 +219,7 @@ fi
 
 echo -e "${YW}--> Aktualizacja pakietów i instalacja Node.js 20...${CL}"
 apt-get update -y
-apt-get install -y curl git sudo ca-certificates
+apt-get install -y curl git sudo ca-certificates openssl
 
 if ! command -v node >/dev/null 2>&1; then
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
@@ -228,9 +234,13 @@ cd "$INSTALL_DIR"
 echo -e "${YW}--> Budowanie aplikacji...${CL}"
 npm install
 npm run build
+mkdir -p "$INSTALL_DIR/data" "$INSTALL_DIR/uploads"
+
+# Generate a cryptographically secure random JWT secret (64 hex characters)
+GEN_SECRET=$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | xxd -p -c 32)
 
 echo -e "${YW}--> Konfiguracja usługi systemowej autostartu (systemd)...${CL}"
-cat << 'EOF' > /etc/systemd/system/nexuspanel.service
+cat << EOF > /etc/systemd/system/nexuspanel.service
 [Unit]
 Description=NexusPanel Homelab Startpage
 After=network.target
@@ -244,7 +254,9 @@ Restart=always
 RestartSec=3
 Environment=NODE_ENV=production
 Environment=PORT=3000
-Environment=JWT_SECRET=nexuspanel-prod-secret-prod
+Environment=JWT_SECRET=${GEN_SECRET}
+Environment=JWT_EXPIRY=24h
+Environment=DB_PATH=/opt/nexuspanel/data/nexuspanel.db
 
 [Install]
 WantedBy=multi-user.target
