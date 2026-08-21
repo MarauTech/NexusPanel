@@ -9,12 +9,14 @@ import { recordAudit } from '../utils/audit.js';
 
 const router = express.Router();
 
-function getCookieOptions() {
+function getCookieOptions(req) {
+  const isHttps = Boolean(req && (req.secure || req.headers['x-forwarded-proto'] === 'https'));
   return {
     httpOnly: true,
-    secure: config.NODE_ENV === 'production',
+    secure: isHttps,
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    path: '/',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   };
 }
 
@@ -104,7 +106,7 @@ router.post('/setup', async (req, res) => {
     const payload = { id: newUserId, username: cleanUsername, role: 'admin', token_version: 1 };
     const token = jwt.sign(payload, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: config.JWT_EXPIRY });
 
-    res.cookie('nexuspanel_token', token, getCookieOptions());
+    res.cookie('nexuspanel_token', token, getCookieOptions(req));
 
     recordAudit({
       event: 'SETUP_COMPLETED',
@@ -155,7 +157,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     const payload = { id: user.id, username: user.username, role: user.role, token_version: user.token_version || 1 };
     const token = jwt.sign(payload, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: config.JWT_EXPIRY });
 
-    res.cookie('nexuspanel_token', token, getCookieOptions());
+    res.cookie('nexuspanel_token', token, getCookieOptions(req));
 
     recordAudit({ event: 'LOGIN_SUCCESS', userId: user.id, username: user.username, ip: req.ip, success: true });
 
@@ -193,10 +195,12 @@ router.post('/logout', (req, res) => {
     }
   }
 
+  const isHttps = Boolean(req.secure || req.headers['x-forwarded-proto'] === 'https');
   res.clearCookie('nexuspanel_token', {
     httpOnly: true,
-    secure: config.NODE_ENV === 'production',
-    sameSite: 'lax'
+    secure: isHttps,
+    sameSite: 'lax',
+    path: '/'
   });
   recordAudit({ event: 'LOGOUT', ip: req.ip, success: true });
   res.json({ success: true, message: 'Logged out successfully' });

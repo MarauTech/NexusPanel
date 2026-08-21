@@ -50,6 +50,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const res = await api.auth.login({ username, password });
+    if (res.data?.token) {
+      localStorage.setItem('nexuspanel_token', res.data.token);
+    }
     if (res.data && res.data.user) {
       setUser(res.data.user);
       setIsAuthenticated(true);
@@ -64,6 +67,7 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       // ignore
     } finally {
+      localStorage.removeItem('nexuspanel_token');
       setUser(null);
       setIsAuthenticated(false);
     }
