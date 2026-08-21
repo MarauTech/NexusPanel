@@ -30,7 +30,7 @@ const config = {
   PORT: parseInt(process.env.PORT, 10) || 3000,
   NODE_ENV,
   JWT_SECRET: jwtSecret,
-  JWT_EXPIRY: process.env.JWT_EXPIRY || '7d',
+  JWT_EXPIRY: process.env.JWT_EXPIRY || '24h',
   DB_PATH: process.env.DB_PATH || './data/nexuspanel.db',
   HEALTH_CHECK_INTERVAL: parseInt(process.env.HEALTH_CHECK_INTERVAL, 10) || 60,
   
@@ -39,7 +39,7 @@ const config = {
   RATE_LIMIT_LOGIN_WINDOW_MINS: parseInt(process.env.RATE_LIMIT_LOGIN_WINDOW_MINS, 10) || 15,
   RATE_LIMIT_GLOBAL_MAX: parseInt(process.env.RATE_LIMIT_GLOBAL_MAX, 10) || 600,
   RATE_LIMIT_SCANNER_MAX: parseInt(process.env.RATE_LIMIT_SCANNER_MAX, 10) || 10,
-  RATE_LIMIT_BACKUP_MAX: parseInt(process.env.RATE_LIMIT_BACKUP_MAX, 10) || 5,
+  RATE_LIMIT_BACKUP_MAX: parseInt(process.env.RATE_LIMIT_BACKUP_MAX, 10) || 20,
   RATE_LIMIT_UPLOAD_MAX: parseInt(process.env.RATE_LIMIT_UPLOAD_MAX, 10) || 20,
 
   // CORS & Network Security

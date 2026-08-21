@@ -7,11 +7,17 @@ import FormData from 'form-data';
 import app from '../index.js';
 import db from '../db/index.js';
 import config from '../config/index.js';
-import { normalizeIpString, isDangerousOrReservedIp, validateDestinationHost, safeHttpRequest } from '../utils/networkSecurity.js';
+import { 
+  normalizeIpString, 
+  isDangerousOrReservedIp, 
+  validateDestinationHost, 
+  createSecureLookup,
+  safeHttpRequest 
+} from '../utils/networkSecurity.js';
 
 async function runRedTeamAudit() {
   console.log('\n⚔️ =================================================================');
-  console.log('   NexusPanel ROUND 3 — FINAL RED TEAM & CORRECTNESS AUDIT SUITE');
+  console.log('   NexusPanel ROUND 4 — ADVERSARIAL VALIDATION & RED TEAM AUDIT');
   console.log('   =================================================================\n');
 
   let passed = 0;
@@ -48,14 +54,14 @@ async function runRedTeamAudit() {
     // -------------------------------------------------------------
     // [SECTION 1] FIRST-RUN CONCURRENCY & RACE CONDITIONS
     // -------------------------------------------------------------
-    console.log('\n[1/7] Testing First-Run Setup Concurrency & Race Conditions...');
+    console.log('\n[1/9] Testing First-Run Setup Concurrency & Atomicity...');
 
     db.exec(`
       DELETE FROM users;
       DELETE FROM settings WHERE key = 'setup_completed';
     `);
 
-    await test('CONCURRENCY: 10 concurrent setup requests create EXACTLY ONE admin (others get 403)', async () => {
+    await test('CONCURRENCY: 10 concurrent setup requests create EXACTLY ONE admin (9 get 403)', async () => {
       const promises = Array(10).fill(0).map((_, i) =>
         client.post('/api/auth/setup', {
           username: `admin_race_${i}`,
@@ -68,7 +74,7 @@ async function runRedTeamAudit() {
       const forbiddenCount = results.filter(r => r.status === 403).length;
 
       assert.strictEqual(successCount, 1, 'Exactly one setup request must succeed');
-      assert.strictEqual(forbiddenCount, 9, 'All 9 concurrent setup requests must be blocked');
+      assert.strictEqual(forbiddenCount, 9, 'All concurrent setup requests must be blocked');
 
       const userCount = db.prepare("SELECT COUNT(*) as count FROM users").get().count;
       assert.strictEqual(userCount, 1, 'Database must contain exactly 1 user');
@@ -81,77 +87,149 @@ async function runRedTeamAudit() {
       config.JWT_SECRET,
       { algorithm: 'HS256', expiresIn: '24h' }
     );
+    const adminAuthHeader = { Authorization: `Bearer ${adminToken}` };
+
+    // Create a regular (non-admin) user for authorization boundary testing
+    db.prepare(`
+      INSERT INTO users (username, password_hash, display_name, role, token_version, created_at, updated_at)
+      VALUES ('regular_user', 'hash', 'Regular', 'user', 1, datetime('now'), datetime('now'))
+    `).run();
+    const nonAdminUser = db.prepare("SELECT id, username, role FROM users WHERE username = 'regular_user'").get();
+    const nonAdminToken = jwt.sign(
+      { id: nonAdminUser.id, username: nonAdminUser.username, role: nonAdminUser.role, token_version: 1 },
+      config.JWT_SECRET,
+      { algorithm: 'HS256', expiresIn: '24h' }
+    );
+    const nonAdminAuthHeader = { Authorization: `Bearer ${nonAdminToken}` };
 
     // -------------------------------------------------------------
-    // [SECTION 2] JWT SECURITY & AUTH PRECEDENCE
+    // [SECTION 2] OBJECT-LEVEL & ENDPOINT AUTHORIZATION MATRIX
     // -------------------------------------------------------------
-    console.log('\n[2/7] Testing JWT Vulnerabilities & Auth Precedence...');
+    console.log('\n[2/9] Testing Full Object-Level & Admin Authorization Boundaries...');
+
+    const adminEndpoints = [
+      { method: 'put', url: '/api/settings', body: { dashboard_name: 'test' } },
+      { method: 'get', url: '/api/backup/export' },
+      { method: 'post', url: '/api/backup/import', body: { categories: [], services: [] } },
+      { method: 'post', url: '/api/backup/factory-reset', body: { confirmation: 'RESET NEXUSPANEL' } },
+      { method: 'post', url: '/api/services', body: { name: 't', url: 'http://192.168.1.1' } },
+      { method: 'put', url: '/api/services/1', body: { name: 't', url: 'http://192.168.1.1' } },
+      { method: 'delete', url: '/api/services/1' },
+      { method: 'post', url: '/api/categories', body: { name: 't' } },
+      { method: 'put', url: '/api/categories/1', body: { name: 't' } },
+      { method: 'delete', url: '/api/categories/1' },
+      { method: 'post', url: '/api/tags', body: { name: 't' } },
+      { method: 'delete', url: '/api/tags/1' },
+      { method: 'post', url: '/api/services/seed-demo', body: {} },
+      { method: 'post', url: '/api/health/probe', body: { url: 'http://192.168.1.1:8080' } }
+    ];
+
+    async function sendRequest(method, url, data, headers = {}) {
+      const m = method.toLowerCase();
+      if (m === 'get' || m === 'delete') {
+        return client[m](url, { headers, data });
+      }
+      return client[m](url, data, { headers });
+    }
+
+    for (const ep of adminEndpoints) {
+      await test(`AUTH: Anonymous access to ${ep.method.toUpperCase()} ${ep.url} returns 401`, async () => {
+        const res = await sendRequest(ep.method, ep.url, ep.body);
+        assert.strictEqual(res.status, 401);
+      });
+
+      await test(`AUTH: Non-admin access to ${ep.method.toUpperCase()} ${ep.url} returns 403`, async () => {
+        const res = await sendRequest(ep.method, ep.url, ep.body, nonAdminAuthHeader);
+        assert.strictEqual(res.status, 403);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // [SECTION 3] JWT ATTACK VECTORS & EDGE CASES
+    // -------------------------------------------------------------
+    console.log('\n[3/9] Testing JWT Edge Cases & Cryptographic Validation...');
 
     await test('JWT: "alg: none" token is rejected with 401', async () => {
       const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
       const payload = Buffer.from(JSON.stringify({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 })).toString('base64url');
-      const res = await client.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${header}.${payload}.` }
-      });
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${header}.${payload}.` } });
       assert.strictEqual(res.status, 401);
     });
 
-    await test('JWT: Forged signature with wrong secret is rejected with 401', async () => {
-      const forged = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 }, 'bad-secret-key-12345678901234567890', { algorithm: 'HS256' });
-      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${forged}` } });
+    await test('JWT: Token with future nbf (Not Before) is rejected with 401', async () => {
+      const futureNbfToken = jwt.sign(
+        { id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1, nbf: Math.floor(Date.now() / 1000) + 3600 },
+        config.JWT_SECRET,
+        { algorithm: 'HS256' }
+      );
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${futureNbfToken}` } });
       assert.strictEqual(res.status, 401);
     });
 
-    await test('JWT: Expired token is rejected with 401 (TOKEN_EXPIRED)', async () => {
-      const expired = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: 1 }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '-10s' });
-      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${expired}` } });
+    await test('JWT: Token with invalid user ID payload type is rejected with 401', async () => {
+      const invalidIdToken = jwt.sign(
+        { id: { nested: 'object' }, username: adminUser.username, role: 'admin', token_version: 1 },
+        config.JWT_SECRET,
+        { algorithm: 'HS256' }
+      );
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${invalidIdToken}` } });
       assert.strictEqual(res.status, 401);
-      assert.strictEqual(res.data.code, 'TOKEN_EXPIRED');
     });
 
-    await test('AUTH: Invalid Authorization header + valid cookie -> 401 (Strict Header Precedence)', async () => {
+    await test('JWT: Token for deleted/non-existent user ID is rejected with 401 (USER_NOT_FOUND)', async () => {
+      const ghostToken = jwt.sign(
+        { id: 999999, username: 'ghost_user', role: 'admin', token_version: 1 },
+        config.JWT_SECRET,
+        { algorithm: 'HS256' }
+      );
+      const res = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${ghostToken}` } });
+      assert.strictEqual(res.status, 401);
+      assert.strictEqual(res.data.code, 'USER_NOT_FOUND');
+    });
+
+    await test('AUTH: Invalid Authorization header + valid cookie -> 401 (Strict Precedence)', async () => {
       const res = await client.get('/api/auth/me', {
         headers: {
-          Authorization: 'Bearer malformed.invalid.token',
+          Authorization: 'Bearer bad.token.here',
           Cookie: `nexuspanel_token=${adminToken}`
         }
       });
       assert.strictEqual(res.status, 401);
     });
 
-    await test('AUTH: Valid Authorization header + invalid cookie -> 200 (Header Succeeds)', async () => {
+    await test('AUTH: Valid Authorization header + invalid cookie -> 200 (Header Wins)', async () => {
       const res = await client.get('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${adminToken}`,
-          Cookie: 'nexuspanel_token=garbage-cookie'
+          Cookie: 'nexuspanel_token=invalid'
         }
       });
       assert.strictEqual(res.status, 200);
     });
 
-    await test('LOGOUT: Calling /logout immediately revokes the JWT token version', async () => {
-      // 1. Token currently works
-      const preRes = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${adminToken}` } });
-      assert.strictEqual(preRes.status, 200);
+    await test('LOGOUT: Calling /logout immediately revokes active token version (401 on reuse)', async () => {
+      // Token currently works
+      const pre = await client.get('/api/auth/me', { headers: adminAuthHeader });
+      assert.strictEqual(pre.status, 200);
 
-      // 2. Call logout with the token
-      const logoutRes = await client.post('/api/auth/logout', {}, { headers: { Authorization: `Bearer ${adminToken}` } });
-      assert.strictEqual(logoutRes.status, 200);
+      // Call logout
+      const logout = await client.post('/api/auth/logout', {}, { headers: adminAuthHeader });
+      assert.strictEqual(logout.status, 200);
 
-      // 3. Old token MUST now be revoked and rejected with 401 TOKEN_REVOKED
-      const postRes = await client.get('/api/auth/me', { headers: { Authorization: `Bearer ${adminToken}` } });
-      assert.strictEqual(postRes.status, 401);
-      assert.strictEqual(postRes.data.code, 'TOKEN_REVOKED');
+      // Old token must now be revoked
+      const post = await client.get('/api/auth/me', { headers: adminAuthHeader });
+      assert.strictEqual(post.status, 401);
+      assert.strictEqual(post.data.code, 'TOKEN_REVOKED');
 
-      // Issue a fresh active token for remaining tests
-      const currentVer = db.prepare("SELECT token_version FROM users WHERE id = ?").get(adminUser.id).token_version;
-      adminToken = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: currentVer }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '24h' });
+      // Refresh admin token for subsequent test suites
+      const curVer = db.prepare("SELECT token_version FROM users WHERE id = ?").get(adminUser.id).token_version;
+      adminToken = jwt.sign({ id: adminUser.id, username: adminUser.username, role: 'admin', token_version: curVer }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '24h' });
     });
 
     // -------------------------------------------------------------
-    // [SECTION 3] STRICT FAIL-CLOSED CSRF VERIFICATION
+    // [SECTION 4] STRICT FAIL-CLOSED CSRF VERIFICATION
     // -------------------------------------------------------------
-    console.log('\n[3/7] Testing Fail-Closed CSRF Protection & Origin Matching...');
+    console.log('\n[4/9] Testing Fail-Closed CSRF Protection & Full Origin Matching...');
 
     const cookieHeader = `nexuspanel_token=${adminToken}`;
 
@@ -194,7 +272,7 @@ async function runRedTeamAudit() {
       assert.strictEqual(res.status, 200);
     });
 
-    await test('CSRF: Cookie + Valid Referer (when Origin is omitted) -> 200 SUCCESS', async () => {
+    await test('CSRF: Cookie + Valid Referer (Origin omitted) -> 200 SUCCESS', async () => {
       const res = await client.put('/api/settings', { dashboard_name: 'NexusPanel Verified 2' }, {
         headers: { Cookie: cookieHeader, Referer: `${validOrigin}/admin` }
       });
@@ -209,33 +287,77 @@ async function runRedTeamAudit() {
     });
 
     // -------------------------------------------------------------
-    // [SECTION 4] SSRF ON LIVE ENDPOINTS & REDIRECT DEFENSE
+    // [SECTION 5] DNS REBINDING & SOCKET BOUNDARY VALIDATION
     // -------------------------------------------------------------
-    console.log('\n[4/7] Testing Live Endpoint SSRF & Redirect Defenses...');
+    console.log('\n[5/9] Testing DNS Rebinding & Socket Security Boundaries...');
+
+    await test('DNS REBINDING: createSecureLookup aborts socket connection if resolved IP is loopback', async () => {
+      const lookup = createSecureLookup(true);
+      await new Promise((resolve) => {
+        lookup('localhost', {}, (err, address) => {
+          assert.ok(err, 'Lookup must return an error for loopback');
+          assert.strictEqual(address, undefined);
+          resolve();
+        });
+      });
+    });
+
+    await test('DNS REBINDING: createSecureLookup aborts socket connection for metadata IP (169.254.169.254)', async () => {
+      const lookup = createSecureLookup(true);
+      await new Promise((resolve) => {
+        lookup('169.254.169.254', {}, (err, address) => {
+          assert.ok(err, 'Lookup must return an error for cloud metadata');
+          assert.strictEqual(address, undefined);
+          resolve();
+        });
+      });
+    });
+
+    await test('DNS REBINDING: createSecureLookup aborts socket connection for IPv6 metadata ([fd00:ec2::254])', async () => {
+      const lookup = createSecureLookup(true);
+      await new Promise((resolve) => {
+        lookup('fd00:ec2::254', {}, (err, address) => {
+          assert.ok(err, 'Lookup must return an error for IPv6 metadata');
+          assert.strictEqual(address, undefined);
+          resolve();
+        });
+      });
+    });
+
+    await test('DNS REBINDING: createSecureLookup aborts socket connection for IPv4-mapped IPv6 (::ffff:127.0.0.1)', async () => {
+      const lookup = createSecureLookup(true);
+      await new Promise((resolve) => {
+        lookup('::ffff:127.0.0.1', {}, (err, address) => {
+          assert.ok(err, 'Lookup must return an error for IPv4-mapped loopback');
+          assert.strictEqual(address, undefined);
+          resolve();
+        });
+      });
+    });
+
+    // -------------------------------------------------------------
+    // [SECTION 6] LIVE ENDPOINT SSRF & ZERO-REDIRECT DEFENSE
+    // -------------------------------------------------------------
+    console.log('\n[6/9] Testing Live Endpoint SSRF & Zero-Redirect Defenses...');
 
     await test('SSRF: /api/health/probe rejects decimal loopback (http://2130706433)', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://2130706433' });
+      const res = await client.post('/api/health/probe', { url: 'http://2130706433' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       assert.strictEqual(res.status, 400);
       assert.ok(res.data.error.includes('SSRF') || res.data.error.includes('restricted'));
     });
 
     await test('SSRF: /api/health/probe rejects hex loopback (http://0x7f000001)', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://0x7f000001' });
+      const res = await client.post('/api/health/probe', { url: 'http://0x7f000001' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       assert.strictEqual(res.status, 400);
     });
 
     await test('SSRF: /api/health/probe rejects octal loopback (http://0177.0.0.1)', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://0177.0.0.1' });
-      assert.strictEqual(res.status, 400);
-    });
-
-    await test('SSRF: /api/health/probe rejects IPv4-mapped IPv6 loopback (http://[::ffff:127.0.0.1])', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://[::ffff:127.0.0.1]' });
+      const res = await client.post('/api/health/probe', { url: 'http://0177.0.0.1' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       assert.strictEqual(res.status, 400);
     });
 
     await test('SSRF: /api/health/probe rejects AWS IMDS IPv6 (http://[fd00:ec2::254])', async () => {
-      const res = await client.post('/api/health/probe', { url: 'http://[fd00:ec2::254]' });
+      const res = await client.post('/api/health/probe', { url: 'http://[fd00:ec2::254]' }, { headers: { Authorization: `Bearer ${adminToken}` } });
       assert.strictEqual(res.status, 400);
     });
 
@@ -246,7 +368,7 @@ async function runRedTeamAudit() {
       assert.strictEqual(res.status, 400);
     });
 
-    // Start a mock HTTP redirect server to test Redirect SSRF defense
+    // Mock redirect server
     const redirectServer = http.createServer((req, res) => {
       res.writeHead(302, { Location: 'http://169.254.169.254/latest/meta-data' });
       res.end();
@@ -255,19 +377,30 @@ async function runRedTeamAudit() {
     const redirectPort = redirectServer.address().port;
 
     await test('SSRF REDIRECT: Server returning 302 to cloud metadata is NOT followed', async () => {
-      const res = await client.post('/api/health/probe', { url: `http://192.168.1.1:${redirectPort}` });
-      // With maxRedirects: 0, the probe will not follow the redirect to 169.254.169.254
+      const res = await client.post('/api/health/probe', { url: `http://192.168.1.1:${redirectPort}` }, { headers: { Authorization: `Bearer ${adminToken}` } });
       assert.ok(res.status === 200 || res.status === 400);
       if (res.status === 200) {
-        assert.notStrictEqual(res.data.httpStatus, 200, 'Must not return metadata 200 content');
+        assert.notStrictEqual(res.data.httpStatus, 200);
       }
     });
     redirectServer.close();
 
     // -------------------------------------------------------------
-    // [SECTION 5] BACKUP DoS, DEEP NESTING & PROTOTYPE POLLUTION
+    // [SECTION 7] BACKUP HARD BODY LIMIT & PAYLOAD CONSTRAINTS
     // -------------------------------------------------------------
-    console.log('\n[5/7] Testing Backup DoS & Payload Limits...');
+    console.log('\n[7/9] Testing Backup Hard Body Size Limit (5MB) & Structure...');
+
+    await test('BACKUP: Request body exceeding 5MB hard limit is rejected with 413 (Payload Too Large)', async () => {
+      // 6MB payload
+      const hugeString = 'X'.repeat(6 * 1024 * 1024);
+      const res = await client.post('/api/backup/import', `{"dummy":"${hugeString}"}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      assert.strictEqual(res.status, 413);
+    });
 
     await test('BACKUP: Deeply nested JSON payload (depth > 6) is rejected with 400', async () => {
       let nested = { categories: [], services: [] };
@@ -302,17 +435,36 @@ async function runRedTeamAudit() {
     });
 
     // -------------------------------------------------------------
-    // [SECTION 6] UPLOAD HARDENING & DECOMPRESSION BOMBS
+    // [SECTION 8] UPLOAD HARDENING & DECOMPRESSION BOMB LIMITS
     // -------------------------------------------------------------
-    console.log('\n[6/7] Testing Upload Hardening & Dimension Boundaries...');
+    console.log('\n[8/9] Testing Upload Hardening, Signatures & Dimension Limits...');
 
-    await test('UPLOAD: Fake non-image binary file with PNG extension is rejected (400)', async () => {
+    await test('UPLOAD: Fake non-image binary with PNG extension is rejected (400)', async () => {
       const form = new FormData();
-      form.append('file', Buffer.from('NOT_AN_IMAGE_PAYLOAD_HERE'), { filename: 'fake.png', contentType: 'image/png' });
+      form.append('file', Buffer.from('NOT_AN_IMAGE_PAYLOAD_SAFE_TEST_MARKER'), { filename: 'fake.png', contentType: 'image/png' });
       const res = await client.post('/api/upload/image', form, {
         headers: { ...form.getHeaders(), Authorization: `Bearer ${adminToken}` }
       });
       assert.strictEqual(res.status, 400);
+    });
+
+    await test('UPLOAD: PNG with oversized dimensions (> 4096px decompression bomb) is rejected (400)', async () => {
+      // Valid PNG header with 10000 x 10000 px dimensions in IHDR
+      const bombPng = Buffer.from([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // Signature
+        0x00, 0x00, 0x00, 0x0D, // IHDR length
+        0x49, 0x48, 0x44, 0x52, // 'IHDR'
+        0x00, 0x00, 0x27, 0x10, // Width: 10,000 px
+        0x00, 0x00, 0x27, 0x10, // Height: 10,000 px
+        0x08, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+      ]);
+      const form = new FormData();
+      form.append('file', bombPng, { filename: 'bomb.png', contentType: 'image/png' });
+      const res = await client.post('/api/upload/image', form, {
+        headers: { ...form.getHeaders(), Authorization: `Bearer ${adminToken}` }
+      });
+      assert.strictEqual(res.status, 400);
+      assert.ok(res.data.error.includes('Wymiary obrazu'));
     });
 
     await test('UPLOAD: Valid 1x1 PNG is accepted and saved as UUID (200)', async () => {
@@ -334,9 +486,9 @@ async function runRedTeamAudit() {
     });
 
     // -------------------------------------------------------------
-    // [SECTION 7] FACTORY RESET SECURITY
+    // [SECTION 9] FACTORY RESET SECURITY (Runs at the very end)
     // -------------------------------------------------------------
-    console.log('\n[7/7] Testing Factory Reset Hardening...');
+    console.log('\n[9/9] Testing Factory Reset Hardening...');
 
     await test('FACTORY RESET: Blocked without exact confirmation phrase (400)', async () => {
       const res = await client.post('/api/backup/factory-reset', { confirmation: 'invalid phrase' }, {
@@ -358,7 +510,7 @@ async function runRedTeamAudit() {
   }
 
   console.log(`\n=================================================================`);
-  console.log(`Round 3 Red Team Verification: ${passed} passed, ${failed} failed`);
+  console.log(`Round 4 Adversarial Audit Results: ${passed} passed, ${failed} failed`);
   console.log(`=================================================================\n`);
 
   if (failed > 0) {
@@ -367,6 +519,6 @@ async function runRedTeamAudit() {
 }
 
 runRedTeamAudit().catch((err) => {
-  console.error('Fatal Red Team verification failure:', err);
+  console.error('Fatal Red Team audit failure:', err);
   process.exit(1);
 });

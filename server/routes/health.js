@@ -3,6 +3,7 @@ import axios from 'axios';
 import http from 'http';
 import https from 'https';
 import { validateDestinationHost, createSecureLookup } from '../utils/networkSecurity.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -10,6 +11,10 @@ const secureLookup = createSecureLookup(true);
 const httpsAgent = new https.Agent({ rejectUnauthorized: false, lookup: secureLookup });
 const httpAgent = new http.Agent({ lookup: secureLookup });
 
+/**
+ * GET /api/health
+ * Public health check for docker / reverse proxy status
+ */
 router.get('/', (req, res) => {
   res.json({
     status: 'ok',
@@ -19,11 +24,15 @@ router.get('/', (req, res) => {
   });
 });
 
-// Live health check probe endpoint with strict SSRF, DNS pinning, and zero-redirect policy
-router.post('/probe', async (req, res) => {
+/**
+ * POST /api/health/probe
+ * Protected live URL probe with SSRF, DNS pinning, and zero-redirect policy
+ * Requires admin authentication to prevent arbitrary SSRF probing by unauthenticated users.
+ */
+router.post('/probe', authenticateToken, requireAdmin, async (req, res) => {
   const { url } = req.body;
-  if (!url || typeof url !== 'string') {
-    return res.status(400).json({ error: 'URL is required and must be a string' });
+  if (!url || typeof url !== 'string' || url.length > 2000) {
+    return res.status(400).json({ error: 'URL is required, must be a string and under 2000 characters' });
   }
 
   const trimmedUrl = url.trim();
@@ -52,10 +61,10 @@ router.post('/probe', async (req, res) => {
     const response = await axios.get(trimmedUrl, {
       timeout: 5000,
       maxRedirects: 0, // Strict zero redirects: prevents redirect SSRF bypass
-      maxContentLength: 1024 * 1024, // 1MB limit for probe
+      maxContentLength: 512 * 1024, // 512KB limit for probe
       httpAgent,
       httpsAgent,
-      validateStatus: () => true, // Treat any HTTP response code as online/reachable
+      validateStatus: () => true, // Treat any HTTP response code as reachable
       headers: { 'User-Agent': 'NexusPanel-HealthProbe/1.0' }
     });
 
@@ -70,21 +79,14 @@ router.post('/probe', async (req, res) => {
       url: trimmedUrl
     });
   } catch (err) {
-    let friendlyError = 'Host unreachable';
-    if (err.code === 'ECONNABORTED' || (err.message && err.message.includes('timeout'))) {
-      friendlyError = 'Connection timed out (5s)';
-    } else if (err.code === 'ECONNREFUSED') {
-      friendlyError = 'Connection refused (port closed)';
-    } else if (err.code === 'ENOTFOUND') {
-      friendlyError = 'DNS lookup failed (host not found)';
-    } else if (err.message && err.message.includes('restricted')) {
+    if (err.message && err.message.includes('restricted')) {
       return res.status(400).json({ error: err.message });
     }
 
     res.json({
       status: 'offline',
       responseTime: null,
-      error: friendlyError,
+      error: 'Host unreachable or probe timed out',
       checkedAt: new Date().toISOString(),
       url: trimmedUrl
     });

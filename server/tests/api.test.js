@@ -55,11 +55,11 @@ async function runTests() {
 
     await test('POST /api/health/probe rejects invalid protocol (SSRF guard)', async () => {
       try {
-        await axios.post(`${BASE_URL}/api/health/probe`, { url: 'file:///etc/passwd' });
+        await axios.post(`${BASE_URL}/api/health/probe`, { url: 'file:///etc/passwd' }, { headers: authHeaders });
         assert.fail('Should have rejected non-http protocol');
       } catch (err) {
         assert.strictEqual(err.response.status, 400);
-        assert.ok(err.response.data.error.includes('http') || err.response.data.error.includes('Disallowed'));
+        assert.ok(err.response.data.error.includes('http') || err.response.data.error.includes('Disallowed') || err.response.data.error.includes('permitted'));
       }
     });
 

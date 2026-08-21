@@ -3,10 +3,11 @@ import axios from 'axios';
 import https from 'https';
 import db from '../db/index.js';
 import { authenticateToken, requireAdmin, optionalAuth } from '../middleware/auth.js';
-import { validateDestinationHost } from '../utils/networkSecurity.js';
+import { validateDestinationHost, createSecureLookup } from '../utils/networkSecurity.js';
 import { recordAudit } from '../utils/audit.js';
 
 const router = express.Router();
+const secureLookup = createSecureLookup(true);
 
 function getProxmoxSettings() {
   const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'proxmox_%'").all();
@@ -48,7 +49,7 @@ router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
   const pvePort = parseInt(port, 10) || 8006;
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
   const isSslVerificationRequired = verify_ssl === 'true' || verify_ssl === true;
-  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired, lookup: secureLookup });
 
   try {
     const headers = {};
@@ -117,7 +118,7 @@ router.get('/node-status', optionalAuth, async (req, res) => {
   const node = settings.proxmox_node || 'pve';
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
   const isSslVerificationRequired = settings.proxmox_verify_ssl === 'true';
-  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired, lookup: secureLookup });
 
   try {
     const headers = {};
@@ -200,7 +201,7 @@ router.get('/lxc-status', optionalAuth, async (req, res) => {
   const node = settings.proxmox_node || 'pve';
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
   const isSslVerificationRequired = settings.proxmox_verify_ssl === 'true';
-  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired, lookup: secureLookup });
 
   try {
     const headers = {};

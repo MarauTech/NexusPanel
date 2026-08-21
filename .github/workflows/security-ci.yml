@@ -27,6 +27,9 @@ jobs:
       - name: Build Frontend Assets
         run: npm run build
 
+      - name: Dependency Security Audit
+        run: npm audit --audit-level=high
+
       - name: Run Automated Security Test Suite
         run: npm run test --workspace=server
         env:

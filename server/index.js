@@ -92,8 +92,8 @@ app.use(
 // 4. Global Rate Limiter
 app.use('/api', globalLimiter);
 
-// 5. Body Parsers with safe small limits (1MB default)
-app.use('/api/backup/import', express.json({ limit: '20mb' })); // Specific limit for backup restore
+// 5. Body Parsers with safe small limits (1MB default, 5MB for backup import)
+app.use('/api/backup/import', express.json({ limit: '5mb' })); // Hard limit for backup restore
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
