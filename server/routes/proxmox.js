@@ -2,10 +2,11 @@ import express from 'express';
 import axios from 'axios';
 import https from 'https';
 import db from '../db/index.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, optionalAuth } from '../middleware/auth.js';
+import { validateDestinationHost } from '../utils/networkSecurity.js';
+import { recordAudit } from '../utils/audit.js';
 
 const router = express.Router();
-const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 function getProxmoxSettings() {
   const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'proxmox_%'").all();
@@ -14,20 +15,27 @@ function getProxmoxSettings() {
   return settings;
 }
 
-// 1. Test Connection - requires admin authentication
+/**
+ * 1. Test Proxmox VE Connection
+ */
 router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
   const { host, port, node, token_id, token_secret, verify_ssl } = req.body;
   
-  if (!host) {
+  if (!host || typeof host !== 'string') {
     return res.status(400).json({
       success: false,
       error: 'Proszę podać adres IP / host serwera Proxmox VE'
     });
   }
 
-  // Prevent SSRF to cloud metadata endpoints
-  if (host === '169.254.169.254' || host === 'metadata.google.internal' || host === '100.100.100.200') {
-    return res.status(403).json({ success: false, error: 'Restricted host' });
+  // SSRF guard: Validate host against loopback and cloud metadata
+  try {
+    await validateDestinationHost(host, true);
+  } catch (ssrfErr) {
+    return res.status(400).json({
+      success: false,
+      error: 'Nieprawidłowy adres hosta (zabezpieczenie SSRF): ' + ssrfErr.message
+    });
   }
 
   // If secret is masked or omitted, use existing saved secret from database
@@ -37,9 +45,10 @@ router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
     secret = saved?.value || '';
   }
 
-  const pvePort = port || 8006;
+  const pvePort = parseInt(port, 10) || 8006;
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
-  const pveAgent = new https.Agent({ rejectUnauthorized: verify_ssl === 'true' || verify_ssl === true });
+  const isSslVerificationRequired = verify_ssl === 'true' || verify_ssl === true;
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
 
   try {
     const headers = {};
@@ -50,7 +59,16 @@ router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
     const versionRes = await axios.get(`${baseUrl}/version`, {
       headers,
       httpsAgent: pveAgent,
-      timeout: 5000
+      timeout: 5000,
+      maxContentLength: 100 * 1024
+    });
+
+    recordAudit({
+      event: 'PROXMOX_TEST_SUCCESS',
+      userId: req.user.id,
+      username: req.user.username,
+      ip: req.ip,
+      details: { host, port: pvePort }
     });
 
     res.json({
@@ -60,15 +78,22 @@ router.post('/test', authenticateToken, requireAdmin, async (req, res) => {
       version: versionRes.data?.data?.version || '8.x'
     });
   } catch (err) {
+    let safeErrMsg = 'Nie można połączyć się z serwerem Proxmox VE';
+    if (err.code === 'ECONNREFUSED') safeErrMsg = `Odrzucono połączenie na porcie ${pvePort}`;
+    else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED') safeErrMsg = 'Przekroczono limit czasu połączenia (5s)';
+    else if (err.response?.status === 401 || err.response?.status === 403) safeErrMsg = 'Błąd uwierzytelnienia API Token w Proxmox (sprawdź Token ID i Secret)';
+
     res.status(400).json({
       success: false,
-      error: err.response?.data?.message || err.message || 'Nie można połączyć się z serwerem Proxmox VE'
+      error: safeErrMsg
     });
   }
 });
 
-// 2. Node Status (CPU, RAM, Disk, Uptime)
-router.get('/node-status', async (req, res) => {
+/**
+ * 2. Node Status (CPU, RAM, Disk, Uptime)
+ */
+router.get('/node-status', optionalAuth, async (req, res) => {
   const settings = getProxmoxSettings();
   const host = settings.proxmox_host;
   const isEnabled = settings.proxmox_enabled === 'true';
@@ -81,10 +106,18 @@ router.get('/node-status', async (req, res) => {
     });
   }
 
-  const pvePort = settings.proxmox_port || 8006;
+  // SSRF guard
+  try {
+    await validateDestinationHost(host, true);
+  } catch (e) {
+    return res.status(400).json({ enabled: false, error: 'Restricted Proxmox host' });
+  }
+
+  const pvePort = parseInt(settings.proxmox_port, 10) || 8006;
   const node = settings.proxmox_node || 'pve';
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
-  const pveAgent = new https.Agent({ rejectUnauthorized: settings.proxmox_verify_ssl === 'true' });
+  const isSslVerificationRequired = settings.proxmox_verify_ssl === 'true';
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
 
   try {
     const headers = {};
@@ -93,8 +126,8 @@ router.get('/node-status', async (req, res) => {
     }
 
     const [statusRes, rrdRes] = await Promise.all([
-      axios.get(`${baseUrl}/nodes/${node}/status`, { headers, httpsAgent: pveAgent, timeout: 5000 }),
-      axios.get(`${baseUrl}/version`, { headers, httpsAgent: pveAgent, timeout: 5000 }).catch(() => ({}))
+      axios.get(`${baseUrl}/nodes/${node}/status`, { headers, httpsAgent: pveAgent, timeout: 5000, maxContentLength: 500 * 1024 }),
+      axios.get(`${baseUrl}/version`, { headers, httpsAgent: pveAgent, timeout: 5000, maxContentLength: 100 * 1024 }).catch(() => ({}))
     ]);
 
     const data = statusRes.data?.data || {};
@@ -135,13 +168,15 @@ router.get('/node-status', async (req, res) => {
     res.status(500).json({
       enabled: false,
       configured: true,
-      error: 'Proxmox API query failed: ' + (err.response?.data?.message || err.message)
+      error: 'Błąd pobierania danych z API Proxmox'
     });
   }
 });
 
-// 3. LXC Containers List
-router.get('/lxc-status', async (req, res) => {
+/**
+ * 3. LXC Containers List
+ */
+router.get('/lxc-status', optionalAuth, async (req, res) => {
   const settings = getProxmoxSettings();
   const host = settings.proxmox_host;
   const isEnabled = settings.proxmox_enabled === 'true';
@@ -154,10 +189,18 @@ router.get('/lxc-status', async (req, res) => {
     });
   }
 
-  const pvePort = settings.proxmox_port || 8006;
+  // SSRF guard
+  try {
+    await validateDestinationHost(host, true);
+  } catch (e) {
+    return res.status(400).json({ enabled: false, error: 'Restricted Proxmox host' });
+  }
+
+  const pvePort = parseInt(settings.proxmox_port, 10) || 8006;
   const node = settings.proxmox_node || 'pve';
   const baseUrl = `https://${host}:${pvePort}/api2/json`;
-  const pveAgent = new https.Agent({ rejectUnauthorized: settings.proxmox_verify_ssl === 'true' });
+  const isSslVerificationRequired = settings.proxmox_verify_ssl === 'true';
+  const pveAgent = new https.Agent({ rejectUnauthorized: isSslVerificationRequired });
 
   try {
     const headers = {};
@@ -165,7 +208,7 @@ router.get('/lxc-status', async (req, res) => {
       headers['Authorization'] = `PVEAPIToken=${settings.proxmox_token_id}=${settings.proxmox_token_secret}`;
     }
 
-    const lxcRes = await axios.get(`${baseUrl}/nodes/${node}/lxc`, { headers, httpsAgent: pveAgent, timeout: 6000 });
+    const lxcRes = await axios.get(`${baseUrl}/nodes/${node}/lxc`, { headers, httpsAgent: pveAgent, timeout: 6000, maxContentLength: 500 * 1024 });
     const rawList = lxcRes.data?.data || [];
 
     const containers = rawList.map(c => ({
@@ -182,7 +225,7 @@ router.get('/lxc-status', async (req, res) => {
 
     res.json({ mode: 'live', enabled: true, configured: true, containers });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch LXC containers: ' + err.message });
+    res.status(500).json({ error: 'Nie udało się pobrać listy kontenerów LXC' });
   }
 });
 

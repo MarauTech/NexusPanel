@@ -237,12 +237,12 @@ const syncTags = (serviceId, tagsArray) => {
 };
 
 // Fast patch endpoint for favorite toggle
-router.patch('/:id/favorite', (req, res) => {
+router.patch('/:id/favorite', authenticateToken, requireAdmin, (req, res) => {
   const { favorite } = req.body;
   const val = (favorite === 1 || favorite === true || favorite === '1') ? 1 : 0;
   try {
     const result = db.prepare("UPDATE services SET favorite = ?, updated_at = datetime('now') WHERE id = ?").run(val, req.params.id);
-    if (result.changes === 0) return res.status(404).json({ error: 'Usługa nie została znaleziona' });
+    if (result.changes === 0) return res.status(404).json({ error: 'Service not found' });
     res.json({ success: true, favorite: val });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -250,12 +250,12 @@ router.patch('/:id/favorite', (req, res) => {
 });
 
 // Fast patch endpoint for enabled/disabled toggle
-router.patch('/:id/toggle', (req, res) => {
+router.patch('/:id/toggle', authenticateToken, requireAdmin, (req, res) => {
   const { enabled } = req.body;
   const val = (enabled === 1 || enabled === true || enabled === '1') ? 1 : 0;
   try {
     const result = db.prepare("UPDATE services SET enabled = ?, updated_at = datetime('now') WHERE id = ?").run(val, req.params.id);
-    if (result.changes === 0) return res.status(404).json({ error: 'Usługa nie została znaleziona' });
+    if (result.changes === 0) return res.status(404).json({ error: 'Service not found' });
     res.json({ success: true, enabled: val });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -1,27 +1,16 @@
 import express from 'express';
 import { scanLocalNetwork, getNetworkInfo } from '../services/networkScanner.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, requireAuthUnlessFirstRun } from '../middleware/auth.js';
+import { scannerLimiter } from '../middleware/rateLimit.js';
 import db from '../db/index.js';
 
 const router = express.Router();
-
-// Allow scanning without auth during initial setup, require admin auth otherwise
-function requireAuthUnlessFirstRun(req, res, next) {
-  try {
-    const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
-    const setupDone = row && (row.value === '1' || row.value === 'true');
-    if (!setupDone) return next();
-    return authenticateToken(req, res, () => requireAdmin(req, res, next));
-  } catch (err) {
-    return next();
-  }
-}
 
 /**
  * GET /api/scanner/discover
  * Automatically detects local subnet, router gateway, and open ports
  */
-router.get('/discover', requireAuthUnlessFirstRun, async (req, res) => {
+router.get('/discover', scannerLimiter, requireAuthUnlessFirstRun, async (req, res) => {
   try {
     const { netInfo, discovered } = await scanLocalNetwork();
 
@@ -62,11 +51,14 @@ router.get('/discover', requireAuthUnlessFirstRun, async (req, res) => {
  * POST /api/scanner/scan-custom
  * Scan specific IP addresses or subnets
  */
-router.post('/scan-custom', requireAuthUnlessFirstRun, async (req, res) => {
+router.post('/scan-custom', scannerLimiter, requireAuthUnlessFirstRun, async (req, res) => {
   try {
     const { hosts } = req.body;
     if (!Array.isArray(hosts) || hosts.length === 0) {
       return res.status(400).json({ error: 'Please provide an array of host IPs to scan' });
+    }
+    if (hosts.length > 256) {
+      return res.status(400).json({ error: 'Cannot scan more than 256 hosts in a single request' });
     }
     const { netInfo, discovered } = await scanLocalNetwork(hosts);
     res.json({ success: true, netInfo, count: discovered.length, discovered });
@@ -79,11 +71,14 @@ router.post('/scan-custom', requireAuthUnlessFirstRun, async (req, res) => {
  * POST /api/scanner/add-batch
  * Batch insert discovered services into database
  */
-router.post('/add-batch', requireAuthUnlessFirstRun, (req, res) => {
+router.post('/add-batch', scannerLimiter, requireAuthUnlessFirstRun, (req, res) => {
   try {
     const { services } = req.body;
     if (!Array.isArray(services) || services.length === 0) {
       return res.status(400).json({ error: 'No services provided for batch import' });
+    }
+    if (services.length > 100) {
+      return res.status(400).json({ error: 'Cannot batch import more than 100 services at once' });
     }
 
     const getCategoryId = db.prepare(`SELECT id FROM categories WHERE name = ?`);
@@ -103,24 +98,25 @@ router.post('/add-batch', requireAuthUnlessFirstRun, (req, res) => {
     let addedCount = 0;
     const addAll = db.transaction((items) => {
       for (const item of items) {
-        const catName = item.category_name || 'Services';
+        if (!item || !item.url) continue;
+        const catName = String(item.category_name || 'Services').slice(0, 50);
         let catRow = getCategoryId.get(catName);
         if (!catRow) {
-          insertCategory.run(catName, item.icon || 'folder', item.color || '#6366f1');
+          insertCategory.run(catName, String(item.icon || 'folder').slice(0, 50), String(item.color || '#6366f1').slice(0, 20));
           catRow = getCategoryId.get(catName);
         }
         const catId = catRow ? catRow.id : null;
 
         insertService.run(
-          item.name || 'Service',
-          item.description || `Usługa homelab pod adresem ${item.url}`,
-          item.url,
+          String(item.name || 'Service').slice(0, 100),
+          String(item.description || `Usługa homelab pod adresem ${item.url}`).slice(0, 500),
+          String(item.url).slice(0, 500),
           catId,
-          item.icon || 'globe',
-          item.color || '#6366f1',
-          item.custom_badge || '',
-          item.url,
-          item.responseTime || 10
+          String(item.icon || 'globe').slice(0, 50),
+          String(item.color || '#6366f1').slice(0, 20),
+          String(item.custom_badge || '').slice(0, 50),
+          String(item.url).slice(0, 500),
+          parseInt(item.responseTime, 10) || 10
         );
         addedCount++;
       }

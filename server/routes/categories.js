@@ -48,11 +48,16 @@ router.put('/:id', authenticateToken, requireAdmin, validateCategory, handleVali
 });
 
 router.delete('/:id', authenticateToken, requireAdmin, (req, res) => {
+  let deleted = false;
   db.transaction(() => {
     db.prepare("UPDATE services SET category_id = NULL WHERE category_id = ?").run(req.params.id);
     const result = db.prepare("DELETE FROM categories WHERE id = ?").run(req.params.id);
-    if (result.changes === 0) throw new Error('Not found');
+    deleted = result.changes > 0;
   })();
+
+  if (!deleted) {
+    return res.status(404).json({ error: 'Not found' });
+  }
   res.json({ success: true });
 });
 

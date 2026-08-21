@@ -1,172 +1,241 @@
 import express from 'express';
 import db from '../db/index.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin, requireAuthUnlessFirstRun } from '../middleware/auth.js';
+import { backupLimiter } from '../middleware/rateLimit.js';
+import { recordAudit } from '../utils/audit.js';
 import { initializeDefaultSettings } from '../db/schema.js';
 
 const router = express.Router();
 
-/**
- * Middleware: checks if initial setup has been completed.
- * If setup_completed is NOT set or is '0', skip auth — allows first-run import.
- * Otherwise require full admin auth.
- */
-function requireAuthUnlessFirstRun(req, res, next) {
-  try {
-    const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
-    const setupDone = row && (row.value === '1' || row.value === 'true');
-    if (!setupDone) {
-      // First run — allow unauthenticated access
-      return next();
-    }
-    // Setup completed — require full admin auth
-    return authenticateToken(req, res, () => {
-      requireAdmin(req, res, next);
-    });
-  } catch (err) {
-    return next();
-  }
-}
+const SENSITIVE_SETTINGS_EXPORT_BLOCKLIST = ['jwt_secret', 'admin_password'];
 
 /**
  * GET /api/backup/export
- * Always requires admin auth — no export without login
+ * Exports dashboard services, categories, tags, and appearance settings as JSON
  */
 router.get('/export', authenticateToken, requireAdmin, (req, res) => {
   try {
+    const categories = db.prepare('SELECT id, name, icon, color, sort_order FROM categories ORDER BY sort_order ASC').all();
+    const services = db.prepare('SELECT id, name, description, url, category_id, icon, icon_type, color, sort_order, open_new_tab, enabled, favorite, health_check_enabled, health_check_url, health_check_interval, health_check_type, custom_badge, notes FROM services ORDER BY sort_order ASC').all();
+    const tags = db.prepare('SELECT id, name, color FROM tags').all();
+    const serviceTags = db.prepare('SELECT service_id, tag_id FROM service_tags').all();
+    
+    // Export non-sensitive settings only
+    const settingsRows = db.prepare('SELECT key, value, type FROM settings').all();
+    const settings = settingsRows.filter(s => !SENSITIVE_SETTINGS_EXPORT_BLOCKLIST.includes(s.key));
+    const widgetConfigs = db.prepare('SELECT widget_type, config_json, sort_order, enabled FROM widget_configs').all();
+
     const data = {
       version: '1.0.0',
       exported_at: new Date().toISOString(),
-      categories: db.prepare("SELECT * FROM categories").all(),
-      services: db.prepare("SELECT * FROM services").all(),
-      tags: db.prepare("SELECT * FROM tags").all(),
-      service_tags: db.prepare("SELECT * FROM service_tags").all(),
-      settings: db.prepare("SELECT * FROM settings").all(),
-      widget_configs: db.prepare("SELECT * FROM widget_configs").all()
+      generator: 'NexusPanel',
+      categories,
+      services,
+      tags,
+      service_tags: serviceTags,
+      settings,
+      widget_configs: widgetConfigs
     };
-    
-    res.setHeader('Content-Disposition', 'attachment; filename=nexuspanel-backup.json');
+
+    recordAudit({ event: 'BACKUP_EXPORT', userId: req.user.id, username: req.user.username, ip: req.ip });
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=nexuspanel-backup-${Date.now()}.json`);
     res.json(data);
   } catch (err) {
     console.error('Export error:', err);
-    res.status(500).json({ error: 'Failed to export configuration' });
+    res.status(500).json({ error: 'Failed to export backup' });
   }
 });
 
 /**
  * POST /api/backup/import
- * Requires admin auth UNLESS this is a first-run (setup not completed).
- * This allows importing a backup on the welcome/empty state screen.
+ * Atomic, validated restore of dashboard configuration
  */
-router.post('/import', requireAuthUnlessFirstRun, (req, res) => {
+router.post('/import', backupLimiter, requireAuthUnlessFirstRun, (req, res) => {
   const data = req.body;
-  if (!data || typeof data !== 'object' || !Array.isArray(data.categories) || !Array.isArray(data.services)) {
+
+  // Strict JSON and prototype pollution protection
+  if (!data || typeof data !== 'object' || Array.isArray(data) || Object.prototype.hasOwnProperty.call(data, '__proto__')) {
+    return res.status(400).json({ error: 'Invalid backup file payload' });
+  }
+
+  if (!Array.isArray(data.categories) || !Array.isArray(data.services)) {
     return res.status(400).json({ error: 'Invalid backup file structure: missing categories or services list' });
   }
-  
+
+  // Max entity limits to prevent memory exhaustion DoS
+  if (data.categories.length > 500 || data.services.length > 2000) {
+    return res.status(400).json({ error: 'Backup payload exceeds maximum entity limits' });
+  }
+
   try {
     db.transaction(() => {
-      // Clean old data
-      db.prepare("DELETE FROM service_tags").run();
-      db.prepare("DELETE FROM tags").run();
-      db.prepare("DELETE FROM services").run();
-      db.prepare("DELETE FROM categories").run();
-      db.prepare("DELETE FROM widget_configs").run();
-      db.prepare("DELETE FROM settings WHERE key NOT IN ('setup_completed', 'auth_enabled')").run();
-
-      // Insert categories
-      const insertCategory = db.prepare(`
-        INSERT INTO categories (id, name, icon, color, sort_order, created_at) 
-        VALUES (?, ?, ?, ?, ?, COALESCE(?, datetime('now')))
+      // 1. Wipe existing dashboard entities
+      db.exec(`
+        DELETE FROM service_tags;
+        DELETE FROM service_health_history;
+        DELETE FROM services;
+        DELETE FROM categories;
+        DELETE FROM tags;
+        DELETE FROM widget_configs;
       `);
-      for (const c of data.categories) {
-        insertCategory.run(c.id || null, c.name || 'Category', c.icon || 'folder', c.color || '#6366f1', c.sort_order || 0, c.created_at || null);
-      }
 
-      // Insert services
-      const insertService = db.prepare(`
-        INSERT INTO services (
-          id, name, description, url, category_id, icon, icon_type, icon_url, color, 
-          sort_order, open_new_tab, enabled, favorite, health_check_enabled, health_check_url, 
-          health_check_interval, health_status, health_last_checked, health_response_time, 
-          custom_badge, notes, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, datetime('now')), datetime('now'))
+      // 2. Insert categories and build ID map
+      const insertCat = db.prepare(`
+        INSERT INTO categories (name, icon, color, sort_order, created_at)
+        VALUES (?, ?, ?, ?, datetime('now'))
       `);
-      for (const s of data.services) {
-        insertService.run(
-          s.id || null, s.name || 'Service', s.description || '', s.url || '#', s.category_id || null, 
-          s.icon || 'globe', s.icon_type || 'lucide', s.icon_url || '', s.color || '#6366f1', 
-          s.sort_order || 0, s.open_new_tab !== undefined ? s.open_new_tab : 1, 
-          s.enabled !== undefined ? s.enabled : 1, s.favorite || 0, 
-          s.health_check_enabled || 0, s.health_check_url || '', s.health_check_interval || 60, 
-          s.health_status || 'unknown', s.health_last_checked || null, s.health_response_time || null, 
-          s.custom_badge || '', s.notes || '', s.created_at || null
+      
+      const categoryIdMap = {};
+      for (const cat of data.categories) {
+        if (!cat || typeof cat !== 'object') continue;
+        const result = insertCat.run(
+          String(cat.name || 'Category').slice(0, 100),
+          String(cat.icon || 'folder').slice(0, 50),
+          String(cat.color || '#6366f1').slice(0, 20),
+          parseInt(cat.sort_order, 10) || 0
         );
+        if (cat.id) {
+          categoryIdMap[cat.id] = result.lastInsertRowid;
+        }
       }
 
-      // Insert tags
+      // 3. Insert tags and build ID map
+      const insertTag = db.prepare(`
+        INSERT INTO tags (name, color)
+        VALUES (?, ?)
+      `);
+      const tagIdMap = {};
       if (Array.isArray(data.tags)) {
-        const insertTag = db.prepare("INSERT OR IGNORE INTO tags (id, name, color) VALUES (?, ?, ?)");
-        for (const t of data.tags) {
-          if (t.name) insertTag.run(t.id || null, t.name, t.color || '#6366f1');
+        for (const tag of data.tags) {
+          if (!tag || typeof tag !== 'object') continue;
+          const result = insertTag.run(
+            String(tag.name || '').toLowerCase().slice(0, 50),
+            String(tag.color || '#6366f1').slice(0, 20)
+          );
+          if (tag.id) {
+            tagIdMap[tag.id] = result.lastInsertRowid;
+          }
         }
       }
 
-      // Insert service tags links
+      // 4. Insert services
+      const insertSvc = db.prepare(`
+        INSERT INTO services (
+          name, description, url, category_id, icon, icon_type, icon_url, color, 
+          sort_order, open_new_tab, enabled, favorite, health_check_enabled, 
+          health_check_url, health_check_interval, health_check_type, health_status, 
+          custom_badge, notes, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'unknown', ?, ?, datetime('now'), datetime('now'))
+      `);
+
+      const serviceIdMap = {};
+      for (const svc of data.services) {
+        if (!svc || typeof svc !== 'object' || !svc.name || !svc.url) continue;
+        const newCatId = svc.category_id ? (categoryIdMap[svc.category_id] || null) : null;
+        
+        const result = insertSvc.run(
+          String(svc.name).slice(0, 100),
+          String(svc.description || '').slice(0, 500),
+          String(svc.url).slice(0, 500),
+          newCatId,
+          String(svc.icon || 'globe').slice(0, 50),
+          String(svc.icon_type || 'lucide').slice(0, 20),
+          String(svc.icon_url || '').slice(0, 500),
+          String(svc.color || '#6366f1').slice(0, 20),
+          parseInt(svc.sort_order, 10) || 0,
+          svc.open_new_tab !== 0 ? 1 : 0,
+          svc.enabled !== 0 ? 1 : 0,
+          svc.favorite === 1 ? 1 : 0,
+          svc.health_check_enabled === 1 ? 1 : 0,
+          String(svc.health_check_url || '').slice(0, 500),
+          parseInt(svc.health_check_interval, 10) || 60,
+          String(svc.health_check_type || 'http').slice(0, 20),
+          String(svc.custom_badge || '').slice(0, 50),
+          String(svc.notes || '').slice(0, 1000)
+        );
+        if (svc.id) {
+          serviceIdMap[svc.id] = result.lastInsertRowid;
+        }
+      }
+
+      // 5. Insert service_tags
       if (Array.isArray(data.service_tags)) {
-        const insertServiceTag = db.prepare("INSERT OR IGNORE INTO service_tags (id, service_id, tag_id) VALUES (?, ?, ?)");
+        const insertServiceTag = db.prepare('INSERT OR IGNORE INTO service_tags (service_id, tag_id) VALUES (?, ?)');
         for (const st of data.service_tags) {
-          insertServiceTag.run(st.id || null, st.service_id, st.tag_id);
+          if (!st) continue;
+          const newSvcId = serviceIdMap[st.service_id];
+          const newTagId = tagIdMap[st.tag_id];
+          if (newSvcId && newTagId) {
+            insertServiceTag.run(newSvcId, newTagId);
+          }
         }
       }
 
-      // Insert settings
+      // 6. Import settings (never overwrite security credentials)
+      const BLOCKED_SETTINGS = ['setup_completed', 'jwt_secret', 'admin_password'];
+      const insertSetting = db.prepare(`
+        INSERT INTO settings (key, value, type) VALUES (?, ?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      `);
+
       if (Array.isArray(data.settings)) {
-        const insertSetting = db.prepare("INSERT OR REPLACE INTO settings (key, value, type) VALUES (?, ?, ?)");
         for (const s of data.settings) {
-          if (['setup_completed', 'auth_enabled'].includes(s.key)) continue;
-          insertSetting.run(s.key, String(s.value || ''), s.type || 'string');
-        }
-      }
-
-      // Insert widget configs if present
-      if (Array.isArray(data.widget_configs)) {
-        const insertWidget = db.prepare("INSERT INTO widget_configs (id, widget_type, config_json, sort_order, enabled) VALUES (?, ?, ?, ?, ?)");
-        for (const w of data.widget_configs) {
-          insertWidget.run(w.id || null, w.widget_type, w.config_json || '{}', w.sort_order || 0, w.enabled || 1);
+          if (!s || !s.key || BLOCKED_SETTINGS.includes(s.key)) continue;
+          insertSetting.run(String(s.key).slice(0, 100), String(s.value || '').slice(0, 5000), String(s.type || 'string').slice(0, 20));
         }
       }
     })();
 
-    res.json({ success: true, message: 'Configuration successfully restored' });
-  } catch (error) {
-    console.error('Import error:', error);
-    res.status(500).json({ error: 'Failed to import backup configuration: ' + error.message });
+    recordAudit({
+      event: 'BACKUP_IMPORT',
+      userId: req.user?.id || null,
+      username: req.user?.username || 'first-run',
+      ip: req.ip,
+      details: { serviceCount: data.services.length, categoryCount: data.categories.length }
+    });
+
+    res.json({
+      success: true,
+      message: 'Configuration imported successfully',
+      imported: {
+        categories: data.categories.length,
+        services: data.services.length
+      }
+    });
+  } catch (err) {
+    console.error('Import error:', err);
+    res.status(500).json({ error: 'Import failed: ' + err.message });
   }
 });
 
 /**
  * POST /api/backup/factory-reset
- * Resets the entire application back to out-of-the-box fresh state
+ * Danger zone: completely resets the database to a fresh clean state
  */
-router.post('/factory-reset', authenticateToken, requireAdmin, (req, res) => {
+router.post('/factory-reset', backupLimiter, authenticateToken, requireAdmin, (req, res) => {
   try {
     db.transaction(() => {
-      // 1. Delete all services & categories & tags & widgets
-      db.prepare("DELETE FROM service_tags").run();
-      db.prepare("DELETE FROM tags").run();
-      db.prepare("DELETE FROM services").run();
-      db.prepare("DELETE FROM categories").run();
-      db.prepare("DELETE FROM widget_configs").run();
-      try {
-        db.prepare("DELETE FROM service_health_history").run();
-      } catch (e) {
-        // ignore if table not present
-      }
-
-      // 2. Reset all settings back to default values
-      db.prepare("DELETE FROM settings").run();
+      db.exec(`
+        DELETE FROM service_tags;
+        DELETE FROM service_health_history;
+        DELETE FROM services;
+        DELETE FROM categories;
+        DELETE FROM tags;
+        DELETE FROM settings;
+        DELETE FROM widget_configs;
+        DELETE FROM users;
+      `);
       initializeDefaultSettings(db);
     })();
+
+    recordAudit({
+      event: 'FACTORY_RESET',
+      userId: req.user.id,
+      username: req.user.username,
+      ip: req.ip
+    });
 
     res.json({
       success: true,
@@ -174,7 +243,7 @@ router.post('/factory-reset', authenticateToken, requireAdmin, (req, res) => {
     });
   } catch (err) {
     console.error('Factory reset error:', err);
-    res.status(500).json({ error: 'Factory reset failed: ' + err.message });
+    res.status(500).json({ error: 'Factory reset failed' });
   }
 });
 

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv, Globe } from 'lucide-react';
+import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv, Globe, LogOut } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 import SearchModal from '../search/SearchModal';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { settings } = useSettings();
   const { language, setLanguage, t } = useLanguage();
+  const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -117,6 +119,17 @@ export default function Header() {
                 <Settings className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 group-hover:rotate-45 transition-transform" />
                 <span className="hidden sm:inline">{t('header.settings', 'Ustawienia')}</span>
               </Link>
+            )}
+
+            {/* Logout Button */}
+            {isAuthenticated && (
+              <button
+                onClick={logout}
+                className="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-red-500/10 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 text-xs font-medium border border-black/[0.06] dark:border-white/10 transition-all cursor-pointer"
+                title={t('header.logout', 'Wyloguj się')}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
             )}
           </div>
         </div>

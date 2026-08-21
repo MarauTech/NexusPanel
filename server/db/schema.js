@@ -83,6 +83,19 @@ export function initializeDatabase(db) {
       sort_order INTEGER DEFAULT 0,
       enabled INTEGER DEFAULT 1
     );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event TEXT NOT NULL,
+      user_id INTEGER,
+      username TEXT,
+      ip_address TEXT,
+      details TEXT,
+      success INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
   `);
 
   // Migrate missing columns if upgrading existing database

@@ -2,6 +2,7 @@ import net from 'net';
 import axios from 'axios';
 import https from 'https';
 import os from 'os';
+import { isDangerousOrReservedIp, isRfc1918PrivateIp } from '../utils/networkSecurity.js';
 
 const COMMON_HOMELAB_PORTS = [
   { port: 8006, name: 'Proxmox VE', category: 'Infrastructure', icon: 'proxmox', color: '#e57000', defaultProto: 'https', path: '' },
@@ -25,11 +26,7 @@ const COMMON_HOMELAB_PORTS = [
   { port: 8085, name: 'qBittorrent', category: 'Media', icon: 'qbittorrent', color: '#3b82f6', defaultProto: 'http', path: '' },
   { port: 9091, name: 'Transmission', category: 'Media', icon: 'transmission', color: '#ef4444', defaultProto: 'http', path: '' },
   { port: 8181, name: 'Nginx Proxy Manager', category: 'Services', icon: 'nginx', color: '#10b981', defaultProto: 'http', path: '' },
-  { port: 8384, name: 'Syncthing', category: 'Services', icon: 'folder', color: '#0ea5e9', defaultProto: 'http', path: '' },
-  { port: 19999, name: 'Netdata Monitor', category: 'Monitoring', icon: 'activity', color: '#10b981', defaultProto: 'http', path: '' },
-  { port: 9090, name: 'Prometheus / Cockpit', category: 'Monitoring', icon: 'activity', color: '#f97316', defaultProto: 'http', path: '' },
-  { port: 2375, name: 'Docker Daemon', category: 'Services', icon: 'docker', color: '#0ea5e9', defaultProto: 'http', path: '' },
-  { port: 10000, name: 'Webmin / Virtualmin', category: 'Infrastructure', icon: 'server', color: '#6366f1', defaultProto: 'https', path: '' }
+  { port: 8384, name: 'Syncthing', category: 'Services', icon: 'folder', color: '#0ea5e9', defaultProto: 'http', path: '' }
 ];
 
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -69,9 +66,9 @@ export function getNetworkInfo() {
 }
 
 /**
- * Ultra-fast TCP port probe with configurable timeout
+ * TCP port probe with configurable timeout (300ms default)
  */
-function probePort(host, port, timeout = 250) {
+function probePort(host, port, timeout = 300) {
   return new Promise((resolve) => {
     const start = Date.now();
     const socket = new net.Socket();
@@ -98,7 +95,7 @@ function probePort(host, port, timeout = 250) {
 }
 
 /**
- * Probe HTTP response to extract HTML page title or server banner
+ * Probe HTTP title safely with response size limit
  */
 async function probeHttpTitle(url) {
   try {
@@ -107,6 +104,7 @@ async function probeHttpTitle(url) {
       httpsAgent,
       headers: { 'User-Agent': 'NexusPanel-Scanner/1.0' },
       maxRedirects: 2,
+      maxContentLength: 50 * 1024, // 50KB limit for title probe
       responseType: 'text'
     });
     if (res.data && typeof res.data === 'string') {
@@ -125,82 +123,93 @@ async function probeHttpTitle(url) {
 }
 
 /**
- * Execute tasks in concurrent batches
+ * Concurrency-limited execution pool (max 32 concurrent sockets)
  */
-async function runInBatches(tasks, batchSize = 150) {
+async function runWithConcurrencyLimit(tasks, limit = 32) {
   const results = [];
-  for (let i = 0; i < tasks.length; i += batchSize) {
-    const batch = tasks.slice(i, i + batchSize);
-    const batchResults = await Promise.all(batch.map(fn => fn()));
-    results.push(...batchResults);
+  let index = 0;
+
+  async function worker() {
+    while (index < tasks.length) {
+      const currentIndex = index++;
+      try {
+        const res = await tasks[currentIndex]();
+        results[currentIndex] = res;
+      } catch (err) {
+        results[currentIndex] = null;
+      }
+    }
   }
+
+  const workers = Array(Math.min(limit, tasks.length)).fill(0).map(() => worker());
+  await Promise.all(workers);
   return results;
 }
 
 /**
- * Full LAN subnet scanner: scans all hosts 1..254 in the detected subnet across all homelab ports
+ * Scan local network with strict IP and CIDR limits
  */
 export async function scanLocalNetwork(targetHosts = []) {
   const netInfo = getNetworkInfo();
 
   let hosts = [];
   if (targetHosts && targetHosts.length > 0) {
+    if (targetHosts.length > 256) {
+      throw new Error('Host list exceeds maximum limit of 256 addresses');
+    }
     hosts = Array.from(new Set(targetHosts));
   } else {
-    // Full subnet scan from 1 to 254
+    // Scan standard subnet 1..254
     for (let i = 1; i <= 254; i++) {
       hosts.push(`${netInfo.subnetPrefix}${i}`);
     }
   }
 
-  // Filter out raw loopbacks if scanning entire network
-  if (hosts.length > 2) {
-    hosts = hosts.filter(h => h !== '127.0.0.1' && h !== 'localhost');
-  }
+  // Filter out dangerous loopback / cloud metadata IPs
+  hosts = hosts.filter(h => !isDangerousOrReservedIp(h));
 
-  // Build probe task factories
   const probeTasks = [];
 
   for (const host of hosts) {
     for (const item of COMMON_HOMELAB_PORTS) {
-      probeTasks.push(() => 
-        probePort(host, item.port, 280).then(async (result) => {
-          if (result.open) {
-            const url = `${item.defaultProto}://${host}:${item.port}${item.path}`;
-            const pageTitle = await probeHttpTitle(url);
+      probeTasks.push(async () => {
+        const result = await probePort(host, item.port, 300);
+        if (result.open) {
+          const url = `${item.defaultProto}://${host}:${item.port}${item.path}`;
+          const pageTitle = await probeHttpTitle(url);
 
-            let displayName = item.name;
-            if (pageTitle) {
-              displayName = pageTitle;
-            } else if (host === netInfo.gatewayIp && (item.port === 80 || item.port === 443)) {
-              displayName = 'Router Gateway / Brama';
-            } else if (item.port === 80) {
-              displayName = `Serwer HTTP (${host})`;
-            } else if (item.port === 443) {
-              displayName = `Serwer HTTPS (${host})`;
-            }
-
-            return {
-              id: `scan-${host}-${item.port}`,
-              name: displayName,
-              url,
-              host,
-              port: item.port,
-              category_name: item.category,
-              icon: item.icon,
-              color: item.color,
-              custom_badge: host === netInfo.gatewayIp ? 'Brama' : `Port ${item.port}`,
-              responseTime: result.responseTime || 5,
-              health_status: 'online'
-            };
+          let displayName = item.name;
+          if (pageTitle) {
+            displayName = pageTitle;
+          } else if (host === netInfo.gatewayIp && (item.port === 80 || item.port === 443)) {
+            displayName = 'Router Gateway / Brama';
+          } else if (item.port === 80) {
+            displayName = `Serwer HTTP (${host})`;
+          } else if (item.port === 443) {
+            displayName = `Serwer HTTPS (${host})`;
           }
-          return null;
-        })
-      );
+
+          return {
+            id: `scan-${host}-${item.port}`,
+            name: displayName,
+            url,
+            host,
+            port: item.port,
+            category_name: item.category,
+            icon: item.icon,
+            color: item.color,
+            custom_badge: host === netInfo.gatewayIp ? 'Brama' : `Port ${item.port}`,
+            responseTime: result.responseTime || 5,
+            health_status: 'online'
+          };
+        }
+        return null;
+      });
     }
   }
 
-  const results = await runInBatches(probeTasks, 160);
+  // Max 32 concurrent sockets to prevent host OS socket exhaustion
+  const results = await runWithConcurrencyLimit(probeTasks, 32);
   const discovered = results.filter(Boolean);
 
   return {

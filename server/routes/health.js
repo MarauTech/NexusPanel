@@ -1,6 +1,8 @@
 import express from 'express';
 import axios from 'axios';
 import https from 'https';
+import { validateDestinationHost } from '../utils/networkSecurity.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -14,7 +16,7 @@ router.get('/', (req, res) => {
   });
 });
 
-// Live health check probe endpoint with SSRF protocol guard
+// Live health check probe endpoint with SSRF destination validation
 router.post('/probe', async (req, res) => {
   const { url } = req.body;
   if (!url || typeof url !== 'string') {
@@ -23,7 +25,7 @@ router.post('/probe', async (req, res) => {
 
   const trimmedUrl = url.trim();
 
-  // Validate URL structure & protocol (SSRF protection against file://, gopher://, etc.)
+  // Validate URL structure & protocol
   let parsedUrl;
   try {
     parsedUrl = new URL(trimmedUrl);
@@ -35,11 +37,19 @@ router.post('/probe', async (req, res) => {
     return res.status(400).json({ error: 'Only http: and https: protocols are permitted' });
   }
 
+  // SSRF guard: Validate hostname against loopback and cloud metadata
+  try {
+    await validateDestinationHost(parsedUrl.hostname, true);
+  } catch (ssrfErr) {
+    return res.status(400).json({ error: 'Target host is restricted (SSRF protection): ' + ssrfErr.message });
+  }
+
   const startTime = Date.now();
   try {
     const response = await axios.get(trimmedUrl, {
       timeout: 5000,
       maxRedirects: 3,
+      maxContentLength: 1024 * 1024, // 1MB limit for probe
       httpsAgent,
       validateStatus: () => true, // Treat any HTTP response code (200, 401, 403, 500) as online/reachable
       headers: { 'User-Agent': 'NexusPanel-HealthProbe/1.0' }

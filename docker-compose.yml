@@ -1,8 +1,9 @@
 # ============================================
-# NexusPanel - Docker Compose
+# NexusPanel - Production Docker Compose
 # ============================================
 # Usage:
 #   cp .env.example .env
+#   # Generate a 32+ char secret: openssl rand -hex 32
 #   # Edit .env and set JWT_SECRET
 #   docker compose up -d
 # ============================================
@@ -14,6 +15,10 @@ services:
     build: .
     container_name: nexuspanel
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
     ports:
       - "${PORT:-3000}:3000"
     volumes:
@@ -22,11 +27,15 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-random-secret-key}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env to a secure string of at least 32 characters}
       - JWT_EXPIRY=${JWT_EXPIRY:-7d}
       - DB_PATH=/app/data/nexuspanel.db
       - HEALTH_CHECK_INTERVAL=${HEALTH_CHECK_INTERVAL:-60}
-      - SEED_DEMO_DATA=${SEED_DEMO_DATA:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-loopback, linklocal, uniquelocal}
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - ALLOWED_NETWORKS=${ALLOWED_NETWORKS:-192.168.0.0/16,10.0.0.0/8,172.16.0.0/12}
+      - RATE_LIMIT_LOGIN_MAX=${RATE_LIMIT_LOGIN_MAX:-5}
+      - RATE_LIMIT_GLOBAL_MAX=${RATE_LIMIT_GLOBAL_MAX:-600}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -10,9 +11,6 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // In zero-auth homelab mode, 401 is passed through without forcing login redirect
-    }
     return Promise.reject(error);
   }
 );
