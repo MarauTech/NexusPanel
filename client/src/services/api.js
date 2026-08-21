@@ -35,7 +35,7 @@ const API = {
     toggleEnabled: (id, enabled) => api.patch(`/services/${id}/toggle`, { enabled }),
     deleteService: (id) => api.delete(`/services/${id}`),
     reorderServices: (items) => api.put('/services/reorder', { items }),
-    seedDemo: () => api.post('/services/seed-demo'),
+    seedDemo: (data = {}) => api.post('/services/seed-demo', data),
     clearServices: () => api.post('/services/clear'),
   },
   categories: {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Sparkles, Server, Shield, Layers, LayoutGrid, Radar, ArrowRight, Network, Compass, User, CheckCircle2, Globe } from 'lucide-react';
+import { Plus, Sparkles, Server, Shield, Layers, LayoutGrid, Radar, ArrowRight, Network, Compass, User, Wand2 } from 'lucide-react';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import api from '../../services/api';
@@ -16,10 +16,24 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState(settings?.user_name || '');
   const [savingName, setSavingName] = useState(false);
+  const [seedingTemplate, setSeedingTemplate] = useState(false);
 
   const handleSelectOption = (mode) => {
     setChosenMode(mode);
     setShowNameModal(true);
+  };
+
+  const handleSeedTemplate = async () => {
+    setSeedingTemplate(true);
+    try {
+      await api.services.seedDemo({ language });
+      addToast(t('empty.template_loaded', 'Szablon demonstracyjny został załadowany'), 'success');
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      addToast(t('common.error', 'Wystąpił błąd podczas ładowania szablonu'), 'error');
+    } finally {
+      setSeedingTemplate(false);
+    }
   };
 
   const handleConfirmName = async (e) => {
@@ -45,29 +59,29 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
   };
 
   return (
-    <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-8 text-center max-w-3xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+    <div className="min-h-[85vh] flex flex-col items-center justify-center p-4 sm:p-8 text-center max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-300">
       
       {/* Top Language Toggle Switcher */}
       <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill mb-6 border border-white/10 shadow-sm">
         <button
           onClick={() => setLanguage('pl')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             language === 'pl'
               ? 'bg-accent text-white shadow-md shadow-accent/25'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <span>🇵🇱 Polski</span>
+          <span>Polski</span>
         </button>
         <button
           onClick={() => setLanguage('en')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             language === 'en'
               ? 'bg-accent text-white shadow-md shadow-accent/25'
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <span>🇬🇧 English</span>
+          <span>English</span>
         </button>
       </div>
 
@@ -75,22 +89,19 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
       <div className="relative mb-6">
         <div className="w-20 h-20 rounded-[26px] glass-card flex items-center justify-center text-accent shadow-2xl relative overflow-hidden border border-white/20">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-transparent to-purple-500/15 pointer-events-none" />
-          <Compass className="w-10 h-10 text-accent relative z-10 animate-pulse" />
+          <Compass className="w-10 h-10 text-accent relative z-10" />
         </div>
-        <span className="absolute -bottom-1.5 -right-1.5 p-1.5 rounded-full bg-emerald-500 text-white shadow-lg">
-          <Sparkles className="w-3.5 h-3.5" />
-        </span>
       </div>
 
       <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
         {t('empty.title', 'Witaj w NexusPanel')}
       </h1>
       <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-lg mb-10 font-medium leading-relaxed">
-        {t('empty.subtitle', 'Twój szybki, nowoczesny ekran startowy w przeglądarce. Skonfiguruj swój pulpit w 30 sekund i przechodź do swoich aplikacji 1 kliknięciem.')}
+        {t('empty.subtitle', 'Twój szybki, nowoczesny ekran startowy w przeglądarce. Skonfiguruj swój pulpit w kilka chwil i przechodź do swoich aplikacji jednym kliknięciem.')}
       </p>
 
-      {/* 2 Focused Interactive Setup Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full text-left mb-10">
+      {/* 3 Focused Interactive Setup Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full text-left mb-10">
         
         {/* Option 1: Auto LAN Discovery (Recommended) */}
         <div 
@@ -108,7 +119,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
             </div>
 
             <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-accent transition-colors">
-              {t('empty.scanner_title', 'Skaner Sieci LAN ⚡')}
+              {t('empty.scanner_title', 'Skaner Sieci LAN')}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               {t('empty.scanner_desc', 'Automatycznie bada Twoją podsieć i wykrywa Proxmox, Home Assistant, Docker, Portainer, NAS oraz inne usługi.')}
@@ -121,7 +132,36 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
           </div>
         </div>
 
-        {/* Option 2: Add Manually */}
+        {/* Option 2: Pre-made Homelab Template */}
+        <div 
+          onClick={handleSeedTemplate}
+          className="group relative p-6 rounded-3xl glass-card border border-purple-500/30 bg-gradient-to-b from-purple-500/10 via-transparent to-transparent hover:border-purple-500 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-xl flex flex-col justify-between"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/30">
+                <Wand2 className="w-6 h-6" />
+              </div>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30">
+                Template
+              </span>
+            </div>
+
+            <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-purple-500 transition-colors">
+              {t('empty.template_title', 'Wczytaj gotowy szablon')}
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {t('empty.template_desc', 'Załaduj przykładowy zestaw popularnych usług homelabu (Infrastruktura, Smart Home, Media, Monitoring).')}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 pt-5 mt-2">
+            <span>{seedingTemplate ? t('common.loading', 'Ładowanie...') : t('empty.template_btn', 'Wczytaj szablon')}</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Option 3: Add Manually */}
         <div 
           onClick={() => handleSelectOption('manual')}
           className="group relative p-6 rounded-3xl glass-card border border-black/[0.08] dark:border-white/15 hover:border-accent/40 hover:scale-[1.02] cursor-pointer transition-all duration-300 shadow-lg flex flex-col justify-between"
@@ -132,7 +172,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
             </div>
 
             <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-accent transition-colors">
-              {t('empty.manual_title', 'Dodaj ręcznie ➕')}
+              {t('empty.manual_title', 'Dodaj ręcznie')}
             </h3>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               {t('empty.manual_desc', 'Wpisz własny adres URL, nazwę i kategorię oraz wybierz ikonę z obszernego katalogu aplikacji homelabu.')}
@@ -228,7 +268,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
                 isLoading={savingName}
                 className="px-6 py-2.5 shadow-lg shadow-accent/25"
               >
-                {t('common.next', 'Dalej ➔')}
+                {t('common.next', 'Dalej')}
               </Button>
             </div>
           </form>

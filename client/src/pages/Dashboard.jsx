@@ -179,7 +179,7 @@ export default function Dashboard() {
             onClick={() => setIsScanModalOpen(true)}
             className="flex-1 sm:flex-none glass-card hover:border-accent/40 text-xs font-bold text-slate-800 dark:text-slate-200"
           >
-            Skanuj sieć LAN ⚡
+            {t('dashboard.btn_scan', 'Skanuj sieć LAN')}
           </Button>
 
           <Button
@@ -187,7 +187,7 @@ export default function Dashboard() {
             onClick={() => setIsAddModalOpen(true)}
             className="flex-1 sm:flex-none shadow-lg shadow-accent/25 text-xs font-bold text-white bg-accent hover:bg-accent-hover"
           >
-            {t('dashboard.add_app', '+ Dodaj aplikację')}
+            {t('dashboard.add_app', 'Dodaj aplikację')}
           </Button>
         </div>
       </div>

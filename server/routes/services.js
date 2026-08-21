@@ -73,7 +73,10 @@ router.get('/', (req, res) => {
   res.json(services);
 });
 
-router.post('/seed-demo', authenticateToken, requireAdmin, (req, res) => {
+router.post('/seed-demo', (req, res) => {
+  const lang = req.body?.language || 'pl';
+  const isEn = lang === 'en';
+
   try {
     db.transaction(() => {
       // Clear existing
@@ -83,34 +86,83 @@ router.post('/seed-demo', authenticateToken, requireAdmin, (req, res) => {
       db.prepare("DELETE FROM categories").run();
 
       const catStmt = db.prepare("INSERT INTO categories (name, icon, color, sort_order) VALUES (?, ?, ?, ?)");
-      const infraId = catStmt.run('Infrastruktura', 'server', '#6366f1', 1).lastInsertRowid;
-      const servicesId = catStmt.run('Usługi', 'layers', '#8b5cf6', 2).lastInsertRowid;
-      const monitoringId = catStmt.run('Monitoring', 'activity', '#10b981', 3).lastInsertRowid;
-      const smartHomeId = catStmt.run('Smart Home', 'home', '#f59e0b', 4).lastInsertRowid;
-      const mediaId = catStmt.run('Media', 'tv', '#ef4444', 5).lastInsertRowid;
+      const infraId = catStmt.run(isEn ? 'Infrastructure' : 'Infrastruktura', 'server', '#6366f1', 1).lastInsertRowid;
+      const servicesId = catStmt.run(isEn ? 'Services' : 'Usługi', 'layers', '#8b5cf6', 2).lastInsertRowid;
+      const monitoringId = catStmt.run(isEn ? 'Monitoring' : 'Monitoring', 'activity', '#10b981', 3).lastInsertRowid;
+      const smartHomeId = catStmt.run(isEn ? 'Smart Home' : 'Smart Home', 'home', '#f59e0b', 4).lastInsertRowid;
+      const mediaId = catStmt.run(isEn ? 'Media' : 'Media', 'tv', '#ef4444', 5).lastInsertRowid;
 
       const svcStmt = db.prepare(`
         INSERT INTO services (name, description, category_id, icon, url, health_check_enabled, health_check_type, favorite, color, custom_badge, health_status, health_response_time) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'online', ?)
       `);
 
-      const proxmoxId = svcStmt.run('Proxmox VE', 'Węzeł wirtualizacji i kontenerów LXC', infraId, 'proxmox', 'https://192.168.1.10:8006', 1, 'http', 1, '#e57000', 'Node 01', 14).lastInsertRowid;
-      const routerId = svcStmt.run('Router Gateway', 'Główna brama sieciowa i router', infraId, 'router', 'http://192.168.1.1', 1, 'ping', 0, '#6366f1', 'Brama', 2).lastInsertRowid;
-      const asustorId = svcStmt.run('ASUSTOR NAS', 'Magazyn danych i backupów', infraId, 'asustor', 'https://192.168.1.20:8001', 0, 'http', 0, '#3b82f6', 'NAS', 28).lastInsertRowid;
-      const portainerId = svcStmt.run('Portainer CE', 'Zarządzanie kontenerami Docker', servicesId, 'portainer', 'http://192.168.1.10:9000', 1, 'http', 0, '#0ea5e9', 'Docker', 19).lastInsertRowid;
-      const haId = svcStmt.run('Home Assistant', 'Centrum automatyki domowej', smartHomeId, 'home-assistant', 'http://192.168.1.30:8123', 1, 'http', 1, '#0284c7', 'Hub', 8).lastInsertRowid;
-      const grafanaId = svcStmt.run('Grafana', 'Wizualizacja metryk Prometheus', monitoringId, 'grafana', 'http://192.168.1.10:3000', 1, 'http', 1, '#f97316', 'Wykresy', 35).lastInsertRowid;
-      const uptimeId = svcStmt.run('Uptime Kuma', 'Monitor dostępności usług', monitoringId, 'uptime-kuma', 'http://192.168.1.10:3001', 0, 'http', 0, '#10b981', 'Monitor', 12).lastInsertRowid;
-      const piholeId = svcStmt.run('Pi-hole DNS', 'Blokowanie reklam i serwer DNS', servicesId, 'pihole', 'http://192.168.1.2/admin', 0, 'http', 0, '#ef4444', 'DNS', 5).lastInsertRowid;
-      const jellyfinId = svcStmt.run('Jellyfin', 'Serwer multimediów', mediaId, 'jellyfin', 'http://192.168.1.10:8096', 0, 'http', 0, '#8b5cf6', 'Media', 45).lastInsertRowid;
-      const nextcloudId = svcStmt.run('Nextcloud', 'Prywatna chmura plików', servicesId, 'nextcloud', 'https://192.168.1.10:8443', 0, 'http', 0, '#0284c7', 'Cloud', 60).lastInsertRowid;
+      const proxmoxId = svcStmt.run(
+        'Proxmox VE', 
+        isEn ? 'Virtualization & LXC Node' : 'Węzeł wirtualizacji i kontenerów LXC', 
+        infraId, 'proxmox', 'https://192.168.1.10:8006', 1, 'http', 1, '#e57000', 'Node 01', 14
+      ).lastInsertRowid;
+
+      const routerId = svcStmt.run(
+        'Router Gateway', 
+        isEn ? 'Main network gateway & router' : 'Główna brama sieciowa i router', 
+        infraId, 'router', 'http://192.168.1.1', 1, 'ping', 0, '#6366f1', isEn ? 'Gateway' : 'Brama', 2
+      ).lastInsertRowid;
+
+      const asustorId = svcStmt.run(
+        'ASUSTOR NAS', 
+        isEn ? 'Network storage and backups' : 'Magazyn danych i backupów', 
+        infraId, 'asustor', 'https://192.168.1.20:8001', 0, 'http', 0, '#3b82f6', 'NAS', 28
+      ).lastInsertRowid;
+
+      const portainerId = svcStmt.run(
+        'Portainer CE', 
+        isEn ? 'Docker container management' : 'Zarządzanie kontenerami Docker', 
+        servicesId, 'portainer', 'http://192.168.1.10:9000', 1, 'http', 0, '#0ea5e9', 'Docker', 19
+      ).lastInsertRowid;
+
+      const haId = svcStmt.run(
+        'Home Assistant', 
+        isEn ? 'Smart home automation hub' : 'Centrum automatyki domowej', 
+        smartHomeId, 'home-assistant', 'http://192.168.1.30:8123', 1, 'http', 1, '#0284c7', 'Hub', 8
+      ).lastInsertRowid;
+
+      const grafanaId = svcStmt.run(
+        'Grafana', 
+        isEn ? 'Metrics & logs visualization' : 'Wizualizacja metryk Prometheus', 
+        monitoringId, 'grafana', 'http://192.168.1.10:3000', 1, 'http', 1, '#f97316', isEn ? 'Charts' : 'Wykresy', 35
+      ).lastInsertRowid;
+
+      const uptimeId = svcStmt.run(
+        'Uptime Kuma', 
+        isEn ? 'Service availability monitor' : 'Monitor dostępności usług', 
+        monitoringId, 'uptime-kuma', 'http://192.168.1.10:3001', 0, 'http', 0, '#10b981', 'Monitor', 12
+      ).lastInsertRowid;
+
+      const piholeId = svcStmt.run(
+        'Pi-hole DNS', 
+        isEn ? 'Network-wide ad blocking' : 'Blokowanie reklam i serwer DNS', 
+        servicesId, 'pihole', 'http://192.168.1.2/admin', 0, 'http', 0, '#ef4444', 'DNS', 5
+      ).lastInsertRowid;
+
+      const jellyfinId = svcStmt.run(
+        'Jellyfin', 
+        isEn ? 'Open-source media server' : 'Serwer multimediów', 
+        mediaId, 'jellyfin', 'http://192.168.1.10:8096', 0, 'http', 0, '#8b5cf6', 'Media', 45
+      ).lastInsertRowid;
+
+      const nextcloudId = svcStmt.run(
+        'Nextcloud', 
+        isEn ? 'Self-hosted cloud storage' : 'Prywatna chmura plików', 
+        servicesId, 'nextcloud', 'https://192.168.1.10:8443', 0, 'http', 0, '#0284c7', 'Cloud', 60
+      ).lastInsertRowid;
 
       const tagStmt = db.prepare("INSERT INTO tags (name, color) VALUES (?, ?)");
       const tDocker = tagStmt.run('docker', '#0ea5e9').lastInsertRowid;
       const tMon = tagStmt.run('monitoring', '#10b981').lastInsertRowid;
-      const tNet = tagStmt.run('sieć', '#6366f1').lastInsertRowid;
+      const tNet = tagStmt.run(isEn ? 'network' : 'sieć', '#6366f1').lastInsertRowid;
       const tNas = tagStmt.run('nas', '#3b82f6').lastInsertRowid;
-      const tPve = tagStmt.run('wirtualizacja', '#e57000').lastInsertRowid;
+      const tPve = tagStmt.run(isEn ? 'virtualization' : 'wirtualizacja', '#e57000').lastInsertRowid;
 
       const linkStmt = db.prepare("INSERT INTO service_tags (service_id, tag_id) VALUES (?, ?)");
       linkStmt.run(proxmoxId, tPve);
@@ -121,7 +173,7 @@ router.post('/seed-demo', authenticateToken, requireAdmin, (req, res) => {
       linkStmt.run(uptimeId, tMon);
     })();
 
-    res.json({ message: 'Demo data seeded successfully' });
+    res.json({ message: 'Demo template data seeded successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
