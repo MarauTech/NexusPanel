@@ -36,6 +36,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Failed to check auth status:', err);
+      setSetupCompleted(false);
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
