@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useServices } from '../../hooks/useServices';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Plus, GripVertical, Edit2, Trash2, CheckCircle, XCircle, Star } from 'lucide-react';
 import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -15,7 +16,7 @@ import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
-function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled }) {
+function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled, t }) {
   const {
     attributes, listeners, setNodeRef, transform, transition, isDragging
   } = useSortable({ id });
@@ -67,7 +68,7 @@ function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled }) {
           )}
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-mono text-[11px]">
-          {service.url} · <span className="font-sans text-accent">{service.category_name || 'Bez kategorii'}</span>
+          {service.url} · <span className="font-sans text-accent">{service.category_name || t('form.uncategorized', 'Bez kategorii')}</span>
         </div>
       </div>
 
@@ -79,24 +80,23 @@ function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled }) {
             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' 
             : 'bg-black/[0.04] dark:bg-white/5 text-slate-400 border border-black/[0.08] dark:border-white/10 hover:bg-black/[0.08]'
         }`}
-        title={isEnabled ? 'Kliknij, aby ukryć usługę na pulpicie' : 'Kliknij, aby włączyć usługę na pulpicie'}
       >
         {isEnabled ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-        <span>{isEnabled ? 'Aktywna' : 'Wyłączona'}</span>
+        <span>{isEnabled ? t('common.active', 'Aktywna') : t('common.disabled', 'Wyłączona')}</span>
       </button>
 
       <div className="flex items-center gap-1">
         <button 
           onClick={() => onEdit(service)} 
-          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
-          title="Edytuj usługę"
+          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          title={t('services.edit_tooltip', 'Edytuj usługę')}
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button 
           onClick={() => onDelete(service)} 
-          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95"
-          title="Usuń usługę"
+          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          title={t('services.delete_tooltip', 'Usuń usługę')}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -107,6 +107,7 @@ function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled }) {
 
 export default function ServiceManager() {
   const { services, loading, refresh, reorder } = useServices();
+  const { t } = useLanguage();
   const [editingService, setEditingService] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -135,9 +136,9 @@ export default function ServiceManager() {
 
     try {
       await reorder(orderedIds);
-      addToast('Zaktualizowano kolejność kafelków', 'success');
+      addToast(t('services.reordered', 'Zaktualizowano kolejność kafelków'), 'success');
     } catch (err) {
-      addToast('Błąd zmiany kolejności', 'error');
+      addToast(t('common.error', 'Błąd zmiany kolejności'), 'error');
     }
   };
 
@@ -145,10 +146,10 @@ export default function ServiceManager() {
     if (!deleteConfirm) return;
     try {
       await api.services.deleteService(deleteConfirm.id);
-      addToast(`Usunięto ${deleteConfirm.name}`, 'success');
+      addToast(t('services.deleted', `Usunięto ${deleteConfirm.name}`).replace('{name}', deleteConfirm.name), 'success');
       refresh();
     } catch (err) {
-      addToast('Nie udało się usunąć usługi', 'error');
+      addToast(t('common.error', 'Nie udało się usunąć usługi'), 'error');
     } finally {
       setDeleteConfirm(null);
     }
@@ -165,24 +166,31 @@ export default function ServiceManager() {
           enabled: newEnabled
         });
       }
-      addToast(newEnabled ? `Włączono ${service.name}` : `Ukryto ${service.name}`, 'info');
+      addToast(
+        newEnabled 
+          ? t('services.enabled_toast', `Włączono ${service.name}`).replace('{name}', service.name)
+          : t('services.disabled_toast', `Ukryto ${service.name}`).replace('{name}', service.name), 
+        'info'
+      );
       refresh();
     } catch (err) {
-      addToast('Błąd aktualizacji statusu', 'error');
+      addToast(t('common.error', 'Błąd aktualizacji statusu'), 'error');
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500 animate-pulse">Ładowanie listy usług...</div>;
+    return <div className="p-8 text-center text-slate-500 animate-pulse">{t('common.loading', 'Ładowanie listy usług...')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Zarządzanie Usługami</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            {t('services.title', 'Zarządzanie Usługami')}
+          </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Dodawaj, zmieniaj kolejność (przeciągnij i upuść) oraz konfiguruj kafelki homelabu.
+            {t('services.subtitle', 'Dodawaj, zmieniaj kolejność (przeciągnij i upuść) oraz konfiguruj kafelki homelabu.')}
           </p>
         </div>
         <Button
@@ -193,7 +201,7 @@ export default function ServiceManager() {
           }}
           className="shadow-lg shadow-accent/25 text-xs font-bold"
         >
-          + Dodaj usługę
+          {t('services.btn_add', '+ Dodaj usługę')}
         </Button>
       </div>
 
@@ -212,6 +220,7 @@ export default function ServiceManager() {
                 key={service.id}
                 id={service.id}
                 service={service}
+                t={t}
                 onEdit={(svc) => {
                   setEditingService(svc);
                   setIsFormOpen(true);
@@ -226,9 +235,11 @@ export default function ServiceManager() {
 
       {services.length === 0 && (
         <div className="py-16 text-center text-slate-500 border border-dashed border-black/[0.1] dark:border-white/10 rounded-[28px] glass-card p-6">
-          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">Brak skonfigurowanych usług</p>
+          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">
+            {t('services.no_services', 'Brak skonfigurowanych usług')}
+          </p>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            Dodaj swoją pierwszą aplikację homelab lub skorzystaj ze skanera sieci LAN.
+            {t('services.no_services_desc', 'Dodaj swoją pierwszą aplikację homelab lub skorzystaj ze skanera sieci LAN.')}
           </p>
           <Button
             icon={Plus}
@@ -238,7 +249,7 @@ export default function ServiceManager() {
               setIsFormOpen(true);
             }}
           >
-            + Dodaj pierwszą usługę
+            {t('services.add_first', '+ Dodaj pierwszą usługę')}
           </Button>
         </div>
       )}
@@ -258,8 +269,8 @@ export default function ServiceManager() {
 
       {deleteConfirm && (
         <ConfirmDialog
-          title={`Usunąć "${deleteConfirm.name}"?`}
-          message={`Czy na pewno chcesz bezpowrotnie usunąć ten kafelek z pulpitu?`}
+          title={t('services.delete_title', `Usunąć "${deleteConfirm.name}"?`).replace('{name}', deleteConfirm.name)}
+          message={t('services.delete_msg', 'Czy na pewno chcesz bezpowrotnie usunąć ten kafelek z pulpitu?')}
           onConfirm={handleDelete}
           onCancel={() => setDeleteConfirm(null)}
         />

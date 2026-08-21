@@ -3,6 +3,7 @@ import * as LucideIcons from 'lucide-react';
 import { Search, Sparkles, Grid } from 'lucide-react';
 import Modal from './Modal';
 import BrandIcon from './BrandIcon';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const HOMELAB_ICONS = [
   { id: 'proxmox', label: 'Proxmox VE' },
@@ -17,7 +18,7 @@ const HOMELAB_ICONS = [
   { id: 'wireguard', label: 'WireGuard' },
   { id: 'asustor', label: 'ASUSTOR NAS' },
   { id: 'synology', label: 'Synology DSM' },
-  { id: 'router', label: 'Router / Brama' },
+  { id: 'router', label: 'Router / Gateway' },
   { id: 'uptime-kuma', label: 'Uptime Kuma' },
   { id: 'sonarr', label: 'Sonarr' },
   { id: 'radarr', label: 'Radarr' },
@@ -28,22 +29,22 @@ const HOMELAB_ICONS = [
   { id: 'syncthing', label: 'Syncthing' },
   { id: 'netdata', label: 'Netdata' },
   { id: 'prometheus', label: 'Prometheus' },
-  { id: 'server', label: 'Serwer / Bare Metal' },
-  { id: 'database', label: 'Baza Danych' },
-  { id: 'hard-drive', label: 'Dysk / Magazyn' },
-  { id: 'cpu', label: 'Procesor / CPU' },
-  { id: 'network', label: 'Przełącznik sieciowy' },
+  { id: 'server', label: 'Server / Bare Metal' },
+  { id: 'database', label: 'Database' },
+  { id: 'hard-drive', label: 'Storage / Disk' },
+  { id: 'cpu', label: 'Processor / CPU' },
+  { id: 'network', label: 'Network Switch' },
   { id: 'wifi', label: 'Wi-Fi / AP' },
-  { id: 'shield', label: 'Firewall / Bezpieczeństwo' },
-  { id: 'terminal', label: 'SSH / Konsola' },
-  { id: 'cloud', label: 'Chmura' },
+  { id: 'shield', label: 'Firewall / Security' },
+  { id: 'terminal', label: 'SSH / Terminal' },
+  { id: 'cloud', label: 'Cloud' },
   { id: 'activity', label: 'Monitoring' },
-  { id: 'camera', label: 'Kamera CCTV' },
+  { id: 'camera', label: 'CCTV Camera' },
   { id: 'tv', label: 'Multimedia / TV' },
   { id: 'home', label: 'Smart Home' },
-  { id: 'lock', label: 'Menedżer haseł' },
-  { id: 'globe', label: 'Strona WWW' },
-  { id: 'folder', label: 'Katalog / Folder' }
+  { id: 'lock', label: 'Password Manager' },
+  { id: 'globe', label: 'Website / WWW' },
+  { id: 'folder', label: 'Directory / Folder' }
 ];
 
 const LUCIDE_NAMES = Object.keys(LucideIcons).filter(name => 
@@ -56,6 +57,7 @@ const LUCIDE_NAMES = Object.keys(LucideIcons).filter(name =>
 export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState('homelab'); // 'homelab' | 'all'
+  const { t } = useLanguage();
 
   const filteredHomelab = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -84,7 +86,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
         <input
           type="text"
           className="w-full bg-black/[0.04] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 text-slate-900 dark:text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-accent shadow-sm placeholder:text-slate-400"
-          placeholder="Szukaj ikony (np. proxmox, docker, tv, home, server, nas)..."
+          placeholder={t('common.search', 'Szukaj ikony...')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -103,7 +105,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Aplikacje i Homelab ({HOMELAB_ICONS.length})</span>
+          <span>Homelab ({HOMELAB_ICONS.length})</span>
         </button>
         
         <button
@@ -116,7 +118,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
           }`}
         >
           <Grid className="w-3.5 h-3.5" />
-          <span>Wszystkie ikony Lucide ({LUCIDE_NAMES.length})</span>
+          <span>Lucide ({LUCIDE_NAMES.length})</span>
         </button>
       </div>
 
@@ -179,7 +181,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
 
         {((tab === 'homelab' && filteredHomelab.length === 0) || (tab === 'all' && filteredLucide.length === 0)) && (
           <div className="text-center py-12 text-slate-400 text-xs">
-            Nie znaleziono pasujących ikon dla zapytania „{search}”.
+            {t('common.error', 'Brak wyników')}
           </div>
         )}
       </div>
@@ -189,7 +191,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
   // If onClose is passed, wrap in Modal popup dialog
   if (onClose) {
     return (
-      <Modal title="Wybierz ikonę z biblioteki" onClose={onClose} maxWidth="max-w-3xl">
+      <Modal title={t('categories.icon_btn', 'Wybierz ikonę z biblioteki')} onClose={onClose} maxWidth="max-w-3xl">
         {content}
       </Modal>
     );

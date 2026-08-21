@@ -4,9 +4,11 @@ import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export default function BackupSettings() {
   const { addToast } = useToast();
+  const { t } = useLanguage();
   const fileInputRef = useRef(null);
 
   const [importing, setImporting] = useState(false);
@@ -31,9 +33,9 @@ export default function BackupSettings() {
       link.click();
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
-      addToast('Kopia zapasowa została pomyślnie wyeksportowana', 'success');
+      addToast(t('common.saved', 'Kopia zapasowa została pomyślnie wyeksportowana'), 'success');
     } catch (err) {
-      addToast('Nie udało się wyeksportować kopii zapasowej', 'error');
+      addToast(t('common.error', 'Nie udało się wyeksportować kopii zapasowej'), 'error');
     } finally {
       setExporting(false);
     }
@@ -48,13 +50,13 @@ export default function BackupSettings() {
       try {
         const json = JSON.parse(event.target.result);
         if (!json.categories || !json.services || !json.settings) {
-          addToast('Nieprawidłowa struktura pliku kopii zapasowej.', 'error');
+          addToast(t('empty.import_invalid', 'Nieprawidłowa struktura pliku kopii zapasowej.'), 'error');
           return;
         }
         setParsedData(json);
         setConfirmImport(file);
       } catch (err) {
-        addToast('Wybrany plik nie jest prawidłowym plikiem JSON', 'error');
+        addToast(t('empty.import_invalid', 'Wybrany plik nie jest prawidłowym plikiem JSON'), 'error');
       }
     };
     reader.readAsText(file);
@@ -66,12 +68,12 @@ export default function BackupSettings() {
     setImporting(true);
     try {
       await api.backup.importBackup(parsedData);
-      addToast('Kopia zapasowa została pomyślnie przywrócona. Przeładowywanie...', 'success');
+      addToast(t('empty.import_success', 'Kopia zapasowa została pomyślnie przywrócona. Przeładowywanie...'), 'success');
       setTimeout(() => {
         window.location.href = '/';
       }, 1200);
     } catch (err) {
-      addToast(err.response?.data?.error || 'Błąd importu kopii zapasowej', 'error');
+      addToast(err.response?.data?.error || t('common.error', 'Błąd importu kopii zapasowej'), 'error');
     } finally {
       setImporting(false);
       setConfirmImport(null);
@@ -83,12 +85,12 @@ export default function BackupSettings() {
     setResetting(true);
     try {
       const res = await api.backup.factoryReset();
-      addToast(res.data?.message || 'Przywrócono ustawienia fabryczne!', 'success');
+      addToast(res.data?.message || t('backup.reset_title', 'Przywrócono ustawienia fabryczne!'), 'success');
       setTimeout(() => {
         window.location.href = '/';
       }, 1200);
     } catch (err) {
-      addToast(err.response?.data?.error || 'Błąd podczas przywracania ustawień fabrycznych', 'error');
+      addToast(err.response?.data?.error || t('common.error', 'Błąd podczas przywracania ustawień fabrycznych'), 'error');
     } finally {
       setResetting(false);
       setShowResetConfirm(false);
@@ -98,9 +100,11 @@ export default function BackupSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kopia Zapasowa i Reset</h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          {t('backup.title', 'Kopia Zapasowa i Reset')}
+        </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Eksportuj konfigurację do pliku, przywracaj kopie zapasowe lub zresetuj NexusPanel do stanu fabrycznego.
+          {t('backup.subtitle', 'Eksportuj konfigurację do pliku, przywracaj kopie zapasowe lub zresetuj NexusPanel do stanu fabrycznego.')}
         </p>
       </div>
       
@@ -113,12 +117,14 @@ export default function BackupSettings() {
               <Download className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-2">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Eksportuj konfigurację</h3>
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                {t('backup.export_title', 'Eksportuj konfigurację')}
+              </h3>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Pobierz plik JSON zawierający wszystkie Twoje usługi, kategorie, tagi oraz ustawienia wyglądu. Hasła i konta użytkowników nie są eksportowane.
+                {t('backup.export_desc', 'Pobierz plik JSON zawierający wszystkie Twoje usługi, kategorie, tagi oraz ustawienia wyglądu. Hasła i konta użytkowników nie są eksportowane.')}
               </p>
               <Button onClick={handleExport} isLoading={exporting} icon={Download} size="sm">
-                Pobierz kopię zapasową (.json)
+                {t('backup.btn_export', 'Pobierz kopię zapasową (.json)')}
               </Button>
             </div>
           </div>
@@ -131,13 +137,15 @@ export default function BackupSettings() {
               <Upload className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-3">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Importuj konfigurację</h3>
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                {t('backup.import_title', 'Importuj konfigurację')}
+              </h3>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Przywróć układ i usługi z wcześniej pobranego pliku JSON kopii zapasowej NexusPanel.
+                {t('backup.import_desc', 'Przywróć układ i usługi z wcześniej pobranego pliku JSON kopii zapasowej NexusPanel.')}
               </p>
               <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-700 dark:text-amber-300 text-xs">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" />
-                <span>Uwaga: Import kopii zastąpi obecne usługi, kategorie i motyw zawartością pliku.</span>
+                <span>{t('backup.import_warning', 'Uwaga: Import kopii zastąpi obecne usługi, kategorie i motyw zawartością pliku.')}</span>
               </div>
               
               <input 
@@ -154,7 +162,7 @@ export default function BackupSettings() {
                 icon={Upload}
                 size="sm"
               >
-                Wybierz plik kopii (.json)
+                {t('backup.btn_import', 'Wybierz plik kopii (.json)')}
               </Button>
             </div>
           </div>
@@ -168,14 +176,16 @@ export default function BackupSettings() {
             </div>
             <div className="flex-1 space-y-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-rose-600 dark:text-rose-300">Przywrócenie ustawień fabrycznych</h3>
+                <h3 className="text-base font-extrabold text-rose-600 dark:text-rose-300">
+                  {t('backup.reset_title', 'Przywrócenie ustawień fabrycznych')}
+                </h3>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30">
-                  Strefa niebezpieczna
+                  {t('backup.reset_danger_zone', 'Strefa niebezpieczna')}
                 </span>
               </div>
               
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Całkowicie czyści bazę danych i przywraca NexusPanel do stanu czystej instalacji. Wszystkie usługi, kategorie, tagi i personalizacje zostaną trwale usunięte.
+                {t('backup.reset_desc', 'Całkowicie czyści bazę danych i przywraca NexusPanel do stanu czystej instalacji. Wszystkie usługi, kategorie, tagi i personalizacje zostaną trwale usunięte.')}
               </p>
 
               <Button 
@@ -186,7 +196,7 @@ export default function BackupSettings() {
                 size="sm"
                 className="shadow-lg shadow-rose-500/20"
               >
-                Przywróć ustawienia fabryczne ⚠️
+                {t('backup.btn_reset', 'Przywróć ustawienia fabryczne ⚠️')}
               </Button>
             </div>
           </div>
@@ -197,9 +207,9 @@ export default function BackupSettings() {
       {/* Import Confirmation Dialog */}
       {confirmImport && (
         <ConfirmDialog
-          title="Potwierdź import kopii zapasowej"
-          message={`Czy na pewno chcesz zaimportować plik "${confirmImport.name}"? Zastąpi to obecne usługi i kategorie zawartością z pliku.`}
-          confirmText="Importuj kopię"
+          title={t('backup.confirm_import_title', 'Potwierdź import kopii zapasowej')}
+          message={t('backup.confirm_import_msg', `Czy na pewno chcesz zaimportować plik "${confirmImport.name}"? Zastąpi to obecne usługi i kategorie zawartością z pliku.`).replace('{file}', confirmImport.name)}
+          confirmText={t('backup.confirm_import_btn', 'Importuj kopię')}
           onConfirm={executeImport}
           onCancel={() => {
             setConfirmImport(null);
@@ -211,9 +221,9 @@ export default function BackupSettings() {
       {/* Factory Reset Confirmation Dialog */}
       {showResetConfirm && (
         <ConfirmDialog
-          title="⚠️ Przywrócić ustawienia fabryczne?"
-          message="Czy na pewno chcesz całkowicie zresetować aplikację? Wszystkie dodane kafelki, kategorie i ustawienia zostaną bezpowrotnie usunięte, a aplikacja powróci do ekranu powitalnego nowej instalacji."
-          confirmText="Tak, zresetuj wszystko"
+          title={t('backup.confirm_reset_title', '⚠️ Przywrócić ustawienia fabryczne?')}
+          message={t('backup.confirm_reset_msg', 'Czy na pewno chcesz całkowicie zresetować aplikację? Wszystkie dodane kafelki, kategorie i ustawienia zostaną bezpowrotnie usunięte, a aplikacja powróci do ekranu powitalnego nowej instalacji.')}
+          confirmText={t('backup.confirm_reset_btn', 'Tak, zresetuj wszystko')}
           confirmVariant="danger"
           onConfirm={executeFactoryReset}
           onCancel={() => setShowResetConfirm(false)}

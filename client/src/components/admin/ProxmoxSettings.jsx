@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
+import { useLanguage } from '../../contexts/LanguageContext';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { useToast } from '../../contexts/ToastContext';
@@ -9,6 +10,7 @@ import BrandIcon from '../common/BrandIcon';
 
 export default function ProxmoxSettings() {
   const { settings, updateSettings, loading } = useSettings();
+  const { t } = useLanguage();
   const { addToast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -59,11 +61,11 @@ export default function ProxmoxSettings() {
         token_secret: formData.proxmox_token_secret,
         verify_ssl: formData.proxmox_verify_ssl
       });
-      setTestResult({ success: true, message: res.data.message || 'Pomyślnie połączono z API Proxmox VE!' });
-      addToast('Połączenie z Proxmox VE zostało zweryfikowane', 'success');
+      setTestResult({ success: true, message: res.data.message || t('proxmox.test_success', 'Pomyślnie połączono z API Proxmox VE!') });
+      addToast(t('proxmox.test_success', 'Połączenie z Proxmox VE zostało zweryfikowane'), 'success');
     } catch (err) {
-      setTestResult({ success: false, message: err.response?.data?.error || err.message || 'Nie udało się połączyć z Proxmox API' });
-      addToast('Test połączenia Proxmox nie powiódł się', 'error');
+      setTestResult({ success: false, message: err.response?.data?.error || err.message || t('proxmox.test_error', 'Nie udało się połączyć z Proxmox API') });
+      addToast(t('proxmox.test_error', 'Test połączenia Proxmox nie powiódł się'), 'error');
     } finally {
       setTesting(false);
     }
@@ -74,22 +76,24 @@ export default function ProxmoxSettings() {
     setSaving(true);
     try {
       await updateSettings(formData);
-      addToast('Zapisano ustawienia integracji z Proxmox VE', 'success');
+      addToast(t('proxmox.saved', 'Zapisano ustawienia integracji z Proxmox VE'), 'success');
     } catch (err) {
-      addToast('Błąd podczas zapisywania ustawień', 'error');
+      addToast(t('common.error', 'Błąd podczas zapisywania ustawień'), 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">Ładowanie ustawień...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">{t('common.loading', 'Ładowanie ustawień...')}</div>;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 max-w-3xl">
       <div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Integracja z Proxmox VE</h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          {t('proxmox.title', 'Integracja z Proxmox VE')}
+        </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-          Podłącz swój węzeł Proxmox VE, aby wyświetlać telemetrię CPU/RAM/Dysk oraz stan kontenerów LXC i maszyn VM.
+          {t('proxmox.subtitle', 'Podłącz swój węzeł Proxmox VE, aby wyświetlać telemetrię CPU/RAM/Dysk oraz stan kontenerów LXC i maszyn VM.')}
         </p>
       </div>
 
@@ -102,8 +106,12 @@ export default function ProxmoxSettings() {
                 <BrandIcon name="proxmox" color="#ffffff" className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Włącz telemetrię Proxmox VE</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Pobiera metryki i statusy maszyn w czasie rzeczywistym</p>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {t('proxmox.enable_title', 'Włącz telemetrię Proxmox VE')}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t('proxmox.enable_desc', 'Pobiera metryki i statusy maszyn w czasie rzeczywistym')}
+                </p>
               </div>
             </div>
 
@@ -123,13 +131,13 @@ export default function ProxmoxSettings() {
         {/* Proxmox API Credentials Card */}
         <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-black/[0.06] dark:border-white/10">
-            Dane węzła i Token API Proxmox
+            {t('proxmox.creds_title', 'Dane węzła i Token API Proxmox')}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <Input
-                label="Adres IP / Host Proxmox"
+                label={t('proxmox.host_label', 'Adres IP / Host Proxmox')}
                 name="proxmox_host"
                 value={formData.proxmox_host}
                 onChange={handleChange}
@@ -138,7 +146,7 @@ export default function ProxmoxSettings() {
             </div>
             <div>
               <Input
-                label="Port API"
+                label={t('proxmox.port_label', 'Port API')}
                 name="proxmox_port"
                 value={formData.proxmox_port}
                 onChange={handleChange}
@@ -149,14 +157,14 @@ export default function ProxmoxSettings() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Nazwa węzła (Node)"
+              label={t('proxmox.node_label', 'Nazwa węzła (Node)')}
               name="proxmox_node"
               value={formData.proxmox_node}
               onChange={handleChange}
-              placeholder="pve (lub maciek)"
+              placeholder="pve"
             />
             <Input
-              label="Token ID"
+              label={t('proxmox.token_id_label', 'Token ID')}
               name="proxmox_token_id"
               value={formData.proxmox_token_id}
               onChange={handleChange}
@@ -166,7 +174,7 @@ export default function ProxmoxSettings() {
 
           <div>
             <Input
-              label="Token Secret (UUID)"
+              label={t('proxmox.token_secret_label', 'Token Secret (UUID)')}
               name="proxmox_token_secret"
               type="password"
               value={formData.proxmox_token_secret}
@@ -183,7 +191,7 @@ export default function ProxmoxSettings() {
               onChange={handleChange}
               className="w-4 h-4 rounded accent-accent"
             />
-            <span>Weryfikuj certyfikat SSL (Odznacz, jeśli używasz certyfikatu self-signed)</span>
+            <span>{t('proxmox.verify_ssl_label', 'Weryfikuj certyfikat SSL (Odznacz, jeśli używasz certyfikatu self-signed)')}</span>
           </label>
         </div>
 
@@ -209,7 +217,7 @@ export default function ProxmoxSettings() {
             disabled={!formData.proxmox_host || !formData.proxmox_token_id}
             className="text-xs font-bold"
           >
-            Testuj połączenie
+            {t('proxmox.test_btn', 'Testuj połączenie')}
           </Button>
 
           <Button
@@ -217,7 +225,7 @@ export default function ProxmoxSettings() {
             isLoading={saving}
             className="px-6 py-2.5 shadow-lg shadow-accent/25 text-xs font-bold"
           >
-            Zapisz ustawienia Proxmox
+            {t('proxmox.save_btn', 'Zapisz ustawienia Proxmox')}
           </Button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCategories } from '../../hooks/useCategories';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Plus, GripVertical, Edit2, Trash2, Folder } from 'lucide-react';
 import Button from '../common/Button';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -18,7 +19,7 @@ import { CSS } from '@dnd-kit/utilities';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
-function SortableCategory({ id, category, onEdit, onDelete }) {
+function SortableCategory({ id, category, onEdit, onDelete, t }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
   const style = {
@@ -57,8 +58,8 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
         <span className="font-extrabold text-sm text-slate-900 dark:text-white block truncate">{category.name}</span>
         <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
           {category.service_count !== undefined 
-            ? `${category.service_count} ${category.service_count === 1 ? 'przypisana usługa' : category.service_count >= 2 && category.service_count <= 4 ? 'przypisane usługi' : 'przypisanych usług'}`
-            : 'Kategoria'}
+            ? t('categories.services_count', `${category.service_count} przypisanych usług`).replace('{count}', category.service_count)
+            : t('form.category', 'Kategoria')}
         </span>
       </div>
 
@@ -66,14 +67,14 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
         <button 
           onClick={() => onEdit(category)} 
           className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          title="Edytuj kategorię"
+          title={t('common.edit', 'Edytuj')}
         >
           <Edit2 className="w-4 h-4" />
         </button>
         <button 
           onClick={() => onDelete(category)} 
           className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          title="Usuń kategorię"
+          title={t('common.delete', 'Usuń')}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -84,6 +85,7 @@ function SortableCategory({ id, category, onEdit, onDelete }) {
 
 export default function CategoryManager() {
   const { categories, loading, refresh } = useCategories();
+  const { t } = useLanguage();
   const [localItems, setLocalItems] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
@@ -119,10 +121,10 @@ export default function CategoryManager() {
     try {
       const itemsPayload = reordered.map((item, index) => ({ id: item.id, sort_order: index }));
       await api.categories.reorderCategories({ items: itemsPayload });
-      addToast('Zaktualizowano kolejność kategorii', 'success');
+      addToast(t('common.saved', 'Zaktualizowano kolejność kategorii'), 'success');
       refresh();
     } catch (err) {
-      addToast('Nie udało się zapisać kolejności', 'error');
+      addToast(t('common.error', 'Nie udało się zapisać kolejności'), 'error');
       setLocalItems(categories);
     }
   };
@@ -142,22 +144,22 @@ export default function CategoryManager() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      addToast('Nazwa kategorii jest wymagana', 'error');
+      addToast(t('categories.name_label', 'Nazwa kategorii jest wymagana'), 'error');
       return;
     }
 
     try {
       if (editingCat) {
         await api.categories.updateCategory(editingCat.id, formData);
-        addToast(`Zaktualizowano kategorię "${formData.name}"`, 'success');
+        addToast(t('common.saved', `Zaktualizowano kategorię "${formData.name}"`), 'success');
       } else {
         await api.categories.createCategory(formData);
-        addToast(`Utworzono kategorię "${formData.name}"`, 'success');
+        addToast(t('common.saved', `Utworzono kategorię "${formData.name}"`), 'success');
       }
       setIsFormOpen(false);
       refresh();
     } catch (err) {
-      addToast(err.response?.data?.error || 'Błąd zapisywania kategorii', 'error');
+      addToast(err.response?.data?.error || t('common.error', 'Błąd zapisywania kategorii'), 'error');
     }
   };
 
@@ -165,28 +167,30 @@ export default function CategoryManager() {
     if (!deleteConfirm) return;
     try {
       await api.categories.deleteCategory(deleteConfirm.id);
-      addToast(`Usunięto kategorię "${deleteConfirm.name}"`, 'success');
+      addToast(t('common.saved', `Usunięto kategorię "${deleteConfirm.name}"`), 'success');
       refresh();
     } catch (err) {
-      addToast('Nie udało się usunąć kategorii', 'error');
+      addToast(t('common.error', 'Nie udało się usunąć kategorii'), 'error');
     } finally {
       setDeleteConfirm(null);
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">Ładowanie kategorii...</div>;
+  if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">{t('common.loading', 'Ładowanie kategorii...')}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Zarządzanie Kategoriami</h2>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            {t('categories.title', 'Zarządzanie Kategoriami')}
+          </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Grupuj kafelki w sekcje (np. Infrastruktura, Smart Home, Media).
+            {t('categories.subtitle', 'Grupuj kafelki w sekcje (np. Infrastruktura, Smart Home, Media).')}
           </p>
         </div>
         <Button icon={Plus} onClick={handleOpenAdd} className="shadow-lg shadow-accent/25 text-xs font-bold">
-          + Dodaj kategorię
+          {t('categories.btn_add', '+ Dodaj kategorię')}
         </Button>
       </div>
 
@@ -198,6 +202,7 @@ export default function CategoryManager() {
                 key={category.id}
                 id={category.id}
                 category={category}
+                t={t}
                 onEdit={handleOpenEdit}
                 onDelete={setDeleteConfirm}
               />
@@ -208,12 +213,14 @@ export default function CategoryManager() {
 
       {localItems.length === 0 && (
         <div className="py-12 text-center text-slate-500 border border-dashed border-black/[0.1] dark:border-white/10 rounded-[24px] glass-card p-6">
-          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">Brak utworzonych kategorii</p>
+          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">
+            {t('categories.no_categories', 'Brak utworzonych kategorii')}
+          </p>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-            Kategorie pozwalają dzielić usługi na logiczne bloki na pulpicie.
+            {t('categories.no_categories_desc', 'Kategorie pozwalają dzielić usługi na logiczne bloki na pulpicie.')}
           </p>
           <Button icon={Plus} size="sm" onClick={handleOpenAdd}>
-            + Dodaj pierwszą kategorię
+            {t('categories.add_first', '+ Dodaj pierwszą kategorię')}
           </Button>
         </div>
       )}
@@ -221,22 +228,22 @@ export default function CategoryManager() {
       {/* Category Add/Edit Modal */}
       {isFormOpen && (
         <Modal 
-          title={editingCat ? `Edytuj: ${editingCat.name}` : '+ Nowa kategoria'} 
+          title={editingCat ? t('categories.edit_title', `Edytuj: ${editingCat.name}`).replace('{name}', editingCat.name) : t('categories.add_title', '+ Nowa kategoria')} 
           onClose={() => setIsFormOpen(false)}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Nazwa kategorii *"
+              label={t('categories.name_label', 'Nazwa kategorii *')}
               value={formData.name}
               onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
               required
-              placeholder="np. Infrastruktura, Media, Smart Home"
+              placeholder={t('categories.name_placeholder', 'np. Infrastruktura, Media, Smart Home')}
               autoFocus
             />
 
             <div>
               <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
-                Ikona kategorii
+                {t('categories.icon_label', 'Ikona kategorii')}
               </label>
               <div className="flex items-center gap-2.5">
                 <div 
@@ -251,24 +258,24 @@ export default function CategoryManager() {
                   onClick={() => setShowIconPicker(true)}
                   className="flex-1 text-xs py-2 font-bold"
                 >
-                  Wybierz ikonę z biblioteki
+                  {t('categories.icon_btn', 'Wybierz ikonę z biblioteki')}
                 </Button>
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 tracking-tight">
-                Kolor kategorii
+                {t('categories.color_label', 'Kolor kategorii')}
               </label>
               <ColorPicker color={formData.color} onChange={c => setFormData(prev => ({ ...prev, color: c }))} />
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t border-black/[0.06] dark:border-white/10">
               <Button type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>
-                Anuluj
+                {t('common.cancel', 'Anuluj')}
               </Button>
               <Button type="submit">
-                {editingCat ? 'Zapisz zmiany' : 'Utwórz kategorię'}
+                {editingCat ? t('common.save', 'Zapisz zmiany') : t('categories.btn_add', 'Utwórz kategorię')}
               </Button>
             </div>
           </form>
@@ -289,8 +296,8 @@ export default function CategoryManager() {
 
       {deleteConfirm && (
         <ConfirmDialog
-          title={`Usunąć kategorię "${deleteConfirm.name}"?`}
-          message="Usługi przypisane do tej kategorii zostaną przeniesione do grupy 'Inne usługi'. Żadna usługa nie zostanie skasowana."
+          title={t('categories.delete_title', `Usunąć kategorię "${deleteConfirm.name}"?`).replace('{name}', deleteConfirm.name)}
+          message={t('categories.delete_msg', 'Usługi przypisane do tej kategorii zostaną przeniesione do grupy "Inne usługi". Żadna usługa nie zostanie skasowana.')}
           onConfirm={handleDelete}
           onCancel={() => setDeleteConfirm(null)}
         />
