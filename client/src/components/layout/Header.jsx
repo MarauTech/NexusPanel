@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv, Globe, LogOut } from 'lucide-react';
+import { Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, Tv, Globe, LogOut, Lock } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -121,8 +121,8 @@ export default function Header() {
               </Link>
             )}
 
-            {/* Logout Button */}
-            {isAuthenticated && (
+            {/* Login / Logout Button */}
+            {isAuthenticated ? (
               <button
                 onClick={logout}
                 className="flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.04] hover:bg-red-500/10 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 text-xs font-medium border border-black/[0.06] dark:border-white/10 transition-all cursor-pointer"
@@ -130,6 +130,15 @@ export default function Header() {
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/25 transition-all"
+                title={t('header.login', 'Zaloguj się')}
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t('header.login', 'Zaloguj')}</span>
+              </Link>
             )}
           </div>
         </div>
