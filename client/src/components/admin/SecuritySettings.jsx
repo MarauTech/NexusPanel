@@ -21,13 +21,17 @@ export default function SecuritySettings() {
       addToast(t('security.pass_mismatch', 'Wprowadzone hasła nie są identyczne'), 'error');
       return;
     }
-    if (passForm.new.length < 6) {
-      addToast(t('security.pass_too_short', 'Nowe hasło musi zawierać co najmniej 6 znaków'), 'error');
+    if (passForm.new.length < 12) {
+      addToast(t('security.pass_too_short', 'Nowe hasło musi zawierać co najmniej 12 znaków'), 'error');
       return;
     }
 
     setLoading(true);
     try {
+      await api.auth.changePassword({
+        currentPassword: passForm.current,
+        newPassword: passForm.new
+      });
       addToast(t('security.pass_success', 'Hasło zostało pomyślnie zaktualizowane'), 'success');
       setPassForm({ current: '', new: '', confirm: '' });
     } catch (err) {
@@ -83,12 +87,12 @@ export default function SecuritySettings() {
           <form onSubmit={handlePassSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input 
-                label={t('security.new_password', 'Nowe hasło')} 
+                label={t('security.new_password', 'Nowe hasło (min. 12 znaków)')} 
                 type="password" 
                 name="new" 
                 value={passForm.new} 
                 onChange={handlePassChange} 
-                placeholder="Min. 6 znaków"
+                placeholder="Min. 12 znaków"
                 required 
               />
               <Input 

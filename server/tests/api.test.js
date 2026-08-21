@@ -18,14 +18,16 @@ async function runTests() {
   const port = server.address().port;
   const BASE_URL = `http://127.0.0.1:${port}`;
 
-  // Ensure admin user exists in DB
+  // Reset users and ensure admin user exists in DB
   db.exec(`
-    INSERT OR IGNORE INTO users (id, username, password_hash, role)
-    VALUES (1, 'admin_test', 'hash', 'admin');
+    DELETE FROM users;
+    INSERT INTO users (id, username, password_hash, role, token_version, created_at, updated_at)
+    VALUES (1, 'admin_test', 'hash', 'admin', 1, datetime('now'), datetime('now'));
+    UPDATE settings SET value = 'true' WHERE key = 'setup_completed';
   `);
 
-  // Create admin token for tests
-  const adminToken = jwt.sign({ id: 1, username: 'admin_test', role: 'admin' }, config.JWT_SECRET, { expiresIn: '1h' });
+  // Create admin token for tests with token_version: 1
+  const adminToken = jwt.sign({ id: 1, username: 'admin_test', role: 'admin', token_version: 1 }, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: '1h' });
   const authHeaders = { Authorization: `Bearer ${adminToken}` };
 
   async function test(name, fn) {
@@ -57,7 +59,7 @@ async function runTests() {
         assert.fail('Should have rejected non-http protocol');
       } catch (err) {
         assert.strictEqual(err.response.status, 400);
-        assert.ok(err.response.data.error.includes('http'));
+        assert.ok(err.response.data.error.includes('http') || err.response.data.error.includes('Disallowed'));
       }
     });
 

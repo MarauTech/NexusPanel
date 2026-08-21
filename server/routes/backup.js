@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import db from '../db/index.js';
 import { authenticateToken, requireAdmin, requireAuthUnlessFirstRun } from '../middleware/auth.js';
 import { backupLimiter } from '../middleware/rateLimit.js';
@@ -48,6 +49,15 @@ router.get('/export', authenticateToken, requireAdmin, (req, res) => {
   }
 });
 
+function hasDangerousKeys(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  for (const key of Object.getOwnPropertyNames(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') return true;
+    if (typeof obj[key] === 'object' && hasDangerousKeys(obj[key])) return true;
+  }
+  return false;
+}
+
 /**
  * POST /api/backup/import
  * Atomic, validated restore of dashboard configuration
@@ -56,8 +66,8 @@ router.post('/import', backupLimiter, requireAuthUnlessFirstRun, (req, res) => {
   const data = req.body;
 
   // Strict JSON and prototype pollution protection
-  if (!data || typeof data !== 'object' || Array.isArray(data) || Object.prototype.hasOwnProperty.call(data, '__proto__')) {
-    return res.status(400).json({ error: 'Invalid backup file payload' });
+  if (!data || typeof data !== 'object' || Array.isArray(data) || hasDangerousKeys(data)) {
+    return res.status(400).json({ error: 'Invalid backup file payload: malicious or malformed keys detected' });
   }
 
   if (!Array.isArray(data.categories) || !Array.isArray(data.services)) {
@@ -213,8 +223,26 @@ router.post('/import', backupLimiter, requireAuthUnlessFirstRun, (req, res) => {
 /**
  * POST /api/backup/factory-reset
  * Danger zone: completely resets the database to a fresh clean state
+ * Requires admin authentication and explicit confirmation phrase
  */
-router.post('/factory-reset', backupLimiter, authenticateToken, requireAdmin, (req, res) => {
+router.post('/factory-reset', backupLimiter, authenticateToken, requireAdmin, async (req, res) => {
+  const { confirmation, password } = req.body || {};
+
+  if (confirmation !== 'RESET NEXUSPANEL') {
+    return res.status(400).json({ error: 'Proszę potwierdzić operację wpisując dokładnie: RESET NEXUSPANEL' });
+  }
+
+  // If password provided, verify against admin user
+  if (password) {
+    const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.user.id);
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) {
+        return res.status(400).json({ error: 'Nieprawidłowe hasło administratora' });
+      }
+    }
+  }
+
   try {
     db.transaction(() => {
       db.exec(`

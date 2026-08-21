@@ -36,17 +36,17 @@ router.get('/status', (req, res) => {
 
 /**
  * POST /api/auth/setup
- * Atomic first-run administrator account creation
+ * Atomic first-run administrator account creation with strong password policy (12-128 chars)
  */
 router.post('/setup', async (req, res) => {
   const { username, password, dashboardName } = req.body;
 
-  if (!username || typeof username !== 'string' || username.trim().length < 3) {
-    return res.status(400).json({ error: 'Username must be at least 3 characters long' });
+  if (!username || typeof username !== 'string' || username.trim().length < 3 || username.trim().length > 50) {
+    return res.status(400).json({ error: 'Username must be between 3 and 50 characters long' });
   }
 
-  if (!password || typeof password !== 'string' || password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  if (!password || typeof password !== 'string' || password.length < 12 || password.length > 128) {
+    return res.status(400).json({ error: 'Password must be between 12 and 128 characters long' });
   }
 
   try {
@@ -58,7 +58,7 @@ router.post('/setup', async (req, res) => {
     }
 
     const cleanUsername = username.trim();
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 12);
     let newUserId = 1;
 
     // Run atomically in transaction
@@ -67,8 +67,8 @@ router.post('/setup', async (req, res) => {
       db.exec('DELETE FROM users');
       
       const insertUser = db.prepare(`
-        INSERT INTO users (username, password_hash, display_name, role, created_at, updated_at)
-        VALUES (?, ?, ?, 'admin', datetime('now'), datetime('now'))
+        INSERT INTO users (username, password_hash, display_name, role, token_version, created_at, updated_at)
+        VALUES (?, ?, ?, 'admin', 1, datetime('now'), datetime('now'))
       `);
       const result = insertUser.run(cleanUsername, passwordHash, cleanUsername);
       newUserId = result.lastInsertRowid || 1;
@@ -83,12 +83,12 @@ router.post('/setup', async (req, res) => {
         db.prepare(`
           INSERT INTO settings (key, value) VALUES ('dashboard_name', ?)
           ON CONFLICT(key) DO UPDATE SET value = excluded.value
-        `).run(dashboardName.trim());
+        `).run(dashboardName.trim().slice(0, 100));
       }
     })();
 
-    const payload = { id: newUserId, username: cleanUsername, role: 'admin' };
-    const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRY });
+    const payload = { id: newUserId, username: cleanUsername, role: 'admin', token_version: 1 };
+    const token = jwt.sign(payload, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: config.JWT_EXPIRY });
 
     res.cookie('nexuspanel_token', token, getCookieOptions());
 
@@ -123,21 +123,20 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 
   try {
-    const user = db.prepare('SELECT id, username, password_hash, display_name, role FROM users WHERE username = ?').get(username.trim());
+    const user = db.prepare('SELECT id, username, password_hash, display_name, role, token_version FROM users WHERE username = ?').get(username.trim());
 
-    if (!user) {
+    // Fake hash compare to prevent timing-based username enumeration
+    const DUMMY_HASH = '$2a$12$e8Zbz1hYk3v0g8kH4W2Jje9fK8U3Wv2J.Y8Y4O0a7q.9hV9hO9hO.';
+    const hashToCompare = user ? user.password_hash : DUMMY_HASH;
+    const isValid = await bcrypt.compare(password, hashToCompare);
+
+    if (!user || !isValid) {
       recordAudit({ event: 'LOGIN_FAILED', username, ip: req.ip, success: false });
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    const isValid = await bcrypt.compare(password, user.password_hash);
-    if (!isValid) {
-      recordAudit({ event: 'LOGIN_FAILED', userId: user.id, username: user.username, ip: req.ip, success: false });
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    const payload = { id: user.id, username: user.username, role: user.role };
-    const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: config.JWT_EXPIRY });
+    const payload = { id: user.id, username: user.username, role: user.role, token_version: user.token_version || 1 };
+    const token = jwt.sign(payload, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: config.JWT_EXPIRY });
 
     res.cookie('nexuspanel_token', token, getCookieOptions());
 
@@ -188,17 +187,17 @@ router.get('/me', authenticateToken, (req, res) => {
 
 /**
  * PUT /api/auth/password
- * Protected endpoint for updating administrator password
+ * Protected endpoint for updating administrator password (enforces 12-128 chars and token revocation)
  */
 router.put('/password', authenticateToken, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
-  if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
-    return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+  if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 12 || newPassword.length > 128) {
+    return res.status(400).json({ error: 'New password must be between 12 and 128 characters long' });
   }
 
   try {
-    const user = db.prepare('SELECT id, password_hash FROM users WHERE id = ?').get(req.user.id);
+    const user = db.prepare('SELECT id, password_hash, token_version FROM users WHERE id = ?').get(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -210,12 +209,21 @@ router.put('/password', authenticateToken, async (req, res) => {
       }
     }
 
-    const newHash = await bcrypt.hash(newPassword, 10);
-    db.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(newHash, user.id);
+    const newHash = await bcrypt.hash(newPassword, 12);
+    // Increment token_version to invalidate all existing JWTs across all devices
+    const newTokenVersion = (user.token_version || 1) + 1;
+    
+    db.prepare("UPDATE users SET password_hash = ?, token_version = ?, updated_at = datetime('now') WHERE id = ?").run(newHash, newTokenVersion, user.id);
+
+    // Issue fresh JWT with new token_version for the current session
+    const payload = { id: user.id, username: req.user.username, role: req.user.role, token_version: newTokenVersion };
+    const freshToken = jwt.sign(payload, config.JWT_SECRET, { algorithm: 'HS256', expiresIn: config.JWT_EXPIRY });
+
+    res.cookie('nexuspanel_token', freshToken, getCookieOptions());
 
     recordAudit({ event: 'PASSWORD_CHANGED', userId: user.id, username: req.user.username, ip: req.ip });
 
-    res.json({ success: true, message: 'Password updated successfully' });
+    res.json({ success: true, message: 'Password updated successfully', token: freshToken });
   } catch (err) {
     res.status(500).json({ error: 'Password update failed' });
   }

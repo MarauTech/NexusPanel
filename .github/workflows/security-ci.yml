@@ -39,5 +39,11 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: ci-security-test-secret-at-least-32-chars-long!
 
+      - name: Run Red Team Verification Test Suite
+        run: npm run test:redteam --workspace=server
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-security-test-secret-at-least-32-chars-long!
+
       - name: Docker Build Check
         run: docker build -t nexuspanel:ci .

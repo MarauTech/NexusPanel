@@ -55,7 +55,7 @@ const API = {
   backup: {
     exportBackup: () => api.get('/backup/export'),
     importBackup: (data) => api.post('/backup/import', data),
-    factoryReset: () => api.post('/backup/factory-reset'),
+    factoryReset: (data = { confirmation: 'RESET NEXUSPANEL' }) => api.post('/backup/factory-reset', data),
   },
   icons: {
     getIcons: () => api.get('/icons'),

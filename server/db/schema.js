@@ -105,6 +105,12 @@ export function initializeDatabase(db) {
     if (!hasCheckType) {
       db.exec("ALTER TABLE services ADD COLUMN health_check_type TEXT DEFAULT 'http'");
     }
+
+    const userInfo = db.prepare("PRAGMA table_info(users)").all();
+    const hasTokenVersion = userInfo.some(col => col.name === 'token_version');
+    if (!hasTokenVersion) {
+      db.exec("ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 1");
+    }
   } catch (e) {
     // Ignore migration error if already exists
   }

@@ -27,6 +27,7 @@ import systemRoutes from './routes/system.js';
 import uploadRoutes from './routes/upload.js';
 import scannerRoutes from './routes/scanner.js';
 
+import { verifyCsrfOrigin } from './middleware/auth.js';
 import HealthCheckService from './services/healthCheck.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -111,7 +112,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// 7. Controlled & Secure Static Uploads Serving
+// 7. CSRF Origin Verification on mutating API endpoints
+app.use('/api', verifyCsrfOrigin);
+
+// 8. Controlled & Secure Static Uploads Serving
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
