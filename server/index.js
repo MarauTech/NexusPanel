@@ -162,8 +162,9 @@ app.use((err, req, res, next) => {
   logger.error(`[Error ID: ${errorId}] Unhandled request error:`, err);
 
   if (config.NODE_ENV === 'production') {
+    const isClientError = err.status && err.status >= 400 && err.status < 500;
     res.status(err.status || 500).json({
-      error: err.message || 'Internal Server Error',
+      error: isClientError ? (err.message || 'Client Error') : 'Internal Server Error',
       errorId
     });
   } else {
