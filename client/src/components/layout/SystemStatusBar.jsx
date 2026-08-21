@@ -102,7 +102,7 @@ export default function SystemStatusBar() {
             type="button"
             onClick={() => setShowWeatherModal(true)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 font-medium transition-all"
-            title="Kliknij, aby zobaczyć prognozę pogody"
+            title={t('weather.title', 'Pogoda lokalna')}
           >
             {getWeatherIcon(weather.icon)}
             <span className="font-mono font-bold text-white">{weather.temperature}°C</span>
@@ -142,7 +142,7 @@ export default function SystemStatusBar() {
       {/* Weather Forecast Modal */}
       {showWeatherModal && weather && (
         <Modal
-          title={`Pogoda lokalna — ${weather.city}`}
+          title={`${t('weather.title', 'Local Weather')} — ${weather.city}`}
           onClose={() => setShowWeatherModal(false)}
           maxWidth="max-w-md"
         >
@@ -151,7 +151,7 @@ export default function SystemStatusBar() {
               <div className="space-y-1">
                 <span className="text-xs text-slate-400 font-medium">{weather.condition}</span>
                 <div className="text-3xl font-black text-white tracking-tight">{weather.temperature}°C</div>
-                <div className="text-xs text-slate-400">Odczuwalna: <strong className="text-white">{weather.apparentTemperature}°C</strong></div>
+                <div className="text-xs text-slate-400">{t('weather.apparent', 'Odczuwalna')}: <strong className="text-white">{weather.apparentTemperature}°C</strong></div>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10 shadow-lg">
                 {getWeatherIcon(weather.icon)}
@@ -160,11 +160,11 @@ export default function SystemStatusBar() {
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-                <span className="text-slate-400 block text-[11px]">Wilgotność</span>
+                <span className="text-slate-400 block text-[11px]">{t('weather.humidity', 'Wilgotność')}</span>
                 <span className="text-base font-bold text-white font-mono">{weather.humidity}%</span>
               </div>
               <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-                <span className="text-slate-400 block text-[11px]">Wiatr</span>
+                <span className="text-slate-400 block text-[11px]">{t('weather.wind', 'Wiatr')}</span>
                 <span className="text-base font-bold text-white font-mono">{weather.windSpeed} km/h</span>
               </div>
             </div>

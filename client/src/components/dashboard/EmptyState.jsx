@@ -87,13 +87,13 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
       />
 
       {/* Top Language Toggle Switcher */}
-      <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill mb-6 border border-white/10 shadow-sm">
+      <div className="flex items-center gap-1.5 p-1 rounded-2xl glass-pill mb-6 border border-black/[0.08] dark:border-white/10 shadow-sm">
         <button
           onClick={() => setLanguage('pl')}
           className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             language === 'pl'
               ? 'bg-accent text-white shadow-md shadow-accent/25'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <span>Polski</span>
@@ -103,7 +103,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
           className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             language === 'en'
               ? 'bg-accent text-white shadow-md shadow-accent/25'
-              : 'text-slate-400 hover:text-white'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <span>English</span>
@@ -112,7 +112,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
 
       {/* Glossy Icon Hub */}
       <div className="relative mb-6">
-        <div className="w-20 h-20 rounded-[26px] glass-card flex items-center justify-center text-accent shadow-2xl relative overflow-hidden border border-white/20">
+        <div className="w-20 h-20 rounded-[26px] glass-card flex items-center justify-center text-accent shadow-2xl relative overflow-hidden border border-black/[0.08] dark:border-white/20">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-transparent to-purple-500/15 pointer-events-none" />
           <Compass className="w-10 h-10 text-accent relative z-10" />
         </div>
@@ -136,7 +136,7 @@ export default function EmptyState({ onRefresh, onOpenScanner, onOpenAddModal })
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/30">
-                <Radar className="w-6 h-6 animate-spin" />
+                <Radar className="w-6 h-6 animate-pulse" />
               </div>
               <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-accent text-white shadow-md">
                 {t('common.recommended', 'Zalecane')}

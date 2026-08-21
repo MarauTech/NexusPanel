@@ -73,7 +73,19 @@ router.get('/', (req, res) => {
   res.json(services);
 });
 
-router.post('/seed-demo', (req, res) => {
+// Conditional auth: skip auth during first-run setup, require admin otherwise
+function requireAuthUnlessFirstRun(req, res, next) {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
+    const setupDone = row && (row.value === '1' || row.value === 'true');
+    if (!setupDone) return next();
+    return authenticateToken(req, res, () => requireAdmin(req, res, next));
+  } catch (err) {
+    return next();
+  }
+}
+
+router.post('/seed-demo', requireAuthUnlessFirstRun, (req, res) => {
   const lang = req.body?.language || 'pl';
   const isEn = lang === 'en';
 

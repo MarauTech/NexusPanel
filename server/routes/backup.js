@@ -5,7 +5,33 @@ import { initializeDefaultSettings } from '../db/schema.js';
 
 const router = express.Router();
 
-router.get('/export', (req, res) => {
+/**
+ * Middleware: checks if initial setup has been completed.
+ * If setup_completed is NOT set or is '0', skip auth — allows first-run import.
+ * Otherwise require full admin auth.
+ */
+function requireAuthUnlessFirstRun(req, res, next) {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key = 'setup_completed'").get();
+    const setupDone = row && (row.value === '1' || row.value === 'true');
+    if (!setupDone) {
+      // First run — allow unauthenticated access
+      return next();
+    }
+    // Setup completed — require full admin auth
+    return authenticateToken(req, res, () => {
+      requireAdmin(req, res, next);
+    });
+  } catch (err) {
+    return next();
+  }
+}
+
+/**
+ * GET /api/backup/export
+ * Always requires admin auth — no export without login
+ */
+router.get('/export', authenticateToken, requireAdmin, (req, res) => {
   try {
     const data = {
       version: '1.0.0',
@@ -26,7 +52,12 @@ router.get('/export', (req, res) => {
   }
 });
 
-router.post('/import', (req, res) => {
+/**
+ * POST /api/backup/import
+ * Requires admin auth UNLESS this is a first-run (setup not completed).
+ * This allows importing a backup on the welcome/empty state screen.
+ */
+router.post('/import', requireAuthUnlessFirstRun, (req, res) => {
   const data = req.body;
   if (!data || typeof data !== 'object' || !Array.isArray(data.categories) || !Array.isArray(data.services)) {
     return res.status(400).json({ error: 'Invalid backup file structure: missing categories or services list' });
@@ -139,11 +170,11 @@ router.post('/factory-reset', authenticateToken, requireAdmin, (req, res) => {
 
     res.json({
       success: true,
-      message: 'Przywrócono ustawienia fabryczne! Pulpit został zresetowany do stanu początkowego.'
+      message: 'Factory reset complete. Dashboard has been reset to initial state.'
     });
   } catch (err) {
     console.error('Factory reset error:', err);
-    res.status(500).json({ error: 'Błąd podczas przywracania ustawień fabrycznych: ' + err.message });
+    res.status(500).json({ error: 'Factory reset failed: ' + err.message });
   }
 });
 

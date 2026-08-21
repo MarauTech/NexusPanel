@@ -232,7 +232,13 @@ export const TRANSLATIONS = {
     'backup.import_title': 'Import Konfiguracji',
     'backup.btn_import': 'Importuj z pliku',
     'backup.reset_title': 'Reset Fabryczny (Factory Reset)',
-    'backup.btn_reset': 'Przywróć stan początkowy'
+    'backup.btn_reset': 'Przywróć stan początkowy',
+
+    // Weather Widget
+    'weather.title': 'Pogoda lokalna',
+    'weather.apparent': 'Odczuwalna',
+    'weather.humidity': 'Wilgotność',
+    'weather.wind': 'Wiatr'
   },
   en: {
     // Common / Global
@@ -467,6 +473,12 @@ export const TRANSLATIONS = {
     'backup.import_title': 'Import Configuration',
     'backup.btn_import': 'Import from JSON file',
     'backup.reset_title': 'Factory Reset',
-    'backup.btn_reset': 'Restore Default State'
+    'backup.btn_reset': 'Restore Default State',
+
+    // Weather Widget
+    'weather.title': 'Local Weather',
+    'weather.apparent': 'Feels like',
+    'weather.humidity': 'Humidity',
+    'weather.wind': 'Wind'
   }
 };

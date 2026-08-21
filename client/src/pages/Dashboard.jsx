@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useServices } from '../hooks/useServices';
 import { useCategories } from '../hooks/useCategories';
 import { useSettings } from '../hooks/useSettings';
@@ -23,19 +23,6 @@ export default function Dashboard() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
 
-  const searchInputRef = useRef(null);
-
-  // Global Ctrl+K shortcut focus search input
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // Transform flat API data into structured format for components
   const enrichedServices = useMemo(() => {
@@ -43,7 +30,7 @@ export default function Dashboard() {
       ...svc,
       category: svc.category_id ? { 
         id: svc.category_id, 
-        name: svc.category_name || 'Bez kategorii' 
+        name: svc.category_name || t('dashboard.other_services', 'Inne') 
       } : null,
       status: svc.health_status || 'unknown',
       openInNewTab: svc.open_new_tab === 1 || svc.open_new_tab === true,
@@ -83,7 +70,7 @@ export default function Dashboard() {
         catMap[svc.category_id].services.push(svc);
       } else if (svc.category_id) {
         catMap[svc.category_id] = {
-          category: { id: svc.category_id, name: svc.category_name || 'Kategoria', color: svc.color || '#6366f1' },
+          category: { id: svc.category_id, name: svc.category_name || 'Category', color: svc.color || '#6366f1' },
           services: [svc]
         };
       } else {
@@ -164,7 +151,7 @@ export default function Dashboard() {
         {/* Title / Subtitle with High-Contrast Theming */}
         <div className="text-left">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            {settings?.user_name ? `Witaj, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
+            {settings?.user_name ? `${t('dashboard.greeting', 'Witaj')}, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-medium">
             {t('dashboard.subtitle', 'Twój szybki ekran startowy — przechodź natychmiast do swoich aplikacji i usług.')}
