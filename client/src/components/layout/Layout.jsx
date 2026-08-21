@@ -1,10 +1,16 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import { useSettings } from '../../hooks/useSettings';
+import { useServices } from '../../hooks/useServices';
 
 export default function Layout() {
   const { settings } = useSettings();
+  const { services, loading: servicesLoading } = useServices();
+  const location = useLocation();
+
+  const isDashboard = location.pathname === '/' || location.pathname === '';
+  const isEmptyDashboard = isDashboard && !servicesLoading && services.length === 0;
 
   const bgStyle = settings?.background_url ? {
     backgroundImage: `url(${settings.background_url})`,
@@ -34,11 +40,11 @@ export default function Layout() {
         />
       )}
 
-      {/* Seamless Minimalist Top Navigation Header */}
-      <Header />
+      {/* Seamless Top Navigation Header - hidden on empty initial welcome/setup screen */}
+      {!isEmptyDashboard && <Header />}
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full relative z-10">
+      <main className="flex-1 w-full relative z-10 flex flex-col">
         <Outlet />
       </main>
     </div>
