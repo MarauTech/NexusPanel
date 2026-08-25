@@ -6,12 +6,17 @@ import Admin from './pages/Admin.jsx';
 import Kiosk from './pages/Kiosk.jsx';
 import Login from './pages/Login.jsx';
 import Setup from './pages/Setup.jsx';
+import ConnectServerScreen from './pages/ConnectServerScreen.jsx';
 import { useAuth } from './contexts/AuthContext.jsx';
 import LoadingSpinner from './components/common/LoadingSpinner.jsx';
 
 function ProtectedAdminRoute({ children }) {
-  const { isAuthenticated, isLoading, setupCompleted } = useAuth();
+  const { isAuthenticated, isLoading, setupCompleted, serverConnected } = useAuth();
   const location = useLocation();
+
+  if (!serverConnected) {
+    return <ConnectServerScreen />;
+  }
 
   if (isLoading) {
     return (
@@ -33,7 +38,11 @@ function ProtectedAdminRoute({ children }) {
 }
 
 function SetupRouteGuard({ children }) {
-  const { setupCompleted, isLoading } = useAuth();
+  const { setupCompleted, isLoading, serverConnected } = useAuth();
+
+  if (!serverConnected) {
+    return <ConnectServerScreen />;
+  }
 
   if (isLoading) {
     return (
@@ -51,7 +60,11 @@ function SetupRouteGuard({ children }) {
 }
 
 function LoginRouteGuard({ children }) {
-  const { isAuthenticated, isLoading, setupCompleted } = useAuth();
+  const { isAuthenticated, isLoading, setupCompleted, serverConnected } = useAuth();
+
+  if (!serverConnected) {
+    return <ConnectServerScreen />;
+  }
 
   if (isLoading) {
     return (
@@ -73,7 +86,11 @@ function LoginRouteGuard({ children }) {
 }
 
 function App() {
-  const { setupCompleted, isLoading } = useAuth();
+  const { setupCompleted, serverConnected, isLoading, checkAuth } = useAuth();
+
+  if (!serverConnected) {
+    return <ConnectServerScreen onConnected={() => checkAuth()} />;
+  }
 
   if (isLoading) {
     return (
@@ -85,6 +102,7 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/connect" element={<ConnectServerScreen onConnected={() => checkAuth()} />} />
       <Route path="/kiosk" element={<Kiosk />} />
       <Route path="/setup" element={<SetupRouteGuard><Setup /></SetupRouteGuard>} />
       <Route path="/login" element={<LoginRouteGuard><Login /></LoginRouteGuard>} />

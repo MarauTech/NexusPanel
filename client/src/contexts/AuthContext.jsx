@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import api, { getServerUrl } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -7,12 +7,15 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [setupCompleted, setSetupCompleted] = useState(null); // null = unknown, true/false
+  const [serverConnected, setServerConnected] = useState(true); // true/false
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuth = useCallback(async () => {
+    setIsLoading(true);
     try {
-      // 1. Check if first-run setup is completed
+      // 1. Check if server is reachable and if first-run setup is completed
       const statusRes = await api.auth.getStatus();
+      setServerConnected(true);
       setSetupCompleted(Boolean(statusRes.data?.setupCompleted));
 
       if (statusRes.data?.setupCompleted) {
@@ -35,8 +38,25 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
       }
     } catch (err) {
-      console.error('Failed to check auth status:', err);
-      setSetupCompleted(false);
+      console.warn('Backend server not directly reachable or not configured yet:', err.message);
+      
+      // If running in Capacitor/Android or standalone and cannot reach server
+      const isStandaloneOrCapacitor = Boolean(
+        window.Capacitor || 
+        window.location.origin.includes('localhost') || 
+        window.location.protocol === 'file:' || 
+        window.location.protocol === 'capacitor:'
+      );
+
+      if (isStandaloneOrCapacitor && !getServerUrl()) {
+        setServerConnected(false);
+      } else if (err.message?.includes('Network Error') || err.code === 'ECONNABORTED') {
+        setServerConnected(false);
+      } else {
+        // Assume default web setup
+        setSetupCompleted(false);
+      }
+
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -57,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user);
       setIsAuthenticated(true);
       setSetupCompleted(true);
+      setServerConnected(true);
     }
     return res.data;
   };
@@ -74,7 +95,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, setupCompleted, isLoading, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated, 
+      setupCompleted, 
+      serverConnected, 
+      setServerConnected, 
+      isLoading, 
+      login, 
+      logout, 
+      checkAuth 
+    }}>
       {children}
     </AuthContext.Provider>
   );
