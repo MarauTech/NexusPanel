@@ -106,12 +106,12 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
-      className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 dark:bg-[#141b27] dark:hover:bg-[#182232] dark:border-[#1d2635] dark:hover:border-[#2a374d] transition-colors cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[78px] shadow-sm dark:shadow-none"
+      className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 hover:border-slate-400 dark:bg-[#141b27] dark:hover:bg-[#182232] dark:border-[#1d2635] dark:hover:border-[#2a374d] transition-all cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[78px] shadow-sm hover:shadow dark:shadow-none"
       aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
       title={`${service.name} (${cleanHost})\nKlik: Otwórz, Shift+Klik: Szczegóły`}
     >
       {/* Small, clean authentic brand Icon */}
-      <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 mt-0.5">
+      <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-300 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs dark:shadow-none">
         <BrandIcon name={service.icon} fallbackText={service.name} className="w-4 h-4" />
       </div>
 
@@ -121,7 +121,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <span 
-              className="font-medium text-sm text-slate-800 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-words"
+              className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-words"
               title={service.name}
             >
               {service.name}
@@ -132,7 +132,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
                 || /^port\s*(name|na)?$/i.test(b)
                 || /^(online|offline|unknown|degraded|n\/a|none|null|undefined|test|default|badge)$/i.test(b);
               return isGeneric ? null : (
-                <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">
+                <span className="text-[10px] text-slate-700 bg-slate-100 border border-slate-300 dark:text-slate-400 dark:bg-[#192231] dark:border-[#222d41] px-1.5 py-0.2 rounded font-mono flex-shrink-0">
                   {service.custom_badge}
                 </span>
               );
@@ -142,32 +142,32 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           {/* Semantic Status Indicator */}
           <div className="flex items-center gap-1.5 flex-shrink-0 text-xs font-mono">
             {isOnline && !isHighLatency && (
-              <span className={`flex items-center gap-1 ${isElevatedLatency ? 'text-emerald-600 dark:text-emerald-400' : 'text-emerald-600 dark:text-emerald-400/60'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isElevatedLatency ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-emerald-500/80 dark:bg-emerald-400/60'}`} />
+              <span className={`flex items-center gap-1 font-semibold ${isElevatedLatency ? 'text-emerald-700 dark:text-emerald-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
+                <span className={`w-2 h-2 rounded-full ${isElevatedLatency ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-emerald-600 dark:bg-emerald-400'}`} />
                 Online
               </span>
             )}
             {isOnline && isHighLatency && (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
+              <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400" />
                 Online
               </span>
             )}
             {isDegraded && (
-              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
+              <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-amber-600 dark:bg-amber-400" />
                 Problem
               </span>
             )}
             {isOffline && (
-              <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400" />
+              <span className="flex items-center gap-1 text-rose-700 dark:text-rose-400 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-rose-600 dark:bg-rose-400" />
                 Offline
               </span>
             )}
             {!isOnline && !isDegraded && !isOffline && (
-              <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+              <span className="flex items-center gap-1 text-slate-500 dark:text-slate-500 font-medium">
+                <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
                 —
               </span>
             )}
@@ -175,9 +175,9 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         </div>
 
         {/* Row 2: IP/Hostname + Ping/Latency */}
-        <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-slate-100 dark:border-[#1c2534] text-xs font-mono text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-slate-200 dark:border-[#1c2534] text-xs font-mono">
           <span 
-            className="truncate text-slate-500 dark:text-slate-400 select-all" 
+            className="truncate text-slate-600 dark:text-slate-400 font-medium select-all" 
             title={cleanHost}
           >
             {cleanHost}
@@ -185,17 +185,17 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {isOffline ? (
-              <span className="text-rose-600 dark:text-rose-400 font-medium">OFFLINE</span>
+              <span className="text-rose-700 dark:text-rose-400 font-bold">OFFLINE</span>
             ) : isDegraded ? (
-              <span className="text-amber-600 dark:text-amber-400 font-medium">{latency ? `${latency} ms` : 'DEGRADED'}</span>
+              <span className="text-amber-700 dark:text-amber-400 font-bold">{latency ? `${latency} ms` : 'DEGRADED'}</span>
             ) : isOnline ? (
-              <span className={`font-medium ${
-                isHighLatency ? 'text-rose-600 dark:text-rose-400' : (isElevatedLatency ? 'text-amber-600 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300')
+              <span className={`font-semibold ${
+                isHighLatency ? 'text-rose-700 dark:text-rose-400' : (isElevatedLatency ? 'text-amber-700 dark:text-amber-300' : 'text-slate-800 dark:text-slate-300')
               }`}>
                 {latency ? `${latency} ms` : 'OK'}
               </span>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500">—</span>
+              <span className="text-slate-500 dark:text-slate-500">—</span>
             )}
           </div>
         </div>

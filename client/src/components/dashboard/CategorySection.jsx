@@ -26,7 +26,7 @@ export default function CategorySection({ category, services, gridGap = '12', on
     <section className="space-y-2">
       {/* Technical Discreet Category Header: MEDIA — 3 ONLINE ─── [▼] */}
       <div 
-        className="flex items-center justify-between gap-3 cursor-pointer select-none py-1.5 border-b border-slate-200 dark:border-[#1c2434] group hover:border-slate-300 dark:hover:border-[#2b384e] transition-colors"
+        className="flex items-center justify-between gap-3 cursor-pointer select-none py-1.5 border-b border-slate-300 dark:border-[#1c2434] group hover:border-slate-400 dark:hover:border-[#2b384e] transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
         role="button"
         tabIndex={0}
@@ -34,32 +34,32 @@ export default function CategorySection({ category, services, gridGap = '12', on
         aria-expanded={isExpanded}
       >
         <div className="flex items-center gap-2 min-w-0">
-          <CategoryIcon className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors flex-shrink-0" />
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">
+          <CategoryIcon className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-slate-300 transition-colors flex-shrink-0" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-white transition-colors truncate">
             {category.name}
           </h2>
-          <span className="text-[11px] font-mono text-slate-500">
+          <span className="text-[11px] font-mono text-slate-600 dark:text-slate-400 font-semibold">
             ({total})
           </span>
         </div>
 
         {/* Right: Technical Live Status (e.g. 3 ONLINE) + Chevron */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-1 text-[11px] font-mono text-slate-700 dark:text-slate-400">
             {offline === 0 && degraded === 0 ? (
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">
                 {online}/{total} ONLINE
               </span>
             ) : (
-              <div className="flex items-center gap-2">
-                {online > 0 && <span className="text-emerald-600 dark:text-emerald-400">{online} on</span>}
-                {degraded > 0 && <span className="text-amber-600 dark:text-amber-400">{degraded} deg</span>}
-                {offline > 0 && <span className="text-rose-600 dark:text-rose-400">{offline} off</span>}
+              <div className="flex items-center gap-2 font-bold">
+                {online > 0 && <span className="text-emerald-700 dark:text-emerald-400">{online} on</span>}
+                {degraded > 0 && <span className="text-amber-700 dark:text-amber-400">{degraded} deg</span>}
+                {offline > 0 && <span className="text-rose-700 dark:text-rose-400">{offline} off</span>}
               </div>
             )}
           </div>
 
-          <div className="text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300 transition-colors">
+          <div className="text-slate-500 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300 transition-colors">
             {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </div>
         </div>

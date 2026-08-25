@@ -2,10 +2,10 @@ import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
 const VARIANTS = {
-  primary: 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/30 font-medium',
-  secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-[#151c28] dark:hover:bg-[#1b2536] dark:text-slate-200 dark:border-[#212c3e] font-medium',
-  danger: 'bg-rose-700 hover:bg-rose-600 text-white border border-rose-600/30 font-medium',
-  ghost: 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.04]'
+  primary: 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/30 font-medium shadow-xs',
+  secondary: 'bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs dark:bg-[#151c28] dark:hover:bg-[#1b2536] dark:text-slate-200 dark:border-[#212c3e] font-medium',
+  danger: 'bg-rose-700 hover:bg-rose-600 text-white border border-rose-600/30 font-medium shadow-xs',
+  ghost: 'bg-transparent text-slate-700 hover:text-slate-900 hover:bg-slate-200/60 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-white/[0.04]'
 };
 
 const SIZES = {

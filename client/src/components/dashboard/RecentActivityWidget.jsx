@@ -53,13 +53,13 @@ export default function RecentActivityWidget({ services = [] }) {
   }
 
   return (
-    <div className="rounded-lg bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] p-4 space-y-3 text-xs shadow-sm dark:shadow-none transition-colors">
+    <div className="rounded-lg bg-white dark:bg-[#141b27] border border-slate-300 dark:border-[#1d2635] p-4 space-y-3 text-xs shadow-xs dark:shadow-none transition-colors">
       {/* Header */}
-      <div className="pb-2 border-b border-slate-100 dark:border-[#1c2534] flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300">
+      <div className="pb-2 border-b border-slate-200 dark:border-[#1c2534] flex items-center justify-between">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-200">
           {t('overview.recent_checks', 'OSTATNIE SPRAWDZENIA')}
         </h3>
-        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">Live Log</span>
+        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 font-semibold">Live Log</span>
       </div>
 
       {/* Log Table Rows */}
@@ -76,25 +76,25 @@ export default function RecentActivityWidget({ services = [] }) {
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <span 
-                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      isOnline ? 'bg-emerald-500 dark:bg-emerald-400' : (isDegraded ? 'bg-amber-500 dark:bg-amber-400' : 'bg-rose-500 dark:bg-rose-400')
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      isOnline ? 'bg-emerald-600 dark:bg-emerald-400' : (isDegraded ? 'bg-amber-600 dark:bg-amber-400' : 'bg-rose-600 dark:bg-rose-400')
                     }`}
                   />
-                  <span className="text-slate-800 dark:text-slate-300 font-medium truncate max-w-[160px]" title={evt.serviceName}>
+                  <span className="text-slate-900 dark:text-slate-200 font-semibold truncate max-w-[160px]" title={evt.serviceName}>
                     {evt.serviceName}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 flex-shrink-0 text-slate-500 dark:text-slate-400">
-                  <span>{evt.responseTime ? `${evt.responseTime} ms` : evt.status}</span>
-                  <span className="text-slate-400 dark:text-slate-500 text-[10px]">{formatTimeAgo(evt.timestamp)}</span>
+                <div className="flex items-center gap-3 flex-shrink-0 text-slate-700 dark:text-slate-400">
+                  <span className="font-semibold">{evt.responseTime ? `${evt.responseTime} ms` : evt.status}</span>
+                  <span className="text-slate-600 dark:text-slate-400 text-[10px]">{formatTimeAgo(evt.timestamp)}</span>
                 </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="py-2 text-center text-slate-400 dark:text-slate-500 text-[11px] font-mono">
+        <div className="py-2 text-center text-slate-500 dark:text-slate-500 text-[11px] font-mono">
           {t('overview.no_activity', 'Brak zarejestrowanych sprawdzeń')}
         </div>
       )}
