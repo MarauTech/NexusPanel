@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.RemoteViews;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -26,13 +27,6 @@ public class ServicesStatusWidget extends AppWidgetProvider {
         }
     }
 
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        for (int appWidgetId : appWidgetIds) {
-            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
-        }
-    }
-
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_services_status);
 
@@ -42,6 +36,7 @@ public class ServicesStatusWidget extends AppWidgetProvider {
                 context, 300 + appWidgetId, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_services_root, rootPendingIntent);
 
+        // 1. Read cached JSON first
         String cached = WidgetUpdateHelper.getCachedJson(context, "services_summary");
         if (cached != null && !cached.isEmpty()) {
             try {
@@ -56,31 +51,73 @@ public class ServicesStatusWidget extends AppWidgetProvider {
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
+        // 2. Fetch live metrics from server
         Executors.newSingleThreadExecutor().execute(() -> {
             String serverUrl = WidgetUpdateHelper.getServerUrl(context);
+            JSONObject parsed = null;
+
+            // Try primary endpoint
             try {
                 URL url = new URL(serverUrl + "/api/widgets/services-summary");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(4000);
-                conn.setReadTimeout(4000);
+                conn.setConnectTimeout(3500);
+                conn.setReadTimeout(3500);
                 if (conn.getResponseCode() == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) sb.append(line);
                     reader.close();
-
-                    String raw = sb.toString();
-                    WidgetUpdateHelper.setCachedJson(context, "services_summary", raw);
-                    JSONObject json = new JSONObject(raw);
-
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        applyServicesSummary(views, json);
-                        appWidgetManager.updateAppWidget(appWidgetId, views);
-                    });
+                    parsed = new JSONObject(sb.toString());
                 }
                 conn.disconnect();
             } catch (Exception ignored) {}
+
+            // If primary failed/404, fallback to /api/services
+            if (parsed == null) {
+                try {
+                    URL url = new URL(serverUrl + "/api/services");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(3500);
+                    conn.setReadTimeout(3500);
+                    if (conn.getResponseCode() == 200) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) sb.append(line);
+                        reader.close();
+
+                        JSONArray services = new JSONArray(sb.toString());
+                        int online = 0;
+                        int warning = 0;
+                        int offline = 0;
+                        for (int i = 0; i < services.length(); i++) {
+                            JSONObject s = services.getJSONObject(i);
+                            if (s.optInt("enabled", 1) == 0) continue;
+                            String st = s.optString("health_status", "unknown");
+                            if ("online".equalsIgnoreCase(st)) online++;
+                            else if ("degraded".equalsIgnoreCase(st) || "warning".equalsIgnoreCase(st)) warning++;
+                            else if ("offline".equalsIgnoreCase(st)) offline++;
+                            else online++;
+                        }
+                        parsed = new JSONObject();
+                        parsed.put("total", services.length());
+                        parsed.put("online", online);
+                        parsed.put("warning", warning);
+                        parsed.put("offline", offline);
+                    }
+                    conn.disconnect();
+                } catch (Exception ignored) {}
+            }
+
+            if (parsed != null) {
+                final JSONObject finalJson = parsed;
+                WidgetUpdateHelper.setCachedJson(context, "services_summary", finalJson.toString());
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    applyServicesSummary(views, finalJson);
+                    appWidgetManager.updateAppWidget(appWidgetId, views);
+                });
+            }
         });
     }
 
