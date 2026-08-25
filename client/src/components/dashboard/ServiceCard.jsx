@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { Star, SlidersHorizontal, AlertTriangle, ArrowUpRight } from 'lucide-react';
 import BrandIcon from '../common/BrandIcon';
 import { useSettings } from '../../hooks/useSettings';
 import api from '../../services/api';
@@ -24,12 +24,25 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   const isDegraded = healthStatus === 'degraded';
   const isOffline = healthStatus === 'offline';
 
+  // Handle Card Click:
+  // - Shift + Click: Open Service Details Drawer
+  // - Regular Click: Open service directly
   const handleCardClick = (e) => {
     e.preventDefault();
-    if (onSelectService) {
+    if (e.shiftKey && onSelectService) {
       onSelectService(service);
     } else {
       handleDirectOpen(e);
+    }
+  };
+
+  const handleOpenDrawer = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (onSelectService) {
+      onSelectService(service);
     }
   };
 
@@ -104,7 +117,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         onKeyDown={handleKeyDown}
         className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
         style={{ borderRadius }}
-        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
+        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
+        title={`${service.name} (Klik: Otwórz, Shift+Klik: Szczegóły)`}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div 
@@ -146,16 +160,27 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           </div>
         </div>
 
-        <button 
-          onClick={handleFavoriteClick}
-          className={`p-1.5 rounded-lg transition-all hover:scale-110 flex-shrink-0 ${
-            isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
-          }`}
-          title="Ulubione"
-          aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
-        >
-          <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
-        </button>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button 
+            onClick={handleFavoriteClick}
+            className={`p-1.5 rounded-lg transition-all hover:scale-110 flex-shrink-0 ${
+              isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
+            }`}
+            title="Ulubione"
+            aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
+          >
+            <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
+          </button>
+
+          <button
+            onClick={handleOpenDrawer}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all"
+            title="Szczegóły usługi (lub Shift+klik)"
+            aria-label="Szczegóły usługi"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -172,7 +197,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         onKeyDown={handleKeyDown}
         className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
         style={{ borderRadius }}
-        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
+        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
+        title={`${service.name} (Klik: Otwórz, Shift+Klik: Szczegóły)`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -208,15 +234,26 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
             </div>
           </div>
 
-          <button 
-            onClick={handleFavoriteClick}
-            className={`p-1.5 rounded-xl transition-all hover:scale-110 ${
-              isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
-            }`}
-            aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
-          >
-            <Star className={`w-4 h-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={handleFavoriteClick}
+              className={`p-1.5 rounded-xl transition-all hover:scale-110 ${
+                isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
+              }`}
+              aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
+            >
+              <Star className={`w-4 h-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
+            </button>
+
+            <button
+              onClick={handleOpenDrawer}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all"
+              title="Szczegóły usługi (lub Shift+klik)"
+              aria-label="Szczegóły usługi"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {service.description && (
@@ -254,7 +291,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       onKeyDown={handleKeyDown}
       className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
       style={{ borderRadius }}
-      aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
+      aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
+      title={`${service.name} (Klik: Otwórz, Shift+Klik: Szczegóły)`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Squircle Brand Icon */}
@@ -333,13 +371,14 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
 
-        <div 
-          onClick={handleDirectOpen}
-          className="p-1 text-slate-400 dark:text-slate-500 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all cursor-pointer"
-          title="Otwórz bezpośrednio"
+        <button
+          onClick={handleOpenDrawer}
+          className="p-1.5 rounded-lg text-slate-400 dark:text-slate-500 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-all"
+          title="Szczegóły usługi (lub Shift+klik)"
+          aria-label="Szczegóły usługi"
         >
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </div>
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
   );
