@@ -173,3 +173,28 @@ export function initializeDefaultSettings(db) {
     stmt.run(key, value, type);
   }
 }
+
+export function initializeDefaultWidgets(db) {
+  const count = db.prepare('SELECT COUNT(*) as cnt FROM widget_configs').get().cnt;
+  if (count > 0) return;
+
+  const defaultWidgets = [
+    { type: 'proxmox', title: 'Proxmox VE', sort_order: 1, enabled: 1, config: {} },
+    { type: 'system_resources', title: 'Zasoby Systemu', sort_order: 2, enabled: 1, config: {} },
+    { type: 'docker', title: 'Docker Containers', sort_order: 3, enabled: 1, config: {} },
+    { type: 'dns_adblock', title: 'AdGuard / Pi-hole', sort_order: 4, enabled: 1, config: {} },
+    { type: 'network_status', title: 'Sieć & WAN IP', sort_order: 5, enabled: 1, config: {} },
+    { type: 'service_health', title: 'Stan Usług & Ping', sort_order: 6, enabled: 1, config: {} },
+    { type: 'uptime_kuma', title: 'Uptime Kuma', sort_order: 7, enabled: 1, config: {} },
+    { type: 'media_streams', title: 'Strumienie Media', sort_order: 8, enabled: 1, config: {} },
+    { type: 'downloads', title: 'Pobieranie (Torrents)', sort_order: 9, enabled: 1, config: {} },
+    { type: 'home_assistant', title: 'Home Assistant', sort_order: 10, enabled: 1, config: {} },
+    { type: 'weather_clock', title: 'Zegar & Pogoda', sort_order: 11, enabled: 1, config: {} },
+    { type: 'scratchpad', title: 'Podręczny Notatnik & SSH', sort_order: 12, enabled: 1, config: { notes: 'Serwer LXC: 192.168.10.96\nBrama domyślna: 192.168.10.1', ssh: ['ssh root@192.168.10.96', 'docker ps --format "table {{.Names}}\t{{.Status}}"'] } }
+  ];
+
+  const insert = db.prepare('INSERT INTO widget_configs (widget_type, config_json, sort_order, enabled) VALUES (?, ?, ?, ?)');
+  for (const w of defaultWidgets) {
+    insert.run(w.type, JSON.stringify(w.config), w.sort_order, w.enabled);
+  }
+}

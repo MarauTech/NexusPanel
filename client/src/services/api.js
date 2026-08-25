@@ -126,6 +126,24 @@ const API = {
     discover: () => api.get('/scanner/discover'),
     scanCustom: (hosts) => api.post('/scanner/scan-custom', { hosts }),
     addBatch: (services) => api.post('/scanner/add-batch', { services }),
+  },
+  widgets: {
+    getConfig: () => api.get('/widgets/config'),
+    updateConfig: (widgets) => api.put('/widgets/config', { widgets }),
+    getSystem: () => api.get('/widgets/system'),
+    getProxmox: () => api.get('/widgets/proxmox'),
+    getDocker: () => api.get('/widgets/docker'),
+    getDnsAdblock: () => api.get('/widgets/dns-adblock'),
+    toggleDnsAdblock: (duration) => api.post('/widgets/dns-adblock/toggle', { duration }),
+    getNetwork: () => api.get('/widgets/network'),
+    getServiceHealth: () => api.get('/widgets/service-health'),
+    getUptimeKuma: () => api.get('/widgets/uptime-kuma'),
+    getMediaStreams: () => api.get('/widgets/media-streams'),
+    getDownloads: () => api.get('/widgets/downloads'),
+    getHomeAssistant: () => api.get('/widgets/homeassistant'),
+    getWeather: () => api.get('/widgets/weather'),
+    getScratchpad: () => api.get('/widgets/scratchpad'),
+    updateScratchpad: (data) => api.put('/widgets/scratchpad', data),
   }
 };
 

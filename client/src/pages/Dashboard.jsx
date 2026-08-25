@@ -14,6 +14,7 @@ import SkeletonCard from '../components/common/SkeletonCard';
 import ServiceForm from '../components/admin/ServiceForm';
 import ServiceDetailsDrawer from '../components/dashboard/ServiceDetailsDrawer';
 import NetworkDiscoveryModal from '../components/scanner/NetworkDiscoveryModal';
+import WidgetGrid from '../components/widgets/WidgetGrid';
 import { LayoutGrid, Star, Plus, Radar, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import Button from '../components/common/Button';
 
@@ -204,12 +205,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 2. Compact Global Status Strip */}
+      {/* 2. Homelab Widgets Grid */}
+      <WidgetGrid />
+
+      {/* 3. Compact Global Status Strip */}
       <div className="mb-1">
         <GlobalStatusStrip services={enrichedServices} />
       </div>
 
-      {/* 3. 2-Column Responsive Layout: Left ~68% Services & Categories, Right ~32% System Overview (Stacked on Mobile/Tablet < 1024px) */}
+      {/* 4. 2-Column Responsive Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full pt-1">
         
         {/* ============================================

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import initSqlJs from 'sql.js';
 import config from '../config/index.js';
-import { initializeDatabase, initializeDefaultSettings } from './schema.js';
+import { initializeDatabase, initializeDefaultSettings, initializeDefaultWidgets } from './schema.js';
 
 // Ensure data directory exists
 const dbDir = path.dirname(config.DB_PATH);
@@ -178,6 +178,7 @@ db.exec('PRAGMA foreign_keys = ON');
 // Initialize schema and default settings
 initializeDatabase(db);
 initializeDefaultSettings(db);
+initializeDefaultWidgets(db);
 
 // Save initial state immediately
 db.saveSync();

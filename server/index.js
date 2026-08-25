@@ -26,6 +26,7 @@ import proxmoxRoutes from './routes/proxmox.js';
 import systemRoutes from './routes/system.js';
 import uploadRoutes from './routes/upload.js';
 import scannerRoutes from './routes/scanner.js';
+import widgetsRoutes from './routes/widgets.js';
 
 import { verifyCsrfOrigin } from './middleware/auth.js';
 import HealthCheckService from './services/healthCheck.js';
@@ -148,6 +149,7 @@ app.use('/api/proxmox', proxmoxRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/scanner', scannerRoutes);
+app.use('/api/widgets', widgetsRoutes);
 
 // 9. Static Frontend SPA Serving
 const distPath = path.join(__dirname, '../client/dist');
