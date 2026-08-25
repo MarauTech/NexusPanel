@@ -18,17 +18,13 @@
         android:paddingEnd="2dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="NEXUS OVERVIEW"
             android:textColor="#94A3B8"
             android:textSize="10sp"
             android:textStyle="bold" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/widget_overview_system_status"
@@ -132,16 +128,12 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Działające usługi:"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/widget_overview_services_ratio"
@@ -160,16 +152,12 @@
             android:layout_marginTop="2dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Aktywne alerty:"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/widget_overview_alerts"
@@ -188,16 +176,12 @@
             android:layout_marginTop="2dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Uptime:"
                 android:textColor="#94A3B8"
                 android:textSize="9sp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/widget_overview_uptime"

@@ -32,17 +32,13 @@
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text=" · Status Usług"
             android:textColor="#F1F5F9"
             android:textSize="10.5sp"
             android:textStyle="bold" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/widget_services_total_badge"
@@ -123,8 +119,7 @@
             <ImageView
                 android:layout_width="8dp"
                 android:layout_height="8dp"
-                android:src="@drawable/widget_status_online"
-                android:tint="#FBBF24"
+                android:src="@drawable/widget_status_warning"
                 android:layout_marginEnd="6dp" />
 
             <LinearLayout
