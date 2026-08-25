@@ -1,8 +1,8 @@
 <p align="center">
   <h1 align="center">🔗 NexusPanel</h1>
-  <p align="center"><strong>Nowoczesny, błyskawiczny i w pełni konfigurowalny ekran startowy dla Twojego homelabu.</strong></p>
+  <p align="center"><strong>Nowoczesny, błyskawiczny i w pełni konfigurowalny ekran startowy dla Twojego homelabu wraz z aplikacją mobilną i widżetami na pulpit Androida.</strong></p>
   <p align="center">
-    Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping • Tryb Kiosk
+    Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping • Android Widgets & Mobile App
   </p>
 </p>
 
@@ -56,11 +56,48 @@ docker compose up -d --build
 
 ---
 
+## 📱 Aplikacja mobilna & Widżety na pulpit Androida
+
+NexusPanel zawiera dedykowaną aplikację mobilną dla systemu Android z obsługą **6 natywnych widżetów na ekran główny telefonu**:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/MarauTech/NexusPanel/main/client/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" width="96" alt="NexusPanel Icon" />
+</p>
+
+### 📥 Pobierz aplikację na Androida:
+Pobierz gotowy plik instalacyjny **[`NexusPanel.apk`](NexusPanel.apk)** i zainstaluj na swoim telefonie.
+
+### 🧩 6 Dedykowanych Widżetów Android:
+1. **⭐ Ulubione Aplikacje (2x2)**:
+   * 4 najważniejsze usługi homelaba w estetycznych, poziomych kartach.
+   * **Prawdziwe logotypy marek** (Proxmox, ASUSTOR, Plex, Immich, Umbrel, Home Assistant, Pi-hole itp.).
+   * Duża, czytelna czcionka nazwy usługi i adresu IP oraz kropka stanu na żywo.
+   * **Błyskawiczne otwieranie**: kliknięcie w kartę usługi natychmiast przenosi do właściwego portu w domyślnej przeglądarce telefonu!
+2. **🎯 Monitoring Konkretnej Usługi (2x2)**:
+   * Dedykowana karta z logo, adresem IP, wskaźnikiem dostępności Uptime oraz czasem odpowiedzi w milisekundach (**Ping ms**).
+3. **🖥️ Status Serwera Host (4x2 / 4x1)**:
+   * Wykres obciążenia procesora (**CPU %**), pamięci RAM (**RAM %**), temperatury oraz czasu pracy serwera (**Uptime**).
+4. **📊 Podsumowanie Wszystkich Usług (4x1)**:
+   * Liczniki usług w stanie **Online (zielony)**, **Warning (żółty)** oraz **Offline (czerwony)**.
+5. **⏱️ Dostępność Uptime (2x2)**:
+   * Wskaźnik SLA i średniej dostępności usług z ostatnich 24 godzin, 7 dni oraz 30 dni.
+6. **🌐 Nexus Overview (4x2)**:
+   * Zbiorcze podsumowanie stanu całego homelaba w jednym kafelku.
+
+### 🎨 Studio Widżetów w aplikacji:
+W zakładce **Ustawienia ➔ Studio Widżetów** możesz:
+* Wybierać i układać kolejność aplikacji w widżecie Ulubionych.
+* Wskazywać usługę do monitorowania na żywo.
+* Podglądać widżety na wiernym ekranie testowym w trybie jasnym lub ciemnym.
+* Kliknąć **„🔄 Wymuś synchronizację wszystkich widżetów”**, aby natychmiast zaktualizować dane na pulpicie telefonu.
+
+---
+
 ## 📋 Spis treści
 
 - [O projekcie](#-o-projekcie)
 - [Główne funkcje](#-główne-funkcje)
-- [📺 Tryb Kiosk i Panel Ścienny](#-tryb-kiosk-i-panel-ścienny-wall-dashboard)
+- [Aplikacja Mobilna i Widżety](#-aplikacja-mobilna--widżety-na-pulpit-androida)
 - [Wymagania systemowe](#-wymagania-systemowe)
 - [Pierwszy start i kreator powitalny](#-pierwszy-start-i-kreator-powitalny)
 - [Skaner Sieci LAN (Pełna podsieć 1..254)](#-skaner-sieci-lan-pełna-podsieć-1254)
@@ -80,8 +117,8 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 - ⚡ **Auto-Discovery**: Automatyczne wykrywanie podsieci LAN (`192.168.10.x`, `192.168.1.x`, `10.0.0.x`) i równoległe skanowanie wszystkich 254 adresów IP na popularnych portach homelabu (Proxmox, Home Assistant, Portainer, NAS, Plex, Grafana, Jellyfin, Webmin).
 - 🟢 **Live Health Check & Ping**: Monitorowanie dostępności usług w czasie rzeczywistym z historią SLA (ms).
-- 📺 **Tryb Kiosk / Ekran Ścienny**: Dedykowany widok na tablet/iPad powieszony na ścianie bez konieczności przewijania strony.
 - 🎨 **Liquid Glassmorphism**: Czysty interfejs z trybem ciemnym/jasnym, płynnymi animacjami i pełną personalizacją.
+- 📱 **Natywne Widżety Android**: Prawdziwe dane bez mocków, bezpośrednie skróty do usług i telemetria serwera.
 - 🔒 **Self-contained**: Wszystko działa w jednym procesie z bazą SQLite — zero zewnętrznych zależności.
 
 ---
@@ -93,6 +130,7 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 - ⭐ **Przypięte Ulubione**: Błyskawiczne oznaczanie gwiazdką i sekcja ulubionych na samej górze.
 - 🔍 **Wyszukiwarka Spotlight**: Błyskawiczne szukanie i filtrowanie pod skrótem `Ctrl + K` (lub `⌘K`).
 - ⛅ **Lokalna Pogoda & Geodekcja**: Pogoda na żywo dopasowana do Twojego adresu IP z temperaturą, wilgotnością i wiatrem.
+- 🌐 **Wielojęzyczność**: Pełne wsparcie dla języka polskiego i angielskiego (przełącznik PL/EN).
 - 📱 **100% Responsywność**: Idealny widok na komputerze, tablecie i smartfonie.
 
 ### ⚙️ Panel Administracyjny
@@ -103,26 +141,12 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 ---
 
-## 📺 Tryb Kiosk i Panel Ścienny (Wall Dashboard)
-
-Dedykowany widok pod adresem **`/kiosk`** stworzony z myślą o tabletach (iPad, Android), Raspberry Pi z dotykowym ekranem lub drugim monitorze.
-
-- **🚫 Zero Scroll (100vh)**: Cały panel mieści się w wysokości ekranu bez konieczności przewijania strony.
-- **🕒 Duży Zegar Ścienny & Data**: Czytelny zegar cyfrowy z pulsującymi sekundami i pełną polską datą.
-- **📊 Telemetria Serwera Host na żywo**: Paski obciążenia procesora (**CPU %**) i pamięci (**RAM %**) w czasie rzeczywistym.
-- **📈 Tabela Monitoringu Dostępności (NOC)**: Lista wszystkich usług z dokładnym czasem odpowiedzi (ping w ms).
-- **📷 Podgląd Kamery CCTV / Drukarki 3D**: Kafelek z odświeżanym na żywo obrazem ze snapshotu kamery IP, OctoPrint, BambuLab, Frigate lub Home Assistant z możliwością powiększenia na pełny ekran.
-- **🌙 Głęboki Sen (0% OLED Blackout)**: Przycisk ⏻, który całkowicie wygasza ekran do czerni (idealne na noc), a dotknięcie w dowolnym miejscu natychmiast wybudza panel.
-- **🔒 Screen Wake Lock API**: Zapobiega samoczynnemu wygaszaniu ekranu tabletu.
-
----
-
 ## 📦 Wymagania systemowe
 
 - **Pamięć RAM**: Zaledwie ~60–128 MB RAM
 - **Procesor**: 1 vCPU
 - **Dysk**: 100 MB wolnego miejsca
-- **System**: Proxmox VE 7/8, Debian, Ubuntu, Alpine, Docker, Windows / macOS
+- **System**: Proxmox VE 7/8, Debian, Ubuntu, Alpine, Docker, Windows / macOS / Android
 
 ---
 
@@ -131,8 +155,8 @@ Dedykowany widok pod adresem **`/kiosk`** stworzony z myślą o tabletach (iPad,
 Wbudowany skaner automatycznie rozpoznaje Twoją podsieć (np. `192.168.10.x`) i skanuje równolegle w paczkach po 160 połączeń socket wszystkie 254 adresy IP pod kątem popularnych usług:
 - **Wirtualizacja & Zarządzanie**: Proxmox VE (8006), Portainer (9000/9443), Webmin (10000), Docker (2375).
 - **Smart Home & Monitoring**: Home Assistant (8123), Uptime Kuma (3001), Grafana (3000), Netdata (19999), Prometheus (9090).
-- **Multimedia & Storage**: Plex (32400), Jellyfin (8096), Synology DSM (5000/5001), ASUSTOR (8001), Nextcloud (8443), qBittorrent (8085), Transmission (9091), Sonarr/Radarr (8989/7878).
-- **Sieć & Bezpieczeństwo**: Router Gateway (80/443), Nginx Proxy Manager (8181), Syncthing (8384), WireGuard.
+- **Multimedia & Storage**: Plex (32400), Jellyfin (8096), Synology DSM (5000/5001), ASUSTOR (8001), Nextcloud (8443), Immich (2283), qBittorrent (8085), Transmission (9091), Sonarr/Radarr (8989/7878).
+- **Sieć & Bezpieczeństwo**: Router Gateway (80/443), Nginx Proxy Manager (8181), Syncthing (8384), WireGuard, AdGuard Home (3000), Pi-hole.
 
 ---
 
@@ -172,6 +196,13 @@ npm install
 
 # Uruchom w trybie dev (React Vite + Node backend równolegle)
 npm run dev
+
+# Kompilacja aplikacji Android (Capacitor + Gradle)
+cd client
+npm run build
+npx cap sync android
+cd android
+./gradlew assembleRelease
 ```
 
 ---
