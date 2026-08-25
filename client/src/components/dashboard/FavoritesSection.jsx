@@ -32,7 +32,7 @@ export default function FavoritesSection({ services, favorites, gridCols = '4', 
         <div className="flex-1 h-[1px] bg-amber-500/20 ml-2" />
       </div>
 
-      <div style={gridStyle} className="transition-all duration-300">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4.5 transition-all duration-300 animate-in fade-in-50">
         {items.map(service => (
           <ServiceCard key={service.id} service={service} onFavoriteToggle={onFavoriteToggle} />
         ))}
