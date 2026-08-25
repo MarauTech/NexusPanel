@@ -4,7 +4,10 @@
   "webDir": "dist",
   "server": {
     "cleartext": true,
-    "androidScheme": "https"
+    "androidScheme": "http",
+    "allowNavigation": [
+      "*"
+    ]
   },
   "android": {
     "allowMixedContent": true,
@@ -12,6 +15,9 @@
     "webContentsDebuggingEnabled": false
   },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "SplashScreen": {
       "launchShowDuration": 1500,
       "launchAutoHide": true,

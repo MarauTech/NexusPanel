@@ -72,15 +72,15 @@ const corsOrigins = config.CORS_ORIGINS;
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      // Allow requests with no origin (e.g. mobile native apps, curl, server-to-server)
       if (!origin) return callback(null, true);
       
-      if (corsOrigins.length === 0 || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
+      // Allow Capacitor / Ionic mobile app origins
+      if (origin.startsWith('capacitor://') || origin.startsWith('ionic://') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
         return callback(null, true);
       }
-      
-      // In local dev, allow localhost
-      if (config.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+
+      if (corsOrigins.length === 0 || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
         return callback(null, true);
       }
 
