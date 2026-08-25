@@ -6,7 +6,7 @@ import { useServices } from '../../hooks/useServices';
 
 export default function Layout() {
   const { settings } = useSettings();
-  const { services, loading: servicesLoading } = useServices();
+  const { services } = useServices();
   const location = useLocation();
 
   const isSetupPage = location.pathname === '/setup';
@@ -25,14 +25,6 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-bg-primary" style={bgStyle}>
-      {/* Subtle Liquid Aurora Background Layer */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[10%] -right-[10%] w-[55vw] h-[55vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-br from-indigo-500/12 via-purple-600/10 to-transparent blur-[130px] animate-aurora-1" />
-        <div className="absolute top-[20%] -left-[15%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-cyan-500/10 via-blue-600/10 to-transparent blur-[120px] animate-aurora-2" />
-        <div className="absolute -bottom-[10%] right-[15%] w-[45vw] h-[45vw] max-w-[650px] max-h-[650px] rounded-full bg-gradient-to-tl from-emerald-500/8 via-teal-600/10 to-transparent blur-[140px] animate-aurora-3" />
-        <div className="absolute bottom-[10%] left-[25%] w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] rounded-full bg-gradient-to-r from-rose-500/6 via-pink-600/6 to-transparent blur-[110px] animate-aurora-1" />
-      </div>
-
       {/* Optional custom background overlay */}
       {settings?.background_url && (
         <div 
@@ -44,7 +36,7 @@ export default function Layout() {
         />
       )}
 
-      {/* Top Navigation Header - hidden on welcome/config screen, shown immediately once configured */}
+      {/* Top Navigation Header */}
       {shouldShowHeader && <Header />}
 
       {/* Main Content Area */}

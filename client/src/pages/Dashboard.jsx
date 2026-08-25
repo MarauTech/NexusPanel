@@ -171,15 +171,15 @@ export default function Dashboard() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-5 w-full max-w-[1920px] mx-auto animate-in fade-in duration-200">
       
-      {/* 1. Sleek Startpage Speed-Dial Hero Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-1 border-b border-black/[0.05] dark:border-white/[0.06] pb-3">
+      {/* 1. Sleek Technical Hero Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-[#1c2534]">
         {/* Title / Subtitle */}
         <div className="text-left">
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
             {settings?.user_name ? `${t('dashboard.greeting', 'Witaj')}, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-            {t('dashboard.subtitle', 'Twój szybki ekran startowy — przechodź natychmiast do swoich aplikacji i usług.')}
+          <p className="text-xs text-slate-400 mt-0.5">
+            {t('dashboard.subtitle', 'Twój pulpit infrastruktury i usług homelabu.')}
           </p>
         </div>
 
@@ -187,17 +187,18 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap sm:flex-nowrap">
           <Button
             variant="secondary"
+            size="sm"
             icon={Radar}
             onClick={() => setIsScanModalOpen(true)}
-            className="flex-1 sm:flex-none glass-card hover:border-accent/40 text-xs font-bold text-slate-800 dark:text-slate-200"
           >
             {t('dashboard.btn_scan', 'Skanuj sieć LAN')}
           </Button>
 
           <Button
+            variant="primary"
+            size="sm"
             icon={Plus}
             onClick={() => setIsAddModalOpen(true)}
-            className="flex-1 sm:flex-none shadow-md shadow-accent/25 text-xs font-bold text-white bg-accent hover:bg-accent-hover"
           >
             {t('dashboard.add_app', 'Dodaj aplikację')}
           </Button>
@@ -208,28 +209,28 @@ export default function Dashboard() {
       <GlobalStatusStrip services={enrichedServices} />
 
       {/* 3. 2-Column Responsive Layout: Left ~68% Services & Categories, Right ~32% System Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full pt-1">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full pt-1">
         
         {/* ============================================
             LEFT COLUMN: FILTERS, FAVORITES & CATEGORIES
             ============================================ */}
-        <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 space-y-5 min-w-0">
+        <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 space-y-4 min-w-0">
           
           {/* Dual Filter Bar: Category Tabs + Status Chips */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-1">
-            {/* Category Filter Capsules */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            {/* Category Filter Tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
               <button
                 onClick={() => setSelectedFilter('all')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
                   selectedFilter === 'all'
-                    ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.02]'
-                    : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                    : 'bg-[#141b27] text-slate-400 hover:text-slate-200 border border-[#1d2635]'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-3 h-3 text-slate-400" />
                 <span>{t('dashboard.all_services', 'Wszystko')}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
+                <span className="text-[10px] font-mono text-slate-500">
                   {enrichedServices.filter(s => s.enabled !== 0).length}
                 </span>
               </button>
@@ -237,15 +238,15 @@ export default function Dashboard() {
               {favorites.length > 0 && (
                 <button
                   onClick={() => setSelectedFilter('favorites')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
                     selectedFilter === 'favorites'
-                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
-                      : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-[#1c2534] text-amber-400 border border-amber-500/30'
+                      : 'bg-[#141b27] text-slate-400 hover:text-slate-200 border border-[#1d2635]'
                   }`}
                 >
-                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3 h-3 fill-amber-400/20 text-amber-400" />
                   <span>{t('dashboard.favorites', 'Ulubione')}</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
+                  <span className="text-[10px] font-mono text-slate-500">
                     {favorites.length}
                   </span>
                 </button>
@@ -255,14 +256,14 @@ export default function Dashboard() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedFilter(String(category.id))}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
                     selectedFilter === String(category.id)
-                      ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.02]'
-                      : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                      : 'bg-[#141b27] text-slate-400 hover:text-slate-200 border border-[#1d2635]'
                   }`}
                 >
                   <span>{category.name}</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
+                  <span className="text-[10px] font-mono text-slate-500">
                     {catServices.length}
                   </span>
                 </button>
@@ -271,14 +272,14 @@ export default function Dashboard() {
               {other.length > 0 && (
                 <button
                   onClick={() => setSelectedFilter('other')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex-shrink-0 ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
                     selectedFilter === 'other'
-                      ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.02]'
-                      : 'glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                      : 'bg-[#141b27] text-slate-400 hover:text-slate-200 border border-[#1d2635]'
                   }`}
                 >
                   <span>{t('dashboard.other_services', 'Inne')}</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
+                  <span className="text-[10px] font-mono text-slate-500">
                     {other.length}
                   </span>
                 </button>
@@ -286,48 +287,48 @@ export default function Dashboard() {
             </div>
 
             {/* Right: Quick Status Chips */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.06] text-[11px] self-end sm:self-auto">
+            <div className="flex items-center gap-1 p-0.5 rounded-md bg-[#141b27] border border-[#1d2635] text-[11px] font-mono self-end sm:self-auto">
               <button
                 onClick={() => setStatusFilter('all')}
-                className={`px-2 py-0.5 rounded-lg font-bold transition-all ${
+                className={`px-2 py-0.5 rounded font-medium transition-colors ${
                   statusFilter === 'all' 
-                    ? 'bg-black/[0.08] dark:bg-white/15 text-slate-900 dark:text-white shadow-xs' 
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                    ? 'bg-[#1c2534] text-white' 
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {t('filter.all_statuses', 'Wszystkie')}
               </button>
               <button
                 onClick={() => setStatusFilter('online')}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg font-bold transition-all ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium transition-colors ${
                   statusFilter === 'online' 
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' 
-                    : 'text-slate-500 hover:text-emerald-500'
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                    : 'text-slate-400 hover:text-emerald-400'
                 }`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 Online
               </button>
               <button
                 onClick={() => setStatusFilter('offline')}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg font-bold transition-all ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium transition-colors ${
                   statusFilter === 'offline' 
-                    ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30' 
-                    : 'text-slate-500 hover:text-rose-500'
+                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' 
+                    : 'text-slate-400 hover:text-rose-400'
                 }`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
                 Offline
               </button>
               <button
                 onClick={() => setStatusFilter('issues')}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg font-bold transition-all ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium transition-colors ${
                   statusFilter === 'issues' 
-                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30' 
-                    : 'text-slate-500 hover:text-amber-500'
+                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
+                    : 'text-slate-400 hover:text-amber-400'
                 }`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 Problemy
               </button>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, ExternalLink, RefreshCw, Edit3, Trash2, Star, CheckCircle2, 
-  AlertTriangle, XCircle, Clock, Globe, Shield, Tag, Folder, Copy, Check, Server
+  AlertTriangle, XCircle, Clock, Globe, Tag, Folder, Copy, Check
 } from 'lucide-react';
 import BrandIcon from '../common/BrandIcon';
 import Button from '../common/Button';
@@ -55,22 +55,20 @@ export default function ServiceDetailsDrawer({
   // Extract Host and Port cleanly from URL
   let host = 'N/A';
   let port = 'N/A';
-  let protocol = 'http:';
 
   try {
     const parsed = new URL(service.url);
     host = parsed.hostname || 'N/A';
-    protocol = parsed.protocol;
     if (parsed.port) {
       port = parsed.port;
     } else {
-      port = parsed.protocol === 'https:' ? '443 (HTTPS)' : '80 (HTTP)';
+      port = parsed.protocol === 'https:' ? '443' : '80';
     }
   } catch {
     const clean = service.url.replace(/^https?:\/\//, '').split('/')[0];
     const parts = clean.split(':');
     host = parts[0] || 'N/A';
-    port = parts[1] || '80 / 443';
+    port = parts[1] || '80';
   }
 
   // Active status (live probe result takes precedence if triggered)
@@ -85,7 +83,6 @@ export default function ServiceDetailsDrawer({
     ? `${service.uptime_percentage}% · ${uptimePeriod}`
     : 'N/A';
 
-  const serviceColor = service.color || '#6366f1';
   const openInNewTab = service.open_new_tab === 1 || service.open_new_tab === true || service.openInNewTab !== false;
 
   // Copy URL action
@@ -100,55 +97,29 @@ export default function ServiceDetailsDrawer({
     }
   };
 
-  // Live health probe
+  // Live Check Action
   const handleCheckNow = async () => {
-    if (isProbing) return;
     setIsProbing(true);
     try {
       const res = await api.services.probeService(service.id);
       if (res.data) {
         setProbeResult(res.data);
-        if (res.data.status === 'online') {
-          addToast(`${service.name} jest dostępny (${res.data.responseTime}ms)`, 'success');
-        } else if (res.data.status === 'degraded') {
-          addToast(`${service.name} odpowiada z opóźnieniem (${res.data.responseTime}ms)`, 'warning');
-        } else {
-          addToast(`${service.name} jest niedostępny`, 'error');
-        }
+        addToast(
+          res.data.status === 'online' 
+            ? `Połączenie nawiązane (${res.data.responseTime} ms)` 
+            : `Status: ${res.data.status}`,
+          res.data.status === 'online' ? 'success' : 'warning'
+        );
         if (onRefresh) onRefresh();
       }
-    } catch (err) {
-      setProbeResult({ status: 'offline', responseTime: null, checkedAt: new Date().toISOString() });
-      addToast('Błąd podczas sprawdzania dostępności', 'error');
+    } catch {
+      addToast('Nie udało się wykonać testu połączenia', 'error');
     } finally {
       setIsProbing(false);
     }
   };
 
-  // Favorite toggle
-  const handleToggleFavorite = async () => {
-    const newFav = isFavorite ? 0 : 1;
-    setIsFavorite(Boolean(newFav));
-    try {
-      if (api.services.toggleFavorite) {
-        await api.services.toggleFavorite(service.id, newFav);
-      } else {
-        await api.services.updateService(service.id, {
-          ...service,
-          favorite: newFav,
-          open_new_tab: service.open_new_tab ? 1 : 0,
-          enabled: service.enabled ? 1 : 0
-        });
-      }
-      if (onFavoriteToggle) onFavoriteToggle(service.id, newFav);
-      addToast(newFav ? `Przypięto ${service.name} do Ulubionych` : `Usunięto ${service.name} z Ulubionych`, 'success');
-    } catch {
-      setIsFavorite(!newFav);
-      addToast('Nie udało się zaktualizować statusu', 'error');
-    }
-  };
-
-  // Open service directly
+  // Direct Launch Action
   const handleOpenService = () => {
     if (openInNewTab) {
       window.open(service.url, '_blank', 'noopener,noreferrer');
@@ -157,12 +128,32 @@ export default function ServiceDetailsDrawer({
     }
   };
 
-  // Format date helper
+  // Toggle Favorite
+  const handleToggleFavorite = async () => {
+    const nextFav = isFavorite ? 0 : 1;
+    setIsFavorite(Boolean(nextFav));
+    try {
+      if (api.services.toggleFavorite) {
+        await api.services.toggleFavorite(service.id, nextFav);
+      } else {
+        await api.services.updateService(service.id, {
+          ...service,
+          favorite: nextFav
+        });
+      }
+      if (onFavoriteToggle) onFavoriteToggle(service.id, nextFav);
+      addToast(nextFav ? 'Przypięto do ulubionych' : 'Usunięto z ulubionych', 'success');
+    } catch {
+      setIsFavorite(!nextFav);
+      addToast('Nie udało się zaktualizować statusu', 'error');
+    }
+  };
+
   const formatDateTime = (dateStr) => {
     if (!dateStr) return 'N/A';
     try {
-      const d = new Date(dateStr);
-      return d.toLocaleString([], {
+      const date = new Date(dateStr);
+      return date.toLocaleString([], {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -182,9 +173,9 @@ export default function ServiceDetailsDrawer({
       aria-modal="true"
       aria-labelledby="drawer-title"
     >
-      {/* Backdrop with smooth blur */}
+      {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/65 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/70 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -192,20 +183,18 @@ export default function ServiceDetailsDrawer({
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         {/* Drawer Panel */}
         <div 
-          className="w-screen max-w-full sm:max-w-md md:max-w-lg bg-bg-secondary text-text-primary shadow-2xl border-l border-black/[0.08] dark:border-white/[0.08] flex flex-col justify-between animate-in slide-in-from-right duration-250 ease-out"
+          className="w-screen max-w-full sm:max-w-md md:max-w-lg bg-[#111622] text-slate-200 border-l border-[#1d2635] shadow-2xl flex flex-col justify-between"
         >
           {/* Top Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08]">
-            <div className="flex items-center gap-2">
-              <h2 id="drawer-title" className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                {t('drawer.service_details', 'Szczegóły Usługi')}
-              </h2>
-            </div>
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#1c2534]">
+            <h2 id="drawer-title" className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {t('drawer.service_details', 'SZCZEGÓŁY USŁUGI')}
+            </h2>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={handleToggleFavorite}
-                className={`p-2 rounded-xl transition-all hover:scale-105 ${
+                className={`p-1.5 rounded transition-colors ${
                   isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
                 }`}
                 title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
@@ -216,47 +205,41 @@ export default function ServiceDetailsDrawer({
 
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-all focus-visible:ring-2 focus-visible:ring-accent"
+                className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
                 aria-label={t('common.close', 'Zamknij')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Scrollable Content Body */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-5">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4 text-xs">
             
             {/* 1. Hero Service Profile */}
-            <div className="flex items-start gap-4 p-4 rounded-2xl glass-card border border-black/[0.06] dark:border-white/[0.08]">
-              <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden"
-                style={{ 
-                  background: `linear-gradient(135deg, ${serviceColor} 0%, ${serviceColor}dd 100%)`
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-black/15 pointer-events-none" />
-                <BrandIcon name={service.icon} color="#ffffff" className="w-7 h-7 relative z-10" fallbackText={service.name} />
+            <div className="flex items-start gap-3.5 p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635]">
+              <div className="w-10 h-10 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300">
+                <BrandIcon name={service.icon} color="#94a3b8" className="w-5 h-5" fallbackText={service.name} />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-lg font-black text-slate-900 dark:text-white tracking-tight break-words">
+                  <h1 className="text-sm font-semibold text-slate-100 break-words">
                     {service.name}
                   </h1>
                   {service.custom_badge && (
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/25 tracking-wider">
-                      {service.custom_badge}
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      [{service.custom_badge}]
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1 break-all">
+                <p className="text-[11px] text-slate-400 font-mono mt-0.5">
                   {host}:{port}
                 </p>
 
                 {service.description && (
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                  <p className="text-slate-400 mt-1.5 leading-relaxed text-[11px]">
                     {service.description}
                   </p>
                 )}
@@ -267,90 +250,90 @@ export default function ServiceDetailsDrawer({
             <Button
               onClick={handleOpenService}
               icon={ExternalLink}
-              className="w-full justify-center py-3 text-sm font-bold shadow-md shadow-accent/20 bg-accent hover:bg-accent-hover text-white"
+              className="w-full justify-center py-2.5 text-xs font-medium"
             >
               {t('drawer.open_service', 'Otwórz usługę')}
             </Button>
 
             {/* 3. Live Health & Availability Card */}
-            <div className="p-4 rounded-2xl glass-card border border-black/[0.06] dark:border-white/[0.08] space-y-3.5">
-              <div className="flex items-center justify-between pb-2.5 border-b border-black/[0.05] dark:border-white/[0.06]">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <div className="p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635] space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1c2534]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   {t('drawer.monitoring_status', 'Status i Dostępność')}
                 </span>
 
                 <button
                   onClick={handleCheckNow}
                   disabled={isProbing}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold transition-all disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#18202d] hover:bg-[#202b3d] text-slate-300 text-[11px] font-mono border border-[#222d41] transition-colors disabled:opacity-50"
                   title={t('drawer.check_now', 'Przetestuj połączenie')}
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isProbing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3 h-3 ${isProbing ? 'animate-spin text-blue-400' : ''}`} />
                   <span>{isProbing ? t('drawer.checking', 'Sprawdzanie...') : t('drawer.check_now', 'Sprawdź teraz')}</span>
                 </button>
               </div>
 
-              {/* Status Indicator */}
-              <div className="grid grid-cols-2 gap-2.5 text-xs">
-                {/* Status Badge */}
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05] space-y-1">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">
+              {/* Status Grid */}
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                {/* Status */}
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                  <span className="text-[10px] text-slate-500 block">
                     {t('drawer.status_label', 'Stan połączenia')}
                   </span>
-                  <div className="flex items-center gap-1.5 font-bold">
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
                     {currentStatus === 'online' && (
                       <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="text-emerald-600 dark:text-emerald-400 font-mono">Online</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Online</span>
                       </>
                     )}
                     {currentStatus === 'degraded' && (
                       <>
-                        <AlertTriangle className="w-4 h-4 text-amber-500" />
-                        <span className="text-amber-600 dark:text-amber-400 font-mono">Spadek wydajności</span>
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-amber-400">Problem</span>
                       </>
                     )}
                     {currentStatus === 'offline' && (
                       <>
-                        <XCircle className="w-4 h-4 text-rose-500" />
-                        <span className="text-rose-600 dark:text-rose-400 font-mono">Offline</span>
+                        <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                        <span className="text-rose-400">Offline</span>
                       </>
                     )}
                     {currentStatus === 'unknown' && (
                       <>
-                        <Clock className="w-4 h-4 text-slate-400" />
-                        <span className="text-slate-400 font-mono">Niezweryfikowany</span>
+                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="text-slate-500">Nieznany</span>
                       </>
                     )}
                   </div>
                 </div>
 
                 {/* Latency */}
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05] space-y-1">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                  <span className="text-[10px] text-slate-500 block">
                     {t('drawer.latency', 'Aktualne opóźnienie')}
                   </span>
-                  <span className="font-bold font-mono text-slate-800 dark:text-slate-200">
+                  <span className="text-slate-200 text-xs font-semibold">
                     {currentLatency !== null ? `${currentLatency} ms` : 'N/A'}
                   </span>
                 </div>
 
                 {/* Last Health Check */}
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05] space-y-1">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                  <span className="text-[10px] text-slate-500 block">
                     {t('drawer.last_check', 'Ostatnie sprawdzenie')}
                   </span>
-                  <span className="font-bold font-mono text-slate-800 dark:text-slate-200 text-[11px] block truncate">
+                  <span className="text-slate-300 text-[11px] block truncate">
                     {formatDateTime(lastChecked)}
                   </span>
                 </div>
 
                 {/* Uptime */}
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05] space-y-1">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                  <span className="text-[10px] text-slate-500 block">
                     {t('drawer.uptime', 'Dostępność (Uptime)')}
                   </span>
-                  <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                  <span className="text-emerald-400 text-xs font-semibold">
                     {uptimeStr}
                   </span>
                 </div>
@@ -358,84 +341,78 @@ export default function ServiceDetailsDrawer({
             </div>
 
             {/* 4. Network & Technical Details */}
-            <div className="p-4 rounded-2xl glass-card border border-black/[0.06] dark:border-white/[0.08] space-y-3">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block pb-1 border-b border-black/[0.05] dark:border-white/[0.06]">
-                {t('drawer.network_details', 'Dane Sieciowe i Konfiguracja')}
+            <div className="p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635] space-y-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block pb-1 border-b border-[#1c2534]">
+                {t('drawer.network_details', 'DANE SIECIOWE')}
               </span>
 
               {/* Service URL with copy button */}
               <div className="space-y-1">
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <span className="text-[11px] text-slate-500">
                   {t('drawer.target_url', 'Pełny adres URL')}
                 </span>
-                <div className="flex items-center gap-2 p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-                  <Globe className="w-4 h-4 text-accent flex-shrink-0" />
-                  <span className="text-xs font-mono text-slate-800 dark:text-slate-200 truncate flex-1 select-all">
+                <div className="flex items-center gap-2 p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                  <span className="text-xs font-mono text-slate-200 truncate flex-1 select-all">
                     {service.url}
                   </span>
                   <button
                     onClick={handleCopyUrl}
-                    className="p-1 rounded-lg hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all flex-shrink-0"
+                    className="p-1 text-slate-400 hover:text-white transition-colors flex-shrink-0"
                     title={t('common.copy', 'Kopiuj')}
                   >
-                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
 
               {/* Host and Port Grid */}
-              <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Host / IP</span>
-                  <span className="font-bold font-mono text-slate-800 dark:text-slate-200 truncate block mt-0.5 select-all">
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                  <span className="text-[10px] text-slate-500 block">Host / IP</span>
+                  <span className="text-slate-200 text-xs truncate block mt-0.5 select-all">
                     {host}
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-medium">Port</span>
-                  <span className="font-bold font-mono text-slate-800 dark:text-slate-200 truncate block mt-0.5">
+                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                  <span className="text-[10px] text-slate-500 block">Port</span>
+                  <span className="text-slate-200 text-xs truncate block mt-0.5">
                     {port}
                   </span>
                 </div>
               </div>
 
               {/* Category */}
-              <div className="pt-1 flex items-center justify-between text-xs">
-                <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <Folder className="w-3.5 h-3.5 text-slate-400" /> {t('drawer.category', 'Kategoria')}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-slate-500 flex items-center gap-1.5">
+                  <Folder className="w-3.5 h-3.5 text-slate-500" /> {t('drawer.category', 'Kategoria')}
                 </span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">
+                <span className="text-slate-300 font-medium">
                   {service.category_name || service.category?.name || t('dashboard.other_services', 'Inne')}
                 </span>
               </div>
 
               {/* Tags */}
-              <div className="pt-1 space-y-1.5 text-xs">
-                <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-slate-400" /> {t('drawer.tags', 'Tagi')}
+              <div className="space-y-1 text-xs pt-1">
+                <span className="text-slate-500 flex items-center gap-1.5">
+                  <Tag className="w-3.5 h-3.5 text-slate-500" /> {t('drawer.tags', 'Tagi')}
                 </span>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 font-mono text-[10px]">
                   {Array.isArray(service.tags) && service.tags.length > 0 ? (
                     service.tags.map((tag, idx) => {
                       const tagName = typeof tag === 'string' ? tag : tag.name;
-                      const tagColor = typeof tag === 'object' && tag.color ? tag.color : '#6366f1';
                       return (
                         <span 
                           key={idx}
-                          className="px-2 py-0.5 rounded-lg text-[10px] font-bold font-mono border"
-                          style={{
-                            backgroundColor: `${tagColor}15`,
-                            borderColor: `${tagColor}30`,
-                            color: tagColor
-                          }}
+                          className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-slate-400"
                         >
                           #{tagName}
                         </span>
                       );
                     })
                   ) : (
-                    <span className="text-[11px] text-slate-400 dark:text-slate-500 italic">
+                    <span className="text-slate-500 italic text-[11px]">
                       {t('drawer.no_tags', 'Brak przypisanych tagów')}
                     </span>
                   )}
@@ -448,12 +425,12 @@ export default function ServiceDetailsDrawer({
 
           {/* Bottom Actions Footer (Admin Actions: Edit, Delete) */}
           {isAdmin && (
-            <div className="p-4 sm:p-5 border-t border-black/[0.06] dark:border-white/[0.08] bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-between gap-3">
+            <div className="p-4 border-t border-[#1c2534] bg-[#0e131d] flex items-center justify-between gap-2.5">
               <Button
                 variant="danger"
                 icon={Trash2}
                 onClick={() => setIsDeleteOpen(true)}
-                className="flex-1 justify-center text-xs font-bold"
+                className="flex-1 justify-center text-xs"
               >
                 {t('common.delete', 'Usuń')}
               </Button>
@@ -465,7 +442,7 @@ export default function ServiceDetailsDrawer({
                   onClose();
                   if (onEdit) onEdit(service);
                 }}
-                className="flex-1 justify-center text-xs font-bold glass-card"
+                className="flex-1 justify-center text-xs"
               >
                 {t('common.edit', 'Edytuj')}
               </Button>

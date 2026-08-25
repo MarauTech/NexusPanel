@@ -2,16 +2,16 @@ import React from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
 const VARIANTS = {
-  primary: 'bg-gradient-to-r from-accent to-accent-hover text-white shadow-lg shadow-accent/25 hover:shadow-accent/40 border border-white/20',
-  secondary: 'glass-pill text-text-primary hover:bg-white/10 shadow-sm',
-  danger: 'bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/25 border border-white/15',
-  ghost: 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-white/5'
+  primary: 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500/30 font-medium',
+  secondary: 'bg-[#151c28] hover:bg-[#1b2536] text-slate-200 border border-[#212c3e] font-medium',
+  danger: 'bg-rose-700 hover:bg-rose-600 text-white border border-rose-600/30 font-medium',
+  ghost: 'bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
 };
 
 const SIZES = {
-  sm: 'px-3 py-1.5 text-xs font-semibold rounded-xl',
-  md: 'px-4 py-2 text-xs sm:text-sm font-bold rounded-2xl',
-  lg: 'px-6 py-3 text-base font-bold rounded-2xl'
+  sm: 'px-2.5 py-1.5 text-xs rounded-md',
+  md: 'px-3.5 py-1.5 text-xs rounded-md',
+  lg: 'px-5 py-2.5 text-sm rounded-md'
 };
 
 export default function Button({
@@ -25,12 +25,12 @@ export default function Button({
   fullWidth = false,
   ...props
 }) {
-  const baseClasses = 'inline-flex items-center justify-center transition-all duration-200 hover:scale-[1.02] active:scale-[0.96] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden select-none cursor-pointer';
+  const baseClasses = 'inline-flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer';
   
   const classes = [
     baseClasses,
-    VARIANTS[variant],
-    SIZES[size],
+    VARIANTS[variant] || VARIANTS.primary,
+    SIZES[size] || SIZES.md,
     fullWidth ? 'w-full' : '',
     className
   ].join(' ');
@@ -41,13 +41,9 @@ export default function Button({
       className={classes}
       {...props}
     >
-      {/* Specular gloss top reflection for primary */}
-      {variant === 'primary' && (
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-black/10 pointer-events-none" />
-      )}
-      {isLoading && <LoadingSpinner size={size === 'sm' ? 'sm' : 'md'} className="mr-2 relative z-10" />}
-      {!isLoading && Icon && <Icon className={`mr-2 relative z-10 ${size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />}
-      <span className="relative z-10">{children}</span>
+      {isLoading && <LoadingSpinner size={size === 'sm' ? 'sm' : 'md'} className="mr-1.5" />}
+      {!isLoading && Icon && <Icon className={`mr-1.5 ${size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />}
+      <span>{children}</span>
     </button>
   );
 }

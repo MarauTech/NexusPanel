@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { Server, Box, Cpu, HardDrive, Database, ExternalLink, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 export default function ProxmoxOverviewWidget() {
   const { t } = useLanguage();
@@ -23,7 +23,7 @@ export default function ProxmoxOverviewWidget() {
           setNodeData(nodeRes.data);
           setLxcData(lxcRes.data);
         }
-      } catch (e) {
+      } catch {
         // ignore
       } finally {
         if (isMounted) setLoading(false);
@@ -39,7 +39,7 @@ export default function ProxmoxOverviewWidget() {
   }, []);
 
   if (!nodeData || !nodeData.configured || !nodeData.enabled) {
-    return null; // Don't clutter UI if Proxmox VE is not configured by user
+    return null;
   }
 
   const containers = lxcData?.containers || [];
@@ -47,24 +47,19 @@ export default function ProxmoxOverviewWidget() {
   const totalLxc = containers.length;
 
   return (
-    <div className="rounded-2xl glass-card border border-black/[0.08] dark:border-white/[0.08] p-4 sm:p-5 space-y-3.5 shadow-sm">
+    <div className="rounded-lg bg-[#141b27] border border-[#1d2635] p-4 space-y-3 text-xs">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2.5 border-b border-black/[0.05] dark:border-white/[0.06]">
+      <div className="flex items-center justify-between pb-2 border-b border-[#1c2534]">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold text-xs">
-            PVE
-          </div>
-          <div>
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-              Proxmox VE ({nodeData.node || 'Node'})
-            </h3>
-            <span className="text-[10px] text-slate-400 font-mono">v{nodeData.pveVersion || '8.x'}</span>
-          </div>
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            PROXMOX VE ({nodeData.node || 'Node'})
+          </h3>
+          <span className="text-[10px] text-slate-500 font-mono">v{nodeData.pveVersion || '8.x'}</span>
         </div>
 
         <Link
           to="/admin/proxmox"
-          className="p-1 rounded-lg hover:bg-black/[0.06] dark:hover:bg-white/[0.08] text-slate-400 hover:text-slate-700 dark:hover:text-white transition-all"
+          className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
           title={t('admin.proxmox', 'Ustawienia Proxmox')}
         >
           <Settings className="w-3.5 h-3.5" />
@@ -72,33 +67,24 @@ export default function ProxmoxOverviewWidget() {
       </div>
 
       {/* Resource Metrics */}
-      <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
-        {/* CPU */}
-        <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-          <div className="flex items-center justify-center gap-1 text-slate-500 dark:text-slate-400 text-[10px] mb-0.5">
-            <Cpu className="w-3 h-3 text-indigo-400" /> CPU
-          </div>
-          <span className="font-bold font-mono text-slate-900 dark:text-white text-xs">
+      <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono">
+        <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+          <span className="text-slate-500 text-[10px] block">CPU</span>
+          <span className="font-semibold text-slate-200 text-xs">
             {nodeData.cpu?.usagePercent || 0}%
           </span>
         </div>
 
-        {/* RAM */}
-        <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-          <div className="flex items-center justify-center gap-1 text-slate-500 dark:text-slate-400 text-[10px] mb-0.5">
-            <HardDrive className="w-3 h-3 text-purple-400" /> RAM
-          </div>
-          <span className="font-bold font-mono text-slate-900 dark:text-white text-xs">
+        <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+          <span className="text-slate-500 text-[10px] block">RAM</span>
+          <span className="font-semibold text-slate-200 text-xs">
             {nodeData.memory?.percent || 0}%
           </span>
         </div>
 
-        {/* Storage */}
-        <div className="p-2 rounded-xl bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.04] dark:border-white/[0.05]">
-          <div className="flex items-center justify-center gap-1 text-slate-500 dark:text-slate-400 text-[10px] mb-0.5">
-            <Database className="w-3 h-3 text-emerald-400" /> Dysk
-          </div>
-          <span className="font-bold font-mono text-slate-900 dark:text-white text-xs">
+        <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+          <span className="text-slate-500 text-[10px] block">DYSK</span>
+          <span className="font-semibold text-slate-200 text-xs">
             {nodeData.storage?.percent || 0}%
           </span>
         </div>
@@ -106,12 +92,10 @@ export default function ProxmoxOverviewWidget() {
 
       {/* LXC Containers Summary */}
       {totalLxc > 0 && (
-        <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.06] flex items-center justify-between text-xs">
-          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1 text-[11px]">
-            <Box className="w-3.5 h-3.5 text-accent" /> Kontenery LXC
-          </span>
-          <span className="font-bold font-mono text-slate-800 dark:text-slate-200 text-[11px]">
-            <span className="text-emerald-500">{runningLxc}</span> / {totalLxc} aktywne
+        <div className="pt-2 border-t border-[#1c2534] flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span>Kontenery LXC:</span>
+          <span className="text-slate-200 font-medium">
+            <span className="text-emerald-400">{runningLxc}</span>/{totalLxc} aktywne
           </span>
         </div>
       )}
