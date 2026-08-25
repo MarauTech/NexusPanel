@@ -65,7 +65,7 @@ export default function RecentActivityWidget({ services = [] }) {
           <History className="w-3.5 h-3.5" />
         </div>
         <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-          {t('overview.recent_activity', 'Ostatnia Aktywność')}
+          {t('overview.recent_checks', 'OSTATNIE SPRAWDZENIA')}
         </h3>
       </div>
 

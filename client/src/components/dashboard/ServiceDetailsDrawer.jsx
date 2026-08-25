@@ -80,8 +80,9 @@ export default function ServiceDetailsDrawer({
     : (typeof service.health_response_time === 'number' ? service.health_response_time : null);
   const lastChecked = probeResult?.checkedAt || service.health_last_checked;
 
-  const uptimeStr = service.uptime_percentage 
-    ? `${service.uptime_percentage}% (ostatnie 20 testów)`
+  const uptimePeriod = service.uptime_period || '24h';
+  const uptimeStr = service.uptime_percentage !== undefined && service.uptime_percentage !== null
+    ? `${service.uptime_percentage}% · ${uptimePeriod}`
     : 'N/A';
 
   const serviceColor = service.color || '#6366f1';
@@ -278,17 +279,15 @@ export default function ServiceDetailsDrawer({
                   {t('drawer.monitoring_status', 'Status i Dostępność')}
                 </span>
 
-                {isAdmin && (
-                  <button
-                    onClick={handleCheckNow}
-                    disabled={isProbing}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold transition-all disabled:opacity-50"
-                    title={t('drawer.check_now', 'Przetestuj połączenie')}
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isProbing ? 'animate-spin' : ''}`} />
-                    <span>{isProbing ? t('drawer.checking', 'Sprawdzanie...') : t('drawer.check_now', 'Sprawdź teraz')}</span>
-                  </button>
-                )}
+                <button
+                  onClick={handleCheckNow}
+                  disabled={isProbing}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold transition-all disabled:opacity-50"
+                  title={t('drawer.check_now', 'Przetestuj połączenie')}
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isProbing ? 'animate-spin' : ''}`} />
+                  <span>{isProbing ? t('drawer.checking', 'Sprawdzanie...') : t('drawer.check_now', 'Sprawdź teraz')}</span>
+                </button>
               </div>
 
               {/* Status Indicator */}

@@ -94,6 +94,36 @@ export const TRANSLATIONS = {
     'service.pinned_toast': 'Przypięto do Ulubionych',
     'service.unpinned_toast': 'Usunięto z Ulubionych',
 
+    // Status & Overview
+    'status.all_systems_operational': 'Wszystkie systemy działają',
+    'status.services_online': 'usług online',
+    'status.services_offline': 'usług offline',
+    'status.services_degraded': 'usług ze spadkiem wydajności',
+    'status.unchecked': 'niezweryfikowanych',
+    'overview.services_status': 'STAN USŁUG',
+    'overview.host_nexuspanel': 'HOST NEXUSPANEL',
+    'overview.recent_checks': 'OSTATNIE SPRAWDZENIA',
+    'overview.no_checks': 'Brak zarejestrowanych sprawdzeń',
+    'overview.no_checks_sub': 'Wyniki testów dostępności pojawią się tutaj.',
+
+    // Drawer
+    'drawer.service_details': 'Szczegóły Usługi',
+    'drawer.open_service': 'Otwórz usługę',
+    'drawer.check_now': 'Sprawdź teraz',
+    'drawer.checking': 'Sprawdzanie...',
+    'drawer.monitoring_status': 'Status i Dostępność',
+    'drawer.network_details': 'Dane Sieciowe i Konfiguracja',
+    'drawer.status_label': 'Stan połączenia',
+    'drawer.latency': 'Aktualne opóźnienie',
+    'drawer.last_check': 'Ostatnie sprawdzenie',
+    'drawer.uptime': 'Dostępność (Uptime)',
+    'drawer.target_url': 'Pełny adres URL',
+    'drawer.category': 'Kategoria',
+    'drawer.tags': 'Tagi',
+    'drawer.no_tags': 'Brak przypisanych tagów',
+    'drawer.delete_title': 'Usuwanie usługi',
+    'drawer.delete_confirm': 'Czy na pewno chcesz usunąć tę usługę? Tej operacji nie można cofnąć.',
+
     // Kiosk Mode
     'kiosk.title': 'KIOSK',
     'kiosk.wall_mode': 'NexusPanel Wall Display Mode',
@@ -448,6 +478,36 @@ export const TRANSLATIONS = {
     'service.favorite_unpin': 'Unpin from favorites',
     'service.pinned_toast': 'Pinned to Favorites',
     'service.unpinned_toast': 'Removed from Favorites',
+
+    // Status & Overview
+    'status.all_systems_operational': 'All systems operational',
+    'status.services_online': 'services online',
+    'status.services_offline': 'services offline',
+    'status.services_degraded': 'services degraded',
+    'status.unchecked': 'unchecked',
+    'overview.services_status': 'SERVICES HEALTH',
+    'overview.host_nexuspanel': 'NEXUSPANEL HOST',
+    'overview.recent_checks': 'RECENT HEALTH CHECKS',
+    'overview.no_checks': 'No recorded health checks',
+    'overview.no_checks_sub': 'Availability probe results will appear here.',
+
+    // Drawer
+    'drawer.service_details': 'Service Details',
+    'drawer.open_service': 'Open Service',
+    'drawer.check_now': 'Check Now',
+    'drawer.checking': 'Checking...',
+    'drawer.monitoring_status': 'Monitoring & Status',
+    'drawer.network_details': 'Network & Configuration',
+    'drawer.status_label': 'Connection Status',
+    'drawer.latency': 'Current Latency',
+    'drawer.last_check': 'Last Checked',
+    'drawer.uptime': 'Availability (Uptime)',
+    'drawer.target_url': 'Full Target URL',
+    'drawer.category': 'Category',
+    'drawer.tags': 'Tags',
+    'drawer.no_tags': 'No tags assigned',
+    'drawer.delete_title': 'Delete Service',
+    'drawer.delete_confirm': 'Are you sure you want to delete this service? This action cannot be undone.',
 
     // Kiosk Mode
     'kiosk.title': 'KIOSK',

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Star, ArrowUpRight } from 'lucide-react';
+import { Star, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import BrandIcon from '../common/BrandIcon';
-import { getStatusColor } from '../../utils/helpers';
 import { useSettings } from '../../hooks/useSettings';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
@@ -17,10 +16,13 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   const [isFavorite, setIsFavorite] = useState(service.favorite === 1 || service.favorite === true);
 
   const healthStatus = service.health_status || service.status || 'unknown';
-  const statusColor = getStatusColor(healthStatus);
   const showStatus = settings?.show_status_indicators !== 'false';
   const serviceColor = service.color || '#6366f1';
   const borderRadius = `${settings?.tile_border_radius || '18'}px`;
+
+  const isOnline = healthStatus === 'online';
+  const isDegraded = healthStatus === 'degraded';
+  const isOffline = healthStatus === 'offline';
 
   const handleCardClick = (e) => {
     e.preventDefault();
@@ -48,7 +50,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   try {
     const parsed = new URL(service.url);
     cleanHost = parsed.host;
-  } catch (e) {
+  } catch {
     cleanHost = service.url.replace(/^https?:\/\//, '').split('/')[0];
   }
 
@@ -71,33 +73,36 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       }
       if (onFavoriteToggle) onFavoriteToggle(service.id, newFav);
       addToast(newFav ? `Przypięto ${service.name} do Ulubionych` : `Usunięto ${service.name} z Ulubionych`, 'success');
-    } catch (err) {
+    } catch {
       setIsFavorite(!newFav);
       addToast('Nie udało się zaktualizować statusu', 'error');
     }
   };
 
-  const handleClick = (e) => {
-    e.preventDefault();
-    if (openInNewTab) {
-      window.open(service.url, '_blank', 'noopener,noreferrer');
-    } else {
-      window.location.href = service.url;
+  // Accessible status label
+  const statusLabel = isOnline 
+    ? 'Online' 
+    : (isDegraded ? 'Spadek wydajności (Degraded)' : (isOffline ? 'Offline' : 'Niezweryfikowany'));
+
+  // Keyboard accessibility
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick(e);
     }
   };
-
-  // Accessible status label
-  const statusLabel = healthStatus === 'online' ? 'Online' : (healthStatus === 'degraded' ? 'Spadek wydajności' : (healthStatus === 'offline' ? 'Offline' : 'Niezweryfikowany'));
 
   // ============================================
   // COMPACT STYLE
   // ============================================
   if (style === 'compact') {
     return (
-      <a 
-        href={service.url} 
+      <div 
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
-        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
+        onKeyDown={handleKeyDown}
+        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
         style={{ borderRadius }}
         aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
@@ -112,21 +117,30 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               {showStatus && (
-                <span 
-                  className="w-2 h-2 rounded-full flex-shrink-0" 
-                  style={{ backgroundColor: statusColor }} 
-                  title={`Status: ${statusLabel}`}
-                  aria-label={statusLabel}
-                />
+                isDegraded ? (
+                  <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                ) : (
+                  <span 
+                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      isOnline ? 'bg-emerald-500' : (isOffline ? 'bg-rose-500' : 'bg-slate-400')
+                    }`}
+                  />
+                )
               )}
               <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                 {service.name}
               </span>
             </div>
-            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-              <span>{cleanHost}</span>
-              {service.health_response_time && (
-                <span className="text-emerald-500">· {service.health_response_time}ms</span>
+            <div className="flex items-center justify-between gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+              <span className="truncate">{cleanHost}</span>
+              {showStatus && (
+                isOffline ? (
+                  <span className="text-rose-500 font-bold text-[10px] uppercase">OFFLINE</span>
+                ) : isDegraded ? (
+                  <span className="text-amber-500 font-bold">{service.health_response_time ? `${service.health_response_time}ms` : 'DEGRADED'}</span>
+                ) : isOnline ? (
+                  <span className="text-emerald-500 font-bold">{service.health_response_time ? `${service.health_response_time}ms` : 'ONLINE'}</span>
+                ) : null
               )}
             </div>
           </div>
@@ -142,7 +156,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         >
           <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
-      </a>
+      </div>
     );
   }
 
@@ -151,10 +165,12 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   // ============================================
   if (style === 'detailed') {
     return (
-      <a 
-        href={service.url} 
+      <div 
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
-        className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
+        onKeyDown={handleKeyDown}
+        className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
         style={{ borderRadius }}
         aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
@@ -168,11 +184,17 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span 
-                  className="w-2 h-2 rounded-full flex-shrink-0" 
-                  style={{ backgroundColor: statusColor }}
-                  title={`Status: ${statusLabel}`}
-                />
+                {showStatus && (
+                  isDegraded ? (
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                  ) : (
+                    <span 
+                      className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        isOnline ? 'bg-emerald-500' : (isOffline ? 'bg-rose-500' : 'bg-slate-400')
+                      }`}
+                    />
+                  )
+                )}
                 <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                   {service.name}
                 </span>
@@ -203,8 +225,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           </p>
         )}
 
-        <div className="flex items-center justify-between pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06] text-xs">
-          <div className="flex items-center gap-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 font-mono">
+        <div className="flex items-center justify-between pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono">
+          <div className="flex items-center gap-2 text-[11px] font-medium text-slate-600 dark:text-slate-300">
             <span className="capitalize">{statusLabel}</span>
             {service.health_response_time && <span>· {service.health_response_time}ms</span>}
             {service.uptime_percentage && <span>· {service.uptime_percentage}% up</span>}
@@ -217,18 +239,20 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
             <ArrowUpRight className="w-3.5 h-3.5" />
           </div>
         </div>
-      </a>
+      </div>
     );
   }
 
   // ============================================
-  // DEFAULT MINIMAL ELEGANT STYLE
+  // DEFAULT MINIMAL COMPACT STYLE
   // ============================================
   return (
-    <a 
-      href={service.url} 
+    <div 
+      role="button"
+      tabIndex={0}
       onClick={handleCardClick}
-      className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
+      onKeyDown={handleKeyDown}
+      className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer select-none"
       style={{ borderRadius }}
       aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
     >
@@ -246,14 +270,19 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
 
         {/* Info Block */}
         <div className="flex-1 min-w-0">
-          {/* Row 1: Status dot + Name + Badge */}
+          {/* Row 1: Status dot/icon + Name + Badge */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {showStatus && (
-              <span 
-                className="w-2 h-2 rounded-full flex-shrink-0" 
-                style={{ backgroundColor: statusColor }} 
-                title={`Status: ${statusLabel}`}
-              />
+              isDegraded ? (
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" title={`Status: ${statusLabel}`} />
+              ) : (
+                <span 
+                  className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                    isOnline ? 'bg-emerald-500' : (isOffline ? 'bg-rose-500' : 'bg-slate-400')
+                  }`}
+                  title={`Status: ${statusLabel}`}
+                />
+              )
             )}
             <span className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors tracking-tight whitespace-normal break-words">
               {service.name}
@@ -265,19 +294,27 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
             )}
           </div>
           
-          {/* Row 2: Clean Host:Port */}
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate block mt-0.5">
-            {cleanHost}
-          </div>
-
-          {/* Row 3: Minimal Live Status Info (Online · 42 ms · 99.9%) */}
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-            <span className="capitalize font-semibold text-slate-700 dark:text-slate-300">{statusLabel}</span>
-            {service.health_response_time && (
-              <span className="font-mono text-emerald-600 dark:text-emerald-400">· {service.health_response_time} ms</span>
-            )}
-            {service.uptime_percentage && (
-              <span className="font-mono text-slate-400">· {service.uptime_percentage}% up</span>
+          {/* Row 2: Clean Host:Port + Latency / Status */}
+          <div className="flex items-center justify-between gap-2 mt-0.5 text-[11px] font-mono">
+            <span className="text-slate-500 dark:text-slate-400 truncate">
+              {cleanHost}
+            </span>
+            {showStatus && (
+              isOffline ? (
+                <span className="text-rose-500 font-bold text-[10px] uppercase flex-shrink-0">
+                  OFFLINE
+                </span>
+              ) : isDegraded ? (
+                <span className="text-amber-500 font-bold flex-shrink-0">
+                  {service.health_response_time ? `${service.health_response_time}ms` : 'DEGRADED'}
+                </span>
+              ) : isOnline ? (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex-shrink-0">
+                  {service.health_response_time ? `${service.health_response_time}ms` : 'ONLINE'}
+                </span>
+              ) : (
+                <span className="text-slate-400 text-[10px] flex-shrink-0">N/A</span>
+              )
             )}
           </div>
         </div>
@@ -304,6 +341,6 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
       </div>
-    </a>
+    </div>
   );
 }

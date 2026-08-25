@@ -62,12 +62,16 @@ router.get('/', (req, res) => {
     const history = historyMap[s.id] || [];
     s.history = history;
 
-    // Calculate Uptime percentage from history
+    // Calculate Uptime percentage and measurement period from history
     if (history.length > 0) {
       const upCount = history.filter(h => h.status === 'online' || h.status === 'degraded').length;
       s.uptime_percentage = ((upCount / history.length) * 100).toFixed(1);
+      s.uptime_period = '24h';
+      s.uptime_sample_count = history.length;
     } else {
-      s.uptime_percentage = s.health_status === 'online' ? '100.0' : (s.health_status === 'offline' ? '0.0' : '100.0');
+      s.uptime_percentage = s.health_status === 'online' ? '100.0' : (s.health_status === 'offline' ? '0.0' : (s.health_status ? '100.0' : null));
+      s.uptime_period = s.uptime_percentage !== null ? '24h' : null;
+      s.uptime_sample_count = 0;
     }
   }
   

@@ -61,7 +61,7 @@ export default function GlobalStatusStrip({ services = [] }) {
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            {online}/{total} {t('status.services_online', 'usług aktywnych')}
+            {online}/{total} {t('status.services_online', 'usług online')}
             {unknown > 0 && ` · ${unknown} ${t('status.unchecked', 'niezweryfikowanych')}`}
           </p>
         </div>
@@ -89,11 +89,11 @@ export default function GlobalStatusStrip({ services = [] }) {
           </div>
         )}
 
-        {/* Overall Fleet Uptime */}
+        {/* Overall Fleet Uptime with Measurement Period */}
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.04] dark:border-white/[0.06] text-[11px]">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
           <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-            {overallUptime}%
+            {overallUptime}% · 24h
           </span>
           <span className="text-slate-500 dark:text-slate-400 text-[10px]">uptime</span>
         </div>
