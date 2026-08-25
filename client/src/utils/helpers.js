@@ -37,12 +37,18 @@ export const getStatusLabel = (status) => {
 };
 
 export const filterServices = (services, query) => {
-  if (!query) return services;
-  const q = query.toLowerCase();
-  return services.filter(service => 
-    service.name?.toLowerCase().includes(q) ||
-    service.description?.toLowerCase().includes(q) ||
-    service.category?.name?.toLowerCase().includes(q) ||
-    service.tags?.some(tag => tag.name?.toLowerCase().includes(q))
-  );
+  if (!query || typeof query !== 'string' || !query.trim()) return services;
+  const q = query.trim().toLowerCase();
+  return services.filter(service => {
+    const nameMatch = service.name?.toLowerCase().includes(q);
+    const urlMatch = service.url?.toLowerCase().includes(q);
+    const descMatch = service.description?.toLowerCase().includes(q);
+    const catMatch = (service.category_name || service.category?.name)?.toLowerCase().includes(q);
+    const badgeMatch = service.custom_badge?.toLowerCase().includes(q);
+    const statusMatch = (service.health_status || service.status)?.toLowerCase() === q;
+    const tagMatch = Array.isArray(service.tags) && service.tags.some(tag => 
+      (typeof tag === 'string' ? tag : tag.name)?.toLowerCase().includes(q)
+    );
+    return nameMatch || urlMatch || descMatch || catMatch || badgeMatch || statusMatch || tagMatch;
+  });
 };

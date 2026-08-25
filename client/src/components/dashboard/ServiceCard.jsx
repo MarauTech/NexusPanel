@@ -14,7 +14,6 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   const style = settings?.tile_style || 'default';
   const openInNewTab = service.open_new_tab === 1 || service.open_new_tab === true || service.openInNewTab !== false;
   
-  // Local state for instant optimistic UI reaction
   const [isFavorite, setIsFavorite] = useState(service.favorite === 1 || service.favorite === true);
 
   const healthStatus = service.health_status || service.status || 'unknown';
@@ -66,16 +65,20 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
     }
   };
 
+  // Accessible status label
+  const statusLabel = healthStatus === 'online' ? 'Online' : (healthStatus === 'degraded' ? 'Spadek wydajności' : (healthStatus === 'offline' ? 'Offline' : 'Niezweryfikowany'));
+
   // ============================================
-  // COMPACT STYLE (Speed-Dial Mini Pill)
+  // COMPACT STYLE
   // ============================================
   if (style === 'compact') {
     return (
       <a 
         href={service.url} 
         onClick={handleClick}
-        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md"
+        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent"
         style={{ borderRadius }}
+        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div 
@@ -87,14 +90,24 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
+              {showStatus && (
+                <span 
+                  className="w-2 h-2 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: statusColor }} 
+                  title={`Status: ${statusLabel}`}
+                  aria-label={statusLabel}
+                />
+              )}
               <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                 {service.name}
               </span>
-              {showStatus && (
-                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
+            </div>
+            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+              <span>{cleanHost}</span>
+              {service.health_response_time && (
+                <span className="text-emerald-500">· {service.health_response_time}ms</span>
               )}
             </div>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono block break-all">{cleanHost}</span>
           </div>
         </div>
 
@@ -104,6 +117,7 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
             isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
           }`}
           title="Ulubione"
+          aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
         >
           <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
@@ -119,20 +133,26 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
       <a 
         href={service.url} 
         onClick={handleClick}
-        className="group relative flex flex-col justify-between p-4.5 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl"
+        className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent"
         style={{ borderRadius }}
+        aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div 
-              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden group-hover:scale-105 transition-transform"
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden group-hover:scale-105 transition-transform"
               style={{ backgroundColor: serviceColor }}
             >
-              <BrandIcon name={service.icon} color="#ffffff" className="w-6 h-6 relative z-10" fallbackText={service.name} />
+              <BrandIcon name={service.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={service.name} />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
+                <span 
+                  className="w-2 h-2 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: statusColor }}
+                  title={`Status: ${statusLabel}`}
+                />
+                <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                   {service.name}
                 </span>
                 {service.custom_badge && (
@@ -150,24 +170,23 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
             className={`p-1.5 rounded-xl transition-all hover:scale-110 ${
               isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
             }`}
+            aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
           >
             <Star className={`w-4 h-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
           </button>
         </div>
 
         {service.description && (
-          <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 my-3 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 my-2.5 leading-relaxed">
             {service.description}
           </p>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-black/[0.05] dark:border-white/[0.06] text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: statusColor }} />
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 capitalize">{healthStatus}</span>
-            {service.health_response_time && (
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({service.health_response_time}ms)</span>
-            )}
+        <div className="flex items-center justify-between pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06] text-xs">
+          <div className="flex items-center gap-2 text-[11px] font-medium text-slate-600 dark:text-slate-300 font-mono">
+            <span className="capitalize">{statusLabel}</span>
+            {service.health_response_time && <span>· {service.health_response_time}ms</span>}
+            {service.uptime_percentage && <span>· {service.uptime_percentage}% up</span>}
           </div>
           <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
         </div>
@@ -176,61 +195,76 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   }
 
   // ============================================
-  // DEFAULT STYLE (Balanced Homelab Card)
+  // DEFAULT MINIMAL ELEGANT STYLE
   // ============================================
   return (
     <a 
       href={service.url} 
       onClick={handleClick}
-      className="group relative flex items-center justify-between gap-3.5 p-3.5 sm:p-4 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg"
+      className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent"
       style={{ borderRadius }}
+      aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
     >
-      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Squircle Brand Icon */}
         <div 
-          className="w-11 h-11 rounded-[14px] flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden group-hover:scale-105 transition-transform" 
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden group-hover:scale-105 transition-transform" 
           style={{ 
-            background: `linear-gradient(135deg, ${serviceColor} 0%, ${serviceColor}cc 100%)`,
+            background: `linear-gradient(135deg, ${serviceColor} 0%, ${serviceColor}dd 100%)`,
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/15 pointer-events-none" />
-          <BrandIcon name={service.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={service.name} />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-black/15 pointer-events-none" />
+          <BrandIcon name={service.icon} color="#ffffff" className="w-4.5 h-4.5 relative z-10" fallbackText={service.name} />
         </div>
 
-        {/* Info Column */}
+        {/* Info Block */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Row 1: Status dot + Name + Badge */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {showStatus && (
+              <span 
+                className="w-2 h-2 rounded-full flex-shrink-0" 
+                style={{ backgroundColor: statusColor }} 
+                title={`Status: ${statusLabel}`}
+              />
+            )}
             <span className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors tracking-tight whitespace-normal break-words">
               {service.name}
             </span>
             {service.custom_badge && (
-              <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/25 flex-shrink-0 tracking-wider">
+              <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md bg-accent/15 text-accent border border-accent/25 flex-shrink-0 tracking-wider">
                 {service.custom_badge}
               </span>
             )}
           </div>
           
-          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono block opacity-90 break-all">
-              {cleanHost}
-            </span>
-            {showStatus && service.health_response_time && (
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-mono flex-shrink-0">
-                {service.health_response_time}ms
-              </span>
+          {/* Row 2: Clean Host:Port */}
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate block mt-0.5">
+            {cleanHost}
+          </div>
+
+          {/* Row 3: Minimal Live Status Info (Online · 42 ms · 99.9%) */}
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+            <span className="capitalize font-semibold text-slate-700 dark:text-slate-300">{statusLabel}</span>
+            {service.health_response_time && (
+              <span className="font-mono text-emerald-600 dark:text-emerald-400">· {service.health_response_time} ms</span>
+            )}
+            {service.uptime_percentage && (
+              <span className="font-mono text-slate-400">· {service.uptime_percentage}% up</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Right Action Icons */}
-      <div className="flex items-center gap-1.5 flex-shrink-0">
+      <div className="flex items-center gap-1 flex-shrink-0">
         <button 
           onClick={handleFavoriteClick}
           className={`p-1.5 rounded-lg transition-all hover:scale-110 ${
             isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-300 dark:text-slate-600 hover:text-amber-400'
           }`}
           title="Ulubione"
+          aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
         >
           <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
