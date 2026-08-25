@@ -10,7 +10,7 @@ function getLucideIcon(iconName) {
   return LucideIcons[pascal] || null;
 }
 
-export default function CategorySection({ category, services, gridGap = '14', onFavoriteToggle }) {
+export default function CategorySection({ category, services, gridGap = '14', onFavoriteToggle, onSelectService }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   if (!services || services.length === 0) return null;
@@ -92,7 +92,12 @@ export default function CategorySection({ category, services, gridGap = '14', on
           className="transition-all duration-300 animate-in fade-in-50 pt-1"
         >
           {services.map(service => (
-            <ServiceCard key={service.id} service={service} onFavoriteToggle={onFavoriteToggle} />
+            <ServiceCard 
+              key={service.id} 
+              service={service} 
+              onFavoriteToggle={onFavoriteToggle}
+              onSelectService={onSelectService}
+            />
           ))}
         </div>
       )}

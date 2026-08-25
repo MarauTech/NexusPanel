@@ -2,7 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import ServiceCard from './ServiceCard';
 
-export default function FavoritesSection({ services, favorites, gridGap = '14', onFavoriteToggle }) {
+export default function FavoritesSection({ services, favorites, gridGap = '14', onFavoriteToggle, onSelectService }) {
   const items = services || favorites || [];
   if (!items || items.length === 0) return null;
 
@@ -35,7 +35,12 @@ export default function FavoritesSection({ services, favorites, gridGap = '14', 
         className="transition-all duration-300 animate-in fade-in-50 pt-1"
       >
         {items.map(service => (
-          <ServiceCard key={service.id} service={service} onFavoriteToggle={onFavoriteToggle} />
+          <ServiceCard 
+            key={service.id} 
+            service={service} 
+            onFavoriteToggle={onFavoriteToggle}
+            onSelectService={onSelectService}
+          />
         ))}
       </div>
     </section>

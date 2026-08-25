@@ -6,7 +6,7 @@ import { useSettings } from '../../hooks/useSettings';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 
-export default function ServiceCard({ service, onFavoriteToggle, overrideSettings }) {
+export default function ServiceCard({ service, onFavoriteToggle, onSelectService, overrideSettings }) {
   const { settings: globalSettings } = useSettings();
   const settings = overrideSettings ? { ...globalSettings, ...overrideSettings } : globalSettings;
   const { addToast } = useToast();
@@ -21,6 +21,27 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   const showStatus = settings?.show_status_indicators !== 'false';
   const serviceColor = service.color || '#6366f1';
   const borderRadius = `${settings?.tile_border_radius || '18'}px`;
+
+  const handleCardClick = (e) => {
+    e.preventDefault();
+    if (onSelectService) {
+      onSelectService(service);
+    } else {
+      handleDirectOpen(e);
+    }
+  };
+
+  const handleDirectOpen = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (openInNewTab) {
+      window.open(service.url, '_blank', 'noopener,noreferrer');
+    } else {
+      window.location.href = service.url;
+    }
+  };
 
   // Parse hostname & port from URL for clean display
   let cleanHost = '';
@@ -75,8 +96,8 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
     return (
       <a 
         href={service.url} 
-        onClick={handleClick}
-        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent"
+        onClick={handleCardClick}
+        className="group relative flex items-center justify-between gap-3 p-3 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
         style={{ borderRadius }}
         aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
@@ -132,8 +153,8 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
     return (
       <a 
         href={service.url} 
-        onClick={handleClick}
-        className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent"
+        onClick={handleCardClick}
+        className="group relative flex flex-col justify-between p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
         style={{ borderRadius }}
         aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
       >
@@ -188,7 +209,13 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
             {service.health_response_time && <span>· {service.health_response_time}ms</span>}
             {service.uptime_percentage && <span>· {service.uptime_percentage}% up</span>}
           </div>
-          <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          <div 
+            onClick={handleDirectOpen}
+            className="p-1 text-slate-400 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all cursor-pointer"
+            title="Otwórz bezpośrednio"
+          >
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </div>
         </div>
       </a>
     );
@@ -200,8 +227,8 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
   return (
     <a 
       href={service.url} 
-      onClick={handleClick}
-      className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent"
+      onClick={handleCardClick}
+      className="group relative flex items-center justify-between gap-3 p-3.5 transition-all duration-200 hover:scale-[1.015] active:scale-[0.98] glass-card border border-black/[0.08] dark:border-white/[0.08] shadow-sm hover:shadow-lg focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
       style={{ borderRadius }}
       aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost}`}
     >
@@ -269,7 +296,11 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
           <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
         </button>
 
-        <div className="p-1 text-slate-400 dark:text-slate-500 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
+        <div 
+          onClick={handleDirectOpen}
+          className="p-1 text-slate-400 dark:text-slate-500 group-hover:text-accent group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all cursor-pointer"
+          title="Otwórz bezpośrednio"
+        >
           <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
       </div>

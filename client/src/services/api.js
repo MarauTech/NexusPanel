@@ -52,6 +52,7 @@ const API = {
     reorderServices: (items) => api.put('/services/reorder', { items }),
     seedDemo: (data = {}) => api.post('/services/seed-demo', data),
     clearServices: () => api.post('/services/clear'),
+    probeService: (id) => api.post(`/services/${id}/probe`),
   },
   categories: {
     getCategories: () => api.get('/categories'),

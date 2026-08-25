@@ -12,6 +12,7 @@ import ProxmoxOverviewWidget from '../components/dashboard/ProxmoxOverviewWidget
 import RecentActivityWidget from '../components/dashboard/RecentActivityWidget';
 import SkeletonCard from '../components/common/SkeletonCard';
 import ServiceForm from '../components/admin/ServiceForm';
+import ServiceDetailsDrawer from '../components/dashboard/ServiceDetailsDrawer';
 import NetworkDiscoveryModal from '../components/scanner/NetworkDiscoveryModal';
 import { LayoutGrid, Star, Plus, Radar, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import Button from '../components/common/Button';
@@ -27,6 +28,9 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
+  const [selectedServiceForDrawer, setSelectedServiceForDrawer] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
 
   // Transform flat API data into structured format for components
   const enrichedServices = useMemo(() => {
@@ -334,6 +338,10 @@ export default function Dashboard() {
             <FavoritesSection 
               favorites={favorites} 
               onFavoriteToggle={handleFavoriteToggle}
+              onSelectService={(svc) => {
+                setSelectedServiceForDrawer(svc);
+                setIsDrawerOpen(true);
+              }}
             />
           )}
 
@@ -344,6 +352,10 @@ export default function Dashboard() {
               category={category}
               services={catServices}
               onFavoriteToggle={handleFavoriteToggle}
+              onSelectService={(svc) => {
+                setSelectedServiceForDrawer(svc);
+                setIsDrawerOpen(true);
+              }}
             />
           ))}
 
@@ -358,6 +370,10 @@ export default function Dashboard() {
               }}
               services={other}
               onFavoriteToggle={handleFavoriteToggle}
+              onSelectService={(svc) => {
+                setSelectedServiceForDrawer(svc);
+                setIsDrawerOpen(true);
+              }}
             />
           )}
 
@@ -391,7 +407,39 @@ export default function Dashboard() {
 
       </div>
 
-      {/* Modal Dialogs */}
+      {/* Service Details Drawer */}
+      {isDrawerOpen && selectedServiceForDrawer && (
+        <ServiceDetailsDrawer
+          service={selectedServiceForDrawer}
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            setSelectedServiceForDrawer(null);
+          }}
+          onRefresh={refreshServices}
+          onEdit={(svc) => {
+            setEditingService(svc);
+          }}
+          onDelete={() => {
+            refreshServices();
+          }}
+          onFavoriteToggle={handleFavoriteToggle}
+        />
+      )}
+
+      {/* Edit Service Modal */}
+      {editingService && (
+        <ServiceForm
+          service={editingService}
+          onClose={() => setEditingService(null)}
+          onSuccess={() => {
+            setEditingService(null);
+            refreshServices();
+          }}
+        />
+      )}
+
+      {/* Add Service Modal */}
       {isAddModalOpen && (
         <ServiceForm
           onClose={() => setIsAddModalOpen(false)}
@@ -402,6 +450,7 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Network Discovery Modal */}
       {isScanModalOpen && (
         <NetworkDiscoveryModal
           onClose={() => setIsScanModalOpen(false)}
