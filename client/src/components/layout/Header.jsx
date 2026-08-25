@@ -89,16 +89,6 @@ export default function Header() {
               <span className="font-semibold">{language.toUpperCase()}</span>
             </button>
 
-            {/* Kiosk Mode */}
-            <Link
-              to="/kiosk"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#141b27] dark:hover:bg-[#1c2534] dark:text-slate-400 dark:hover:text-slate-200 dark:border-[#1d2635] transition-colors shadow-xs"
-              title="Tryb Kiosk / Pełnoekranowy"
-            >
-              <Tv className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>Kiosk</span>
-            </Link>
-
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -194,7 +184,7 @@ export default function Header() {
         {/* Mobile Dropdown Menu Drawer */}
         {mobileMenuOpen && (
           <div className="md:hidden pt-3 pb-2 border-t border-slate-200 dark:border-[#18202d] mt-2.5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="grid grid-cols-2 gap-2 text-xs font-medium">
+            <div className="text-xs font-medium">
               {isAdmin ? (
                 <Link
                   to="/"
@@ -212,14 +202,6 @@ export default function Header() {
                   <span>{t('header.settings', 'Ustawienia')}</span>
                 </Link>
               )}
-
-              <Link
-                to="/kiosk"
-                className="flex items-center justify-center gap-2 p-2.5 rounded-md bg-slate-100 dark:bg-[#141b27] border border-slate-300 dark:border-[#1d2635] text-slate-800 dark:text-slate-200 text-center"
-              >
-                <Tv className="w-4 h-4" />
-                <span>Tryb Kiosk</span>
-              </Link>
             </div>
 
             {/* Mobile Server Connection Button */}

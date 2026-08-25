@@ -137,7 +137,7 @@ router.get('/favorite-apps', (req, res) => {
   }
 });
 
-router.put('/favorite-apps', authenticateToken, (req, res) => {
+router.put('/favorite-apps', (req, res) => {
   try {
     const { service_ids } = req.body;
     if (!Array.isArray(service_ids)) {

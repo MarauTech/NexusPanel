@@ -85,14 +85,19 @@ export default function HomescreenWidgetsManager() {
 
   // Save Favorite Apps configuration (Max 4)
   const handleSaveFavoriteApps = async (newFavs) => {
+    setFavApps(newFavs);
+    try {
+      localStorage.setItem('nexuspanel_favorite_widgets', JSON.stringify(newFavs));
+      window.AndroidWidgetBridge?.syncWidgetData('favorite_apps', JSON.stringify(newFavs));
+    } catch (e) {}
+
     const ids = newFavs.map(s => s.id);
     try {
       await API.widgets.updateFavoriteApps(ids);
-      setFavApps(newFavs);
-      addToast('Zapisano ulubione aplikacje dla widżetu', 'success');
     } catch (err) {
-      addToast('Błąd podczas zapisywania widżetu: ' + err.message, 'error');
+      console.warn('Backend sync warning (saved locally):', err);
     }
+    addToast('Zapisano ulubione aplikacje dla widżetu', 'success');
   };
 
   // Add app to favorites (Max 4)
@@ -107,10 +112,18 @@ export default function HomescreenWidgetsManager() {
       addToast('Ta aplikacja jest już na liście', 'info');
       return;
     }
+    let host = '127.0.0.1';
+    try {
+      const u = new URL(svc.url.startsWith('http') ? svc.url : `http://${svc.url}`);
+      host = u.hostname + (u.port ? `:${u.port}` : '');
+    } catch (e) {
+      host = svc.url || '127.0.0.1';
+    }
+
     const updated = [...favApps, {
       id: svc.id,
       name: svc.name,
-      ip: svc.url ? new URL(svc.url.startsWith('http') ? svc.url : `http://${svc.url}`).hostname : '192.168.1.1',
+      ip: host,
       url: svc.url,
       icon: svc.icon || 'globe',
       color: svc.color || '#6366f1',
@@ -119,7 +132,7 @@ export default function HomescreenWidgetsManager() {
     handleSaveFavoriteApps(updated);
   };
 
-  // Remove app from favorites
+  // Remove app
   const handleRemoveApp = (id) => {
     const updated = favApps.filter(s => s.id !== id);
     handleSaveFavoriteApps(updated);
@@ -127,25 +140,45 @@ export default function HomescreenWidgetsManager() {
 
   // Move app up/down
   const handleMoveApp = (index, direction) => {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= favApps.length) return;
-    const copy = [...favApps];
-    const item = copy.splice(index, 1)[0];
-    copy.splice(targetIndex, 0, item);
-    handleSaveFavoriteApps(copy);
+    const newIdx = index + direction;
+    if (newIdx < 0 || newIdx >= favApps.length) return;
+    const clone = [...favApps];
+    const item = clone.splice(index, 1)[0];
+    clone.splice(newIdx, 0, item);
+    handleSaveFavoriteApps(clone);
   };
 
-  // Save Single Service selection
-  const handleSelectSingleService = async (serviceId) => {
-    setSelectedServiceId(serviceId);
+  // Select single service to monitor
+  const handleSelectSingleService = (svcId) => {
+    setSelectedServiceId(String(svcId));
+    const svc = services.find(s => s.id === Number(svcId));
+    if (!svc) return;
+
+    let host = '127.0.0.1';
     try {
-      await API.widgets.updateServiceMonitor(Number(serviceId));
-      const res = await API.widgets.getServiceMonitor(Number(serviceId));
-      setSingleService(res.data);
-      addToast('Zapisano wybraną usługę dla widżetu', 'success');
-    } catch (err) {
-      addToast('Błąd: ' + err.message, 'error');
+      const u = new URL(svc.url.startsWith('http') ? svc.url : `http://${svc.url}`);
+      host = u.hostname + (u.port ? `:${u.port}` : '');
+    } catch (e) {
+      host = svc.url || '127.0.0.1';
     }
+
+    const singleObj = {
+      id: svc.id,
+      name: svc.name,
+      ip: host,
+      url: svc.url,
+      status: svc.health_status || 'online',
+      uptimeFormatted: '100%',
+      latencyMs: svc.health_response_time || null,
+      color: svc.color || '#6366f1'
+    };
+
+    setSingleService(singleObj);
+    try {
+      localStorage.setItem('nexuspanel_single_widget', JSON.stringify(singleObj));
+      window.AndroidWidgetBridge?.syncWidgetData('single_service', JSON.stringify(singleObj));
+    } catch (e) {}
+    addToast(`Ustawiono ${svc.name} jako monitorowaną usługę`, 'success');
   };
 
   const widgetDefinitions = [

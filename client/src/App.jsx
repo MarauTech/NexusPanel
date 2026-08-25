@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/layout/Layout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Admin from './pages/Admin.jsx';
-import Kiosk from './pages/Kiosk.jsx';
 import Login from './pages/Login.jsx';
 import Setup from './pages/Setup.jsx';
 import ConnectServerScreen from './pages/ConnectServerScreen.jsx';
@@ -113,7 +112,6 @@ function App() {
   return (
     <Routes>
       <Route path="/connect" element={<ConnectServerScreen onConnected={() => checkAuth()} />} />
-      <Route path="/kiosk" element={<Kiosk />} />
       <Route path="/setup" element={<SetupRouteGuard><Setup /></SetupRouteGuard>} />
       <Route path="/login" element={<LoginRouteGuard><Login /></LoginRouteGuard>} />
       
