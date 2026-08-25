@@ -8,13 +8,14 @@ import Login from './pages/Login.jsx';
 import Setup from './pages/Setup.jsx';
 import ConnectServerScreen from './pages/ConnectServerScreen.jsx';
 import { useAuth } from './contexts/AuthContext.jsx';
+import { getServerUrl } from './services/api.js';
 import LoadingSpinner from './components/common/LoadingSpinner.jsx';
 
 function ProtectedAdminRoute({ children }) {
   const { isAuthenticated, isLoading, setupCompleted, serverConnected } = useAuth();
   const location = useLocation();
 
-  if (!serverConnected) {
+  if (!serverConnected || !isAuthenticated) {
     return <ConnectServerScreen />;
   }
 
@@ -86,18 +87,27 @@ function LoginRouteGuard({ children }) {
 }
 
 function App() {
-  const { setupCompleted, serverConnected, isLoading, checkAuth } = useAuth();
-
-  if (!serverConnected) {
-    return <ConnectServerScreen onConnected={() => checkAuth()} />;
-  }
+  const { setupCompleted, serverConnected, isAuthenticated, isLoading, checkAuth } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-primary">
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
         <LoadingSpinner size="lg" />
       </div>
     );
+  }
+
+  const isCapacitorOrStandalone = Boolean(
+    window.Capacitor || 
+    window.location.origin.includes('localhost') || 
+    window.location.protocol === 'file:' || 
+    window.location.protocol === 'capacitor:' ||
+    !getServerUrl()
+  );
+
+  // If on mobile client and not yet authenticated or server not connected -> show 3-step setup (Language -> IP -> Login)
+  if ((!serverConnected || !isAuthenticated) && isCapacitorOrStandalone) {
+    return <ConnectServerScreen onConnected={() => checkAuth()} />;
   }
 
   return (
