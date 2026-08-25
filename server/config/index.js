@@ -1,11 +1,14 @@
+import fs from 'fs';
+import path from 'path';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const isProd = NODE_ENV === 'production';
+const DB_PATH = process.env.DB_PATH || './data/nexuspanel.db';
 
-// Production secret enforcement with automatic secure cryptographic fallback
+// Production secret enforcement with automatic persistent cryptographic fallback
 let jwtSecret = process.env.JWT_SECRET;
 const INSECURE_DEFAULTS = [
   'nexuspanel-dev-secret-change-me',
@@ -17,8 +20,26 @@ const INSECURE_DEFAULTS = [
 
 if (!jwtSecret || INSECURE_DEFAULTS.includes(jwtSecret) || jwtSecret.length < 32) {
   if (isProd) {
-    jwtSecret = crypto.randomBytes(32).toString('hex');
-    console.warn('[WARN] JWT_SECRET was missing or shorter than 32 chars. A secure random 256-bit key has been generated automatically.');
+    try {
+      const dataDir = path.dirname(path.resolve(DB_PATH));
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      const secretFilePath = path.join(dataDir, '.jwt_secret');
+      if (fs.existsSync(secretFilePath)) {
+        const savedSecret = fs.readFileSync(secretFilePath, 'utf8').trim();
+        if (savedSecret && savedSecret.length >= 32) {
+          jwtSecret = savedSecret;
+        }
+      }
+      if (!jwtSecret || jwtSecret.length < 32) {
+        jwtSecret = crypto.randomBytes(32).toString('hex');
+        fs.writeFileSync(secretFilePath, jwtSecret, { mode: 0o600 });
+        console.warn('[WARN] JWT_SECRET was generated and persisted to data/.jwt_secret.');
+      }
+    } catch (err) {
+      jwtSecret = crypto.randomBytes(32).toString('hex');
+    }
   } else {
     jwtSecret = 'nexuspanel-dev-secret-change-me-for-local-testing-only-32chars!';
   }

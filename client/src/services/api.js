@@ -19,6 +19,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      const code = error.response.data?.code;
+      if (code === 'INVALID_TOKEN' || code === 'TOKEN_EXPIRED' || code === 'USER_NOT_FOUND' || code === 'TOKEN_REVOKED') {
+        localStorage.removeItem('nexuspanel_token');
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/setup') {
+          window.location.href = '/login';
+        }
+      }
+    }
     return Promise.reject(error);
   }
 );
