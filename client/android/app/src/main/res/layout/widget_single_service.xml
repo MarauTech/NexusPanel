@@ -15,16 +15,11 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="6dp">
 
-        <TextView
+        <ImageView
             android:id="@+id/widget_single_icon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:background="@drawable/widget_icon_badge_indigo"
-            android:gravity="center"
-            android:text="PL"
-            android:textColor="#818CF8"
-            android:textSize="11sp"
-            android:textStyle="bold" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:scaleType="centerInside" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -38,8 +33,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Plex Media Server"
-                android:textColor="#F1F5F9"
-                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:singleLine="true" />
 
@@ -48,9 +43,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="192.168.10.20"
-                android:textColor="#94A3B8"
-                android:textSize="9sp"
+                android:textColor="#CBD5E1"
+                android:textSize="11sp"
                 android:fontFamily="monospace"
+                android:layout_marginTop="1.5dp"
                 android:singleLine="true" />
         </LinearLayout>
 
@@ -60,13 +56,13 @@
             android:layout_height="wrap_content"
             android:text="🟢 Online"
             android:textColor="#34D399"
-            android:textSize="9.5sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:background="@drawable/widget_button_bg"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="1.5dp"
-            android:paddingBottom="1.5dp" />
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
     </LinearLayout>
 
     <!-- Bottom Metric Chips (Uptime & Latency) -->
@@ -90,8 +86,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="UPTIME"
-                android:textColor="#64748B"
-                android:textSize="8sp" />
+                android:textColor="#94A3B8"
+                android:textSize="8.5sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/widget_single_uptime"
@@ -99,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:text="14d 6h"
                 android:textColor="#38BDF8"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginTop="1dp" />
         </LinearLayout>
@@ -118,8 +115,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CZAS ODPOWIEDZI"
-                android:textColor="#64748B"
-                android:textSize="8sp" />
+                android:textColor="#94A3B8"
+                android:textSize="8.5sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/widget_single_latency"
@@ -127,7 +125,7 @@
                 android:layout_height="wrap_content"
                 android:text="8 ms"
                 android:textColor="#34D399"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginTop="1dp" />
         </LinearLayout>

@@ -100,9 +100,12 @@ public class SingleServiceWidget extends AppWidgetProvider {
         final boolean hasLatency = json.has("latencyMs") && !json.isNull("latencyMs");
         final String latency = hasLatency ? (json.optInt("latencyMs") + " ms") : "--";
 
+        final String icon = json.optString("icon", "globe");
+        final String color = json.optString("color", "#6366F1");
+
         views.setTextViewText(R.id.widget_single_name, name);
         views.setTextViewText(R.id.widget_single_ip, ip);
-        views.setTextViewText(R.id.widget_single_icon, WidgetUpdateHelper.makeMonogram(name));
+        views.setImageViewBitmap(R.id.widget_single_icon, WidgetUpdateHelper.getServiceIconBitmap(context, name, icon, color));
         views.setTextViewText(R.id.widget_single_uptime, uptime);
         views.setTextViewText(R.id.widget_single_latency, latency);
 

@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -45,10 +46,6 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
                 context, 100 + appWidgetId, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_fav_badge, rootPendingIntent);
 
-        // Read specific configuration for this widget instance
-        JSONObject config = WidgetUpdateHelper.getWidgetConfig(context, appWidgetId);
-        JSONArray configuredIds = config.optJSONArray("service_ids");
-
         // Try cached data first
         String cachedJson = WidgetUpdateHelper.getCachedJson(context, "fav_apps_" + appWidgetId);
         if (cachedJson == null) {
@@ -65,16 +62,7 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
         // Fetch live metrics in background
         Executors.newSingleThreadExecutor().execute(() -> {
             String serverUrl = WidgetUpdateHelper.getServerUrl(context);
-            StringBuilder idsParam = new StringBuilder();
-            if (configuredIds != null && configuredIds.length() > 0) {
-                for (int i = 0; i < configuredIds.length(); i++) {
-                    if (i > 0) idsParam.append(",");
-                    idsParam.append(configuredIds.optInt(i));
-                }
-            }
-
-            String endpoint = serverUrl + "/api/widgets/favorite-apps" 
-                    + (idsParam.length() > 0 ? ("?ids=" + idsParam.toString()) : "");
+            String endpoint = serverUrl + "/api/widgets/favorite-apps";
 
             try {
                 URL url = new URL(endpoint);
@@ -89,7 +77,7 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
                     reader.close();
 
                     String raw = sb.toString();
-                    WidgetUpdateHelper.setCachedJson(context, "fav_apps_" + appWidgetId, raw);
+                    WidgetUpdateHelper.setCachedJson(context, "favorite_apps", raw);
                     JSONArray apps = new JSONArray(raw);
 
                     new Handler(Looper.getMainLooper()).post(() -> {
@@ -125,12 +113,16 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
                     String name = app.optString("name", "Usługa");
                     String ip = app.optString("ip", "--");
                     String svcUrl = app.optString("url", "");
+                    String icon = app.optString("icon", "globe");
+                    String color = app.optString("color", "#6366F1");
                     String status = app.optString("health_status", "unknown");
 
                     views.setViewVisibility(cardViews[i], View.VISIBLE);
                     views.setTextViewText(nameViews[i], name);
                     views.setTextViewText(ipViews[i], ip);
-                    views.setTextViewText(iconViews[i], WidgetUpdateHelper.makeMonogram(name));
+
+                    Bitmap iconBmp = WidgetUpdateHelper.getServiceIconBitmap(context, name, icon, color);
+                    views.setImageViewBitmap(iconViews[i], iconBmp);
 
                     if ("online".equalsIgnoreCase(status)) {
                         views.setImageViewResource(statusViews[i], R.drawable.widget_status_online);

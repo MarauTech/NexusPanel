@@ -9,6 +9,7 @@ import { useServices } from '../../hooks/useServices';
 import { useToast } from '../../contexts/ToastContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import Button from '../common/Button';
+import BrandIcon from '../common/BrandIcon';
 
 export default function HomescreenWidgetsManager() {
   const { services, loading: servicesLoading, refresh: refreshServices } = useServices();
@@ -485,12 +486,12 @@ export default function HomescreenWidgetsManager() {
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="text-[11px] font-bold text-slate-400 w-4">{idx + 1}.</span>
-                      <div className="w-6 h-6 rounded bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-[10px] font-bold">
-                        {app.name.substring(0, 2).toUpperCase()}
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-[#182030] border border-slate-200 dark:border-[#223048] flex items-center justify-center p-1 flex-shrink-0 shadow-xs">
+                        <BrandIcon name={app.icon || app.name} color={app.color} className="w-4 h-4" fallbackText={app.name} />
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{app.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">{app.ip}</div>
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">{app.name}</div>
+                        <div className="text-[10.5px] text-slate-400 font-mono truncate">{app.ip}</div>
                       </div>
                     </div>
 
@@ -741,20 +742,17 @@ export default function HomescreenWidgetsManager() {
                           isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'
                         }`}
                       >
-                        {/* Logo Monogram */}
-                        <div 
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-[10.5px] font-bold shadow-sm"
-                          style={{ backgroundColor: `${app.color}20`, color: app.color }}
-                        >
-                          {app.name.substring(0, 2).toUpperCase()}
+                        {/* Logo Icon */}
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center p-1.5 flex-shrink-0 shadow-sm">
+                          <BrandIcon name={app.icon || app.name} color={app.color} className="w-5 h-5" fallbackText={app.name} />
                         </div>
 
                         {/* Name & IP */}
                         <div className="min-w-0 flex-1">
-                          <div className="text-[11.5px] font-bold truncate leading-tight">{app.name}</div>
+                          <div className="text-[13px] font-bold text-slate-900 dark:text-white truncate leading-tight">{app.name}</div>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[9px] text-slate-400 font-mono truncate">{app.ip}</span>
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            <span className="text-[10.5px] text-slate-600 dark:text-slate-300 font-mono font-medium truncate">{app.ip}</span>
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${
                               app.health_status === 'offline' ? 'bg-rose-500' :
                               app.health_status === 'degraded' ? 'bg-amber-500' : 'bg-emerald-500'
                             }`} />
@@ -905,16 +903,13 @@ export default function HomescreenWidgetsManager() {
                   isDark ? 'bg-[#0f1523]/95 border-[#1e293b] text-white' : 'bg-white/95 border-slate-200 text-slate-900'
                 }`}>
                   <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
-                        style={{ backgroundColor: `${singleService?.color || '#6366f1'}20`, color: singleService?.color || '#6366f1' }}
-                      >
-                        {(singleService?.name || 'US').substring(0, 2).toUpperCase()}
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center p-2 flex-shrink-0 shadow-sm">
+                        <BrandIcon name={singleService?.icon || singleService?.name} color={singleService?.color} className="w-5 h-5" fallbackText={singleService?.name} />
                       </div>
                       <div>
-                        <div className="text-xs font-bold">{singleService?.name || 'Brak wybranej usługi'}</div>
-                        <div className="text-[9.5px] text-slate-400 font-mono">{singleService?.ip || '--'}</div>
+                        <div className="text-sm font-bold text-slate-900 dark:text-white">{singleService?.name || 'Brak wybranej usługi'}</div>
+                        <div className="text-xs text-slate-600 dark:text-slate-300 font-mono font-medium">{singleService?.ip || '--'}</div>
                       </div>
                     </div>
 
