@@ -87,29 +87,29 @@ export default function ProxmoxSettings() {
   if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">{t('common.loading', 'Ładowanie ustawień...')}</div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 max-w-3xl">
-      <div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+    <div className="space-y-5 animate-in fade-in duration-200 max-w-3xl">
+      <div className="pb-2 border-b border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
           {t('proxmox.title', 'Integracja z Proxmox VE')}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-400 mt-0.5">
           {t('proxmox.subtitle', 'Podłącz swój węzeł Proxmox VE, aby wyświetlać telemetrię CPU/RAM/Dysk oraz stan kontenerów LXC i maszyn VM.')}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Enable Integration Card */}
-        <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
+        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#e57000] flex items-center justify-center text-white shadow-md">
-                <BrandIcon name="proxmox" color="#ffffff" className="w-6 h-6" />
+              <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-orange-400">
+                <BrandIcon name="proxmox" color="#e57000" className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h3 className="text-xs font-semibold text-slate-200">
                   {t('proxmox.enable_title', 'Włącz telemetrię Proxmox VE')}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-[11px] text-slate-400">
                   {t('proxmox.enable_desc', 'Pobiera metryki i statusy maszyn w czasie rzeczywistym')}
                 </p>
               </div>
@@ -121,16 +121,15 @@ export default function ProxmoxSettings() {
                 name="proxmox_enabled"
                 checked={formData.proxmox_enabled === 'true'}
                 onChange={handleChange}
-                className="sr-only peer"
+                className="w-4 h-4 rounded accent-blue-500 cursor-pointer"
               />
-              <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
             </label>
           </div>
         </div>
 
         {/* Proxmox API Credentials Card */}
-        <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white pb-2 border-b border-black/[0.06] dark:border-white/10">
+        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 pb-2 border-b border-[#1c2534]">
             {t('proxmox.creds_title', 'Dane węzła i Token API Proxmox')}
           </h3>
 
@@ -183,13 +182,13 @@ export default function ProxmoxSettings() {
             />
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer pt-1">
+          <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
             <input
               type="checkbox"
               name="proxmox_verify_ssl"
               checked={formData.proxmox_verify_ssl === 'true'}
               onChange={handleChange}
-              className="w-4 h-4 rounded accent-accent"
+              className="w-4 h-4 rounded accent-blue-500"
             />
             <span>{t('proxmox.verify_ssl_label', 'Weryfikuj certyfikat SSL (Odznacz, jeśli używasz certyfikatu self-signed)')}</span>
           </label>
@@ -197,25 +196,25 @@ export default function ProxmoxSettings() {
 
         {/* Test Result Feedback */}
         {testResult && (
-          <div className={`p-4 rounded-2xl border ${
+          <div className={`p-3 rounded-lg border text-xs flex items-center gap-2.5 font-mono ${
             testResult.success 
-              ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-300' 
-              : 'bg-rose-500/10 border-rose-500/25 text-rose-600 dark:text-rose-300'
-          } flex items-center gap-3 text-xs`}>
-            {testResult.success ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
-            <span className="font-semibold">{testResult.message}</span>
+              ? 'bg-[#18202d] border-emerald-500/30 text-emerald-400' 
+              : 'bg-[#18202d] border-rose-500/30 text-rose-400'
+          }`}>
+            {testResult.success ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
+            <span className="font-medium">{testResult.message}</span>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-2.5 pt-1">
           <Button
             type="button"
             variant="secondary"
             onClick={handleTestConnection}
             isLoading={testing}
             disabled={!formData.proxmox_host || !formData.proxmox_token_id}
-            className="text-xs font-bold"
+            className="text-xs font-medium"
           >
             {t('proxmox.test_btn', 'Testuj połączenie')}
           </Button>
@@ -223,7 +222,7 @@ export default function ProxmoxSettings() {
           <Button
             type="submit"
             isLoading={saving}
-            className="px-6 py-2.5 shadow-lg shadow-accent/25 text-xs font-bold"
+            className="px-5 py-2 text-xs font-medium"
           >
             {t('proxmox.save_btn', 'Zapisz ustawienia Proxmox')}
           </Button>

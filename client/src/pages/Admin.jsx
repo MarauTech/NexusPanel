@@ -38,27 +38,27 @@ export default function Admin() {
   ];
 
   return (
-    <div className="p-4 sm:p-8 lg:p-12 w-full">
-      <div className="flex flex-col md:flex-row min-h-[calc(100vh-140px)] gap-6">
+    <div className="p-4 sm:p-6 lg:p-8 w-full max-w-[1920px] mx-auto animate-in fade-in duration-200">
+      <div className="flex flex-col md:flex-row min-h-[calc(100vh-140px)] gap-5">
         
         {/* Mobile nav toggle */}
-        <div className="md:hidden p-4 rounded-2xl glass-card flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
-            <Settings className="w-5 h-5 text-accent" />
+        <div className="md:hidden p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635] flex items-center justify-between">
+          <div className="flex items-center gap-2 font-semibold text-sm text-slate-200">
+            <Settings className="w-4 h-4 text-blue-400" />
             <span>{t('admin.title', 'Menu Ustawień')}</span>
           </div>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-            className="p-2 rounded-xl glass-pill text-slate-500 hover:text-slate-900 dark:hover:text-white"
+            className="p-1.5 rounded-md bg-[#18202d] border border-[#222d41] text-slate-400 hover:text-white"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Apple Style Glass Sidebar (Navigation Dock) */}
-        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-64 flex-shrink-0 space-y-3`}>
-          <div className="p-3 rounded-[24px] glass-card space-y-1 shadow-xl border border-black/[0.08] dark:border-white/10">
-            <div className="px-3 py-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {/* Technical Sysadmin Sidebar */}
+        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-60 flex-shrink-0 space-y-3`}>
+          <div className="p-2 rounded-lg bg-[#141b27] border border-[#1d2635] space-y-1">
+            <div className="px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold border-b border-[#1c2534] mb-1">
               {t('admin.preferences', 'Preferencje')}
             </div>
             
@@ -72,13 +72,13 @@ export default function Admin() {
                   key={tab.id}
                   to={tab.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 font-medium text-xs sm:text-sm ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-md transition-colors text-xs font-medium ${
                     isActive 
-                      ? 'bg-accent text-white shadow-md shadow-accent/25 font-bold scale-[1.02]' 
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-[#1c2534] text-white border border-[#2b394f]' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#18202d] border border-transparent'
                   }`}
                 >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                   <span className="truncate">{tab.label}</span>
                 </NavLink>
               );
@@ -88,16 +88,16 @@ export default function Admin() {
           {/* Quick Back to Dashboard Button */}
           <Link
             to="/"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-[18px] glass-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all hover:scale-[1.02]"
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[#141b27] hover:bg-[#18202d] border border-[#1d2635] text-slate-300 hover:text-white text-xs font-medium transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>{t('admin.back_to_dashboard', 'Wróć do Pulpitu')}</span>
           </Link>
         </div>
 
-        {/* Content Pane in iOS Liquid Glass Card */}
-        <div className="flex-1 overflow-x-hidden">
-          <div className="glass-card rounded-[28px] p-6 sm:p-8 min-h-full shadow-2xl transition-all duration-300 border border-black/[0.08] dark:border-white/10">
+        {/* Content Pane */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-[#141b27] border border-[#1d2635] rounded-lg p-5 sm:p-6 min-h-full">
             <Routes>
               <Route path="/" element={<Navigate to="general" replace />} />
               <Route path="general" element={<GeneralSettings />} />

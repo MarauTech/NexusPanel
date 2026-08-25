@@ -28,35 +28,29 @@ function SortableCategory({ id, category, onEdit, onDelete, t }) {
     zIndex: isDragging ? 10 : 0,
   };
 
-  const catColor = category.color || '#6366f1';
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3.5 p-3.5 rounded-2xl glass-card transition-all ${
+      className={`flex items-center gap-3 p-3 rounded-lg bg-[#111622] border transition-colors ${
         isDragging 
-          ? 'shadow-2xl border-accent opacity-90 scale-[1.02]' 
-          : 'hover:border-black/[0.15] dark:hover:border-white/20'
+          ? 'shadow-xl border-blue-500 bg-[#18202d]' 
+          : 'border-[#1d2635] hover:border-[#2b394f]'
       }`}
     >
-      <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 -ml-1">
-        <GripVertical className="w-5 h-5" />
+      <div {...attributes} {...listeners} className="cursor-grab text-slate-500 hover:text-slate-200 p-1 -ml-1">
+        <GripVertical className="w-4 h-4" />
       </div>
       
       <div 
-        className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0 shadow-md relative overflow-hidden text-white" 
-        style={{ 
-          background: `linear-gradient(135deg, ${catColor} 0%, ${catColor}cc 100%)`,
-        }}
+        className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/15 pointer-events-none" />
-        <BrandIcon name={category.icon || 'folder'} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={category.name} />
+        <BrandIcon name={category.icon || 'folder'} color={category.color} className="w-4 h-4" fallbackText={category.name} />
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className="font-extrabold text-sm text-slate-900 dark:text-white block truncate">{category.name}</span>
-        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+        <span className="font-medium text-sm text-slate-100 block truncate">{category.name}</span>
+        <span className="text-[11px] text-slate-400 font-mono">
           {category.service_count !== undefined 
             ? t('categories.services_count', `${category.service_count} przypisanych usług`).replace('{count}', category.service_count)
             : t('form.category', 'Kategoria')}
@@ -66,17 +60,17 @@ function SortableCategory({ id, category, onEdit, onDelete, t }) {
       <div className="flex items-center gap-1">
         <button 
           onClick={() => onEdit(category)} 
-          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-white hover:bg-[#18202d] rounded-md transition-colors cursor-pointer"
           title={t('common.edit', 'Edytuj')}
         >
-          <Edit2 className="w-4 h-4" />
+          <Edit2 className="w-3.5 h-3.5" />
         </button>
         <button 
           onClick={() => onDelete(category)} 
-          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
           title={t('common.delete', 'Usuń')}
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
@@ -179,24 +173,30 @@ export default function CategoryManager() {
   if (loading) return <div className="p-8 text-center text-slate-500 animate-pulse">{t('common.loading', 'Ładowanie kategorii...')}</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#1c2534]">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
             {t('categories.title', 'Zarządzanie Kategoriami')}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             {t('categories.subtitle', 'Grupuj kafelki w sekcje (np. Infrastruktura, Smart Home, Media).')}
           </p>
         </div>
-        <Button icon={Plus} onClick={handleOpenAdd} className="shadow-lg shadow-accent/25 text-xs font-bold">
-          {t('categories.btn_add', '+ Dodaj kategorię')}
+        <Button 
+          variant="secondary"
+          size="sm"
+          icon={Plus} 
+          onClick={handleOpenAdd} 
+          className="text-xs font-medium"
+        >
+          {t('categories.btn_add', 'Dodaj kategorię')}
         </Button>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={localItems.map(c => c.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {localItems.map(category => (
               <SortableCategory
                 key={category.id}
@@ -212,15 +212,15 @@ export default function CategoryManager() {
       </DndContext>
 
       {localItems.length === 0 && (
-        <div className="py-12 text-center text-slate-500 border border-dashed border-black/[0.1] dark:border-white/10 rounded-[24px] glass-card p-6">
-          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">
+        <div className="py-12 text-center text-slate-400 border border-dashed border-[#1d2635] rounded-lg bg-[#111622] p-6">
+          <p className="font-semibold text-sm text-slate-200 mb-1">
             {t('categories.no_categories', 'Brak utworzonych kategorii')}
           </p>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             {t('categories.no_categories_desc', 'Kategorie pozwalają dzielić usługi na logiczne bloki na pulpicie.')}
           </p>
-          <Button icon={Plus} size="sm" onClick={handleOpenAdd}>
-            {t('categories.add_first', '+ Dodaj pierwszą kategorię')}
+          <Button variant="secondary" icon={Plus} size="sm" onClick={handleOpenAdd}>
+            {t('categories.add_first', 'Dodaj pierwszą kategorię')}
           </Button>
         </div>
       )}
@@ -242,21 +242,21 @@ export default function CategoryManager() {
             />
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">
                 {t('categories.icon_label', 'Ikona kategorii')}
               </label>
               <div className="flex items-center gap-2.5">
                 <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm relative overflow-hidden"
-                  style={{ backgroundColor: formData.color || '#6366f1' }}
+                  className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0"
                 >
-                  <BrandIcon name={formData.icon || 'folder'} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={formData.name} />
+                  <BrandIcon name={formData.icon || 'folder'} color={formData.color} className="w-4 h-4" fallbackText={formData.name} />
                 </div>
                 <Button
                   type="button"
                   variant="secondary"
+                  size="sm"
                   onClick={() => setShowIconPicker(true)}
-                  className="flex-1 text-xs py-2 font-bold"
+                  className="flex-1 text-xs"
                 >
                   {t('categories.icon_btn', 'Wybierz ikonę z biblioteki')}
                 </Button>
@@ -264,17 +264,17 @@ export default function CategoryManager() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 tracking-tight">
+              <label className="block text-xs font-medium text-slate-300 mb-2">
                 {t('categories.color_label', 'Kolor kategorii')}
               </label>
               <ColorPicker color={formData.color} onChange={c => setFormData(prev => ({ ...prev, color: c }))} />
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-black/[0.06] dark:border-white/10">
-              <Button type="button" variant="ghost" onClick={() => setIsFormOpen(false)}>
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-[#1c2534]">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setIsFormOpen(false)}>
                 {t('common.cancel', 'Anuluj')}
               </Button>
-              <Button type="submit">
+              <Button type="submit" size="sm">
                 {editingCat ? t('common.save', 'Zapisz zmiany') : t('categories.btn_add', 'Utwórz kategorię')}
               </Button>
             </div>

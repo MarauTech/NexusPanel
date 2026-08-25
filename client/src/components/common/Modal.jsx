@@ -17,41 +17,38 @@ export default function Modal({ title, children, onClose, footer, maxWidth = 'ma
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-x-hidden overflow-y-auto select-none">
-      {/* Blurred visionOS / Umbrel OS Backdrop */}
+      {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/75 backdrop-blur-2xl transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 bg-black/75 transition-opacity animate-in fade-in duration-150"
         onClick={onClose}
       />
       
-      {/* Liquid Glass Modal Card */}
-      <div className={`relative glass-card rounded-[28px] border border-white/20 shadow-2xl w-full ${maxWidth} max-h-[88vh] flex flex-col animate-in fade-in zoom-in-95 duration-200 overflow-hidden z-10 my-auto`}>
+      {/* Solid Technical Modal Card */}
+      <div className={`relative bg-[#141b27] rounded-lg border border-[#1d2635] shadow-2xl w-full ${maxWidth} max-h-[90vh] flex flex-col animate-in fade-in duration-150 overflow-hidden z-10 my-auto text-slate-200`}>
         
-        {/* Specular Top Shine */}
-        <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
-
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.02] flex-shrink-0">
-          <h2 className="text-base sm:text-lg font-extrabold text-text-primary tracking-tight truncate pr-4">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#1c2534] bg-[#111622] flex-shrink-0">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 truncate pr-4">
             {title}
           </h2>
           <button 
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full glass-pill text-text-secondary hover:text-text-primary transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+            className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors flex-shrink-0"
             title="Zamknij (Esc)"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Scrollable Body with Clean Dark Glass Scrollbar */}
-        <div className="p-6 overflow-y-auto custom-scrollbar min-h-0 space-y-4 text-left select-text">
+        {/* Scrollable Body */}
+        <div className="p-5 overflow-y-auto custom-scrollbar min-h-0 space-y-4 text-left select-text text-xs">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-white/10 bg-white/[0.02] flex items-center justify-end gap-3 flex-shrink-0">
+          <div className="px-5 py-3.5 border-t border-[#1c2534] bg-[#111622] flex items-center justify-end gap-2.5 flex-shrink-0">
             {footer}
           </div>
         )}

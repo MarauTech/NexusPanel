@@ -181,15 +181,15 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         
-        {/* Modern 3-Step Pill Tab Bar with Clear Active Contrast */}
-        <div className="flex items-center p-1.5 rounded-2xl bg-black/[0.04] dark:bg-black/40 border border-black/[0.08] dark:border-white/10 gap-1.5">
+        {/* Modern 3-Step Tab Bar matching dashboard filter tabs */}
+        <div className="flex items-center p-1 rounded-lg bg-[#18202d] border border-[#222d41] gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('basic')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'basic'
-                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+                ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -199,10 +199,10 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
           <button
             type="button"
             onClick={() => setActiveTab('appearance')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'appearance'
-                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+                ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
             }`}
           >
             <Palette className="w-3.5 h-3.5" />
@@ -212,10 +212,10 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
           <button
             type="button"
             onClick={() => setActiveTab('advanced')}
-            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            className={`flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
               activeTab === 'advanced'
-                ? 'bg-accent text-white shadow-md shadow-accent/25 scale-[1.01]'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.03] dark:hover:bg-white/5'
+                ? 'bg-[#1c2534] text-white border border-[#2b394f]'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
@@ -227,22 +227,22 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             TAB 1: PODSTAWOWE
            ========================================================= */}
         {activeTab === 'basic' && (
-          <div className="space-y-4 animate-in fade-in duration-200">
+          <div className="space-y-4 animate-in fade-in duration-150">
             {/* Auto Catalog Suggestion Pill */}
             {suggestion && (
-              <div className="p-3 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1">
-                <div className="flex items-center gap-2.5">
-                  <Sparkles className="w-4 h-4 text-accent animate-pulse" />
-                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+              <div className="p-2.5 rounded-lg bg-[#18202d] border border-blue-500/30 flex items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-xs text-slate-200 font-medium">
                     {t('form.detected', `Rozpoznano: ${suggestion.name} (Katalog Homelabu)`).replace('{name}', suggestion.name)}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => applySuggestion(suggestion)}
-                  className="px-3 py-1 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer"
+                  className="px-2.5 py-1 bg-[#151c28] hover:bg-[#1b2536] border border-[#212c3e] text-slate-200 text-xs font-medium rounded-md transition-colors cursor-pointer"
                 >
-                  {t('form.use_detected', 'Użyj ikony i stylu ➔')}
+                  {t('form.use_detected', 'Użyj ikony ➔')}
                 </button>
               </div>
             )}
@@ -270,14 +270,14 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
                   {t('form.category', 'Kategoria')}
                 </label>
                 <select
                   name="category_id"
                   value={formData.category_id}
                   onChange={handleChange}
-                  className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                  className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none"
                 >
                   <option value="">{t('form.uncategorized', 'Bez kategorii (Inne)')}</option>
                   {categories.map(cat => (
@@ -289,21 +289,21 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
                   {t('form.icon', 'Ikona aplikacji')}
                 </label>
                 <div className="flex items-center gap-2">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm relative overflow-hidden"
-                    style={{ backgroundColor: formData.color }}
+                    className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0"
                   >
-                    <BrandIcon name={formData.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={formData.name} />
+                    <BrandIcon name={formData.icon} color={formData.color} className="w-4 h-4" fallbackText={formData.name} />
                   </div>
                   <Button
                     type="button"
                     variant="secondary"
+                    size="sm"
                     onClick={() => setShowIconPicker(true)}
-                    className="flex-1 text-xs py-2"
+                    className="flex-1 text-xs"
                   >
                     {t('form.icon_btn', 'Wybierz ikonę z biblioteki')}
                   </Button>
@@ -312,7 +312,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">
                 {t('form.description', 'Krótki opis')}
               </label>
               <textarea
@@ -321,7 +321,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                 onChange={handleChange}
                 rows={2}
                 placeholder="np. Główny hiperwizor dla maszyn wirtualnych i kontenerów LXC"
-                className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none resize-none"
+                className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none resize-none"
               />
             </div>
           </div>
@@ -331,9 +331,9 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             TAB 2: WYGLĄD I KOLOR
            ========================================================= */}
         {activeTab === 'appearance' && (
-          <div className="space-y-4 animate-in fade-in duration-200">
+          <div className="space-y-4 animate-in fade-in duration-150">
             <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 tracking-tight">
+              <label className="block text-xs font-medium text-slate-300 mb-2">
                 {t('form.color', 'Kolor kafelka (Wybierz z palety lub podaj HEX)')}
               </label>
               <ColorPicker
@@ -342,7 +342,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <Input
                 label={t('form.custom_badge', 'Własna plakietka / Badge (opcjonalnie)')}
                 name="custom_badge"
@@ -360,15 +360,15 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
               />
             </div>
 
-            {/* iOS Style Switches for display options */}
-            <div className="p-4 rounded-2xl glass-card space-y-3 mt-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {/* Display Options Container */}
+            <div className="p-3.5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-2.5">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                 {t('form.display_options', 'Opcje wyświetlania')}
               </h4>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <label className="flex items-center justify-between p-2.5 rounded-md bg-[#18202d] border border-[#202c3e] cursor-pointer hover:border-[#2f3d56] transition-colors">
+                  <span className="text-xs font-medium text-slate-200">
                     {t('form.enabled', 'Włączona')}
                   </span>
                   <input
@@ -376,12 +376,12 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                     name="enabled"
                     checked={formData.enabled}
                     onChange={handleChange}
-                    className="w-4 h-4 rounded accent-accent cursor-pointer"
+                    className="w-4 h-4 rounded accent-blue-500 cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                <label className="flex items-center justify-between p-2.5 rounded-md bg-[#18202d] border border-[#202c3e] cursor-pointer hover:border-[#2f3d56] transition-colors">
+                  <span className="text-xs font-medium text-slate-200">
                     {t('form.favorite', 'Ulubiona ⭐')}
                   </span>
                   <input
@@ -389,12 +389,12 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                     name="favorite"
                     checked={formData.favorite}
                     onChange={handleChange}
-                    className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
+                    className="w-4 h-4 rounded accent-amber-400 cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-2.5 rounded-xl glass-pill cursor-pointer hover:border-accent/30 transition-colors">
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                <label className="flex items-center justify-between p-2.5 rounded-md bg-[#18202d] border border-[#202c3e] cursor-pointer hover:border-[#2f3d56] transition-colors">
+                  <span className="text-xs font-medium text-slate-200">
                     {t('form.open_new_tab', 'W nowej karcie')}
                   </span>
                   <input
@@ -402,7 +402,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                     name="open_new_tab"
                     checked={formData.open_new_tab}
                     onChange={handleChange}
-                    className="w-4 h-4 rounded accent-accent cursor-pointer"
+                    className="w-4 h-4 rounded accent-blue-500 cursor-pointer"
                   />
                 </label>
               </div>
@@ -414,15 +414,15 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             TAB 3: MONITORING & NOTATKI
            ========================================================= */}
         {activeTab === 'advanced' && (
-          <div className="space-y-4 animate-in fade-in duration-200">
+          <div className="space-y-4 animate-in fade-in duration-150">
             {/* Health Check Card */}
-            <div className="p-4 rounded-2xl glass-card space-y-3.5 border border-black/[0.08] dark:border-white/10">
+            <div className="p-3.5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
+                  <h4 className="text-xs font-semibold text-slate-200">
                     {t('form.health_check', 'Automatyczny Health Check (Monitoring pingu)')}
                   </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-400 mt-0.5">
                     {t('form.health_check_desc', 'Bada dostępność hosta w tle i wyświetla czas odpowiedzi w milisekundach (ms).')}
                   </p>
                 </div>
@@ -433,14 +433,13 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                     name="health_check_enabled"
                     checked={formData.health_check_enabled}
                     onChange={handleChange}
-                    className="sr-only peer"
+                    className="w-4 h-4 rounded accent-blue-500 cursor-pointer"
                   />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                 </label>
               </div>
 
               {formData.health_check_enabled && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-black/[0.05] dark:border-white/10 animate-in fade-in">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#1c2534] animate-in fade-in">
                   <Input
                     label={t('form.alt_health_url', 'Alternatywny URL Health Check')}
                     name="health_check_url"
@@ -450,14 +449,14 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                   />
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
                       {t('form.check_interval', 'Częstotliwość sprawdzania')}
                     </label>
                     <select
                       name="health_check_interval"
                       value={formData.health_check_interval}
                       onChange={handleChange}
-                      className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none"
+                      className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none"
                     >
                       <option value={30}>{t('form.interval_30s', 'Co 30 sekund')}</option>
                       <option value={60}>{t('form.interval_1m', 'Co 1 minutę')}</option>
@@ -470,7 +469,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 tracking-tight">
+              <label className="block text-xs font-medium text-slate-300 mb-1.5">
                 {t('form.notes', 'Prywatne notatki administratora (opcjonalnie)')}
               </label>
               <textarea
@@ -479,14 +478,14 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                 onChange={handleChange}
                 rows={3}
                 placeholder={t('form.notes_placeholder', 'np. Domyślny login, podsieć VLAN, data ostatniej aktualizacji, klucze referencyjne')}
-                className="w-full bg-black/[0.03] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 focus:border-accent text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-medium focus:outline-none resize-none"
+                className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none resize-none"
               />
             </div>
           </div>
         )}
 
         {/* Footer Navigation & Submit */}
-        <div className="flex items-center justify-between pt-3 border-t border-black/[0.06] dark:border-white/10">
+        <div className="flex items-center justify-between pt-3 border-t border-[#1c2534]">
           <div>
             {activeTab !== 'basic' ? (
               <Button type="button" variant="ghost" size="sm" onClick={prevTab} className="text-xs">
@@ -501,7 +500,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
 
           <div className="flex items-center gap-2">
             {activeTab !== 'advanced' && (
-              <Button type="button" variant="secondary" size="sm" onClick={nextTab} className="text-xs font-bold">
+              <Button type="button" variant="secondary" size="sm" onClick={nextTab} className="text-xs font-medium">
                 {t('common.next', 'Dalej')} <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             )}
@@ -509,7 +508,8 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
             <Button
               type="submit"
               isLoading={loading}
-              className="px-6 py-2 shadow-lg shadow-accent/25 text-xs font-bold"
+              size="sm"
+              className="px-5 py-1.5 text-xs font-medium"
             >
               {isEdit ? t('form.save_changes', 'Zapisz zmiany') : t('form.create', 'Utwórz aplikację')}
             </Button>

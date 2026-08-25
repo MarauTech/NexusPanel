@@ -10,25 +10,24 @@ const Input = forwardRef(({
   options = [],
   ...props
 }, ref) => {
-  // Ultra-sleek Umbrel OS / visionOS dark glass input styling
   const baseInputClasses = `
-    w-full bg-slate-100/80 dark:bg-black/40 backdrop-blur-xl 
-    border border-slate-300/80 dark:border-white/10 
-    text-slate-900 dark:text-white 
-    placeholder:text-slate-400 dark:placeholder:text-slate-500
-    rounded-[14px] px-4 py-2.5 text-xs sm:text-sm font-medium
-    shadow-sm transition-all duration-200
-    hover:border-slate-400/80 dark:hover:border-white/25 hover:bg-slate-200/50 dark:hover:bg-black/50
-    focus:outline-none focus:border-accent focus:ring-4 focus:ring-accent/20 focus:bg-white dark:focus:bg-black/60
-    ${error ? '!border-rose-500 focus:!ring-rose-500/25' : ''}
+    w-full bg-[#18202d] 
+    border border-[#222d41] 
+    text-slate-200 
+    placeholder:text-slate-500
+    rounded-md px-3 py-2 text-xs sm:text-sm font-normal
+    transition-colors
+    hover:border-[#2f3d56]
+    focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
+    ${error ? '!border-rose-500 focus:!ring-rose-500' : ''}
     ${className}
   `;
 
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 tracking-tight">
-          {label} {props.required && <span className="text-rose-500">*</span>}
+        <label className="block text-xs font-medium text-slate-300 mb-1.5">
+          {label} {props.required && <span className="text-rose-400">*</span>}
         </label>
       )}
       

@@ -77,15 +77,15 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
   };
 
   const content = (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-3.5">
       {/* Search Input */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-slate-400" />
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-3.5 w-3.5 text-slate-400" />
         </div>
         <input
           type="text"
-          className="w-full bg-black/[0.04] dark:bg-black/40 border border-black/[0.1] dark:border-white/15 text-slate-900 dark:text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-accent shadow-sm placeholder:text-slate-400"
+          className="w-full bg-[#18202d] border border-[#222d41] text-slate-200 text-xs rounded-md pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500 placeholder:text-slate-500 font-mono"
           placeholder={t('common.search', 'Szukaj ikony...')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -94,30 +94,30 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-black/[0.06] dark:border-white/10 pb-2">
+      <div className="flex items-center gap-1.5 border-b border-[#1c2534] pb-2">
         <button
           type="button"
           onClick={() => setTab('homelab')}
-          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
             tab === 'homelab' 
-              ? 'bg-accent text-white shadow-md shadow-accent/25' 
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/5'
+              ? 'bg-[#1c2534] text-white border border-[#2b394f]' 
+              : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Sparkles className="w-3 h-3 text-blue-400" />
           <span>Homelab ({HOMELAB_ICONS.length})</span>
         </button>
         
         <button
           type="button"
           onClick={() => setTab('all')}
-          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
             tab === 'all' 
-              ? 'bg-accent text-white shadow-md shadow-accent/25' 
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/5'
+              ? 'bg-[#1c2534] text-white border border-[#2b394f]' 
+              : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
         >
-          <Grid className="w-3.5 h-3.5" />
+          <Grid className="w-3 h-3 text-slate-400" />
           <span>Lucide ({LUCIDE_NAMES.length})</span>
         </button>
       </div>
@@ -125,7 +125,7 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
       {/* Icon Grid Area */}
       <div className="max-h-[50vh] overflow-y-auto custom-scrollbar p-1">
         {tab === 'homelab' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {filteredHomelab.map(item => {
               const isSelected = selectedIcon === item.id;
               return (
@@ -133,25 +133,25 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(item.id)}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl text-left transition-all border cursor-pointer ${
+                  className={`flex items-center gap-2.5 p-2 rounded-md text-left transition-colors border cursor-pointer ${
                     isSelected
-                      ? 'bg-accent/15 border-accent shadow-sm ring-2 ring-accent/30'
-                      : 'glass-card border-black/[0.08] dark:border-white/10 hover:border-accent/40 hover:scale-[1.02]'
+                      ? 'bg-[#1c2534] border-blue-500 ring-1 ring-blue-500'
+                      : 'bg-[#18202d] border-[#202c3e] hover:border-[#2f3d56]'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center text-accent flex-shrink-0 shadow-sm">
-                    <BrandIcon name={item.id} color="currentColor" className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded bg-[#141b27] border border-[#222d41] flex items-center justify-center flex-shrink-0">
+                    <BrandIcon name={item.id} className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-bold text-xs text-slate-900 dark:text-white truncate">{item.label}</div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">{item.id}</div>
+                    <div className="font-medium text-xs text-slate-200 truncate">{item.label}</div>
+                    <div className="text-[10px] text-slate-500 font-mono truncate">{item.id}</div>
                   </div>
                 </button>
               );
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
             {filteredLucide.map(name => {
               const Icon = LucideIcons[name];
               const isSelected = selectedIcon === name;
@@ -162,14 +162,14 @@ export default function IconPicker({ selectedIcon = '', onSelect, onClose }) {
                   key={name}
                   type="button"
                   onClick={() => handleSelect(name)}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`flex flex-col items-center justify-center p-2 rounded-md border transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-accent/20 border-accent shadow-sm ring-2 ring-accent/30 text-accent'
-                      : 'glass-card border-black/[0.08] dark:border-white/10 hover:border-accent/40 hover:scale-105 text-slate-600 dark:text-slate-300 hover:text-accent'
+                      ? 'bg-[#1c2534] border-blue-500 ring-1 ring-blue-500 text-blue-400'
+                      : 'bg-[#18202d] border-[#202c3e] hover:border-[#2f3d56] text-slate-400 hover:text-slate-200'
                   }`}
                   title={name}
                 >
-                  <Icon className="w-5 h-5 mb-1 flex-shrink-0" />
+                  <Icon className="w-4 h-4 mb-1 flex-shrink-0" />
                   <span className="text-[9px] truncate w-full text-center font-mono opacity-80">
                     {name}
                   </span>

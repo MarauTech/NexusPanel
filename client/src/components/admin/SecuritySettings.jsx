@@ -42,33 +42,33 @@ export default function SecuritySettings() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 max-w-3xl">
-      <div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+    <div className="space-y-5 animate-in fade-in duration-200 max-w-3xl">
+      <div className="pb-2 border-b border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
           {t('security.title', 'Bezpieczeństwo i Dostęp')}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-400 mt-0.5">
           {t('security.subtitle', 'Zarządzaj dostępem w sieci lokalnej, uprawnieniami administratora i zabezpieczeniami API.')}
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Network Access Mode Card */}
-        <div className="p-5 rounded-2xl glass-card space-y-3.5 border border-black/[0.08] dark:border-white/10">
-          <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
-            <Radio className="w-4 h-4 text-emerald-500" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-3.5">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
+            <Radio className="w-3.5 h-3.5 text-emerald-400" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
               {t('security.zero_auth_title', 'Lokalny tryb sieci homelab')}
             </h3>
           </div>
 
-          <div className="p-4 rounded-xl glass-pill bg-emerald-500/10 border-emerald-500/25 flex items-start gap-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-lg bg-[#18202d] border border-emerald-500/30 flex items-start gap-3">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-xs sm:text-sm text-emerald-600 dark:text-emerald-300 block">
+              <span className="font-semibold text-xs text-emerald-400 block">
                 {t('security.zero_auth_badge', 'Tryb Zero-Auth aktywny (Otwarty dostęp w sieci LAN)')}
               </span>
-              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+              <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                 {t('security.zero_auth_desc', 'NexusPanel działa w zaufanym trybie homelab. Urządzenia w Twojej sieci lokalnej oraz VPN mają bezpośredni, wygodny dostęp do pulpitu i ustawień bez uciążliwego logowania hasłem.')}
               </p>
             </div>
@@ -76,10 +76,10 @@ export default function SecuritySettings() {
         </div>
 
         {/* Admin Password Change Card */}
-        <div className="p-5 rounded-2xl glass-card space-y-4 border border-black/[0.08] dark:border-white/10">
-          <div className="flex items-center gap-2 pb-2 border-b border-black/[0.06] dark:border-white/10">
-            <KeyRound className="w-4 h-4 text-accent" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
+            <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
               {t('security.change_password', 'Zmień hasło administratora')}
             </h3>
           </div>
@@ -106,8 +106,8 @@ export default function SecuritySettings() {
               />
             </div>
 
-            <div className="pt-2">
-              <Button type="submit" isLoading={loading} className="px-6 py-2.5 text-xs font-bold shadow-lg shadow-accent/25">
+            <div className="pt-1">
+              <Button type="submit" isLoading={loading} className="px-5 py-2 text-xs font-medium">
                 {t('security.btn_update_pass', 'Zapisz nowe hasło')}
               </Button>
             </div>

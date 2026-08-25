@@ -27,78 +27,71 @@ function SortableItem({ id, service, onEdit, onDelete, onToggleEnabled, t }) {
     zIndex: isDragging ? 10 : 0,
   };
 
-  const serviceColor = service.color || 'var(--accent)';
   const isEnabled = service.enabled === 1 || service.enabled === true || service.enabled !== false;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3.5 p-3.5 rounded-2xl glass-card transition-all ${
+      className={`flex items-center gap-3 p-3 rounded-lg bg-[#111622] border transition-colors ${
         isDragging 
-          ? 'shadow-2xl border-accent opacity-90 scale-[1.02]' 
-          : 'hover:border-black/[0.15] dark:hover:border-white/20'
-      } ${!isEnabled ? 'opacity-55' : ''}`}
+          ? 'shadow-xl border-blue-500 bg-[#18202d]' 
+          : 'border-[#1d2635] hover:border-[#2b394f]'
+      } ${!isEnabled ? 'opacity-50' : ''}`}
     >
-      <div {...attributes} {...listeners} className="cursor-grab text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 -ml-1">
-        <GripVertical className="w-5 h-5" />
+      <div {...attributes} {...listeners} className="cursor-grab text-slate-500 hover:text-slate-200 p-1 -ml-1">
+        <GripVertical className="w-4 h-4" />
       </div>
       
-      {/* Squircle Brand Icon */}
-      <div 
-        className="w-11 h-11 rounded-[14px] flex items-center justify-center font-bold text-white flex-shrink-0 shadow-md relative overflow-hidden" 
-        style={{ 
-          background: `linear-gradient(135deg, ${serviceColor} 0%, ${serviceColor}cc 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-white/35 via-transparent to-black/15 pointer-events-none" />
-        <BrandIcon name={service.icon} color="#ffffff" className="w-5 h-5 relative z-10" fallbackText={service.name} />
+      {/* Brand Icon (Matches ServiceCard exactly) */}
+      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0">
+        <BrandIcon name={service.icon} className="w-4 h-4" fallbackText={service.name} />
       </div>
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{service.name}</span>
+          <span className="font-medium text-sm text-slate-100 truncate">{service.name}</span>
           {service.favorite === 1 && (
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 flex-shrink-0" />
           )}
           {service.custom_badge && (
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/25 tracking-wider">
+            <span className="text-[10px] text-slate-400 font-mono flex-shrink-0">
               {service.custom_badge}
             </span>
           )}
         </div>
-        <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-mono text-[11px]">
-          {service.url} · <span className="font-sans text-accent">{service.category_name || t('form.uncategorized', 'Bez kategorii')}</span>
+        <div className="text-[11px] text-slate-400 truncate mt-0.5 font-mono">
+          {service.url} · <span className="text-slate-300 font-sans">{service.category_name || t('form.uncategorized', 'Bez kategorii')}</span>
         </div>
       </div>
 
-      {/* Interactive Toggle Switch for Enable/Disable */}
+      {/* Enable/Disable Toggle */}
       <button
         onClick={() => onToggleEnabled(service)}
-        className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+        className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer border ${
           isEnabled 
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' 
-            : 'bg-black/[0.04] dark:bg-white/5 text-slate-400 border border-black/[0.08] dark:border-white/10 hover:bg-black/[0.08]'
+            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/20' 
+            : 'bg-[#18202d] text-slate-400 border-[#202c3e] hover:bg-[#202c3e]'
         }`}
       >
-        {isEnabled ? <CheckCircle className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+        {isEnabled ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
         <span>{isEnabled ? t('common.active', 'Aktywna') : t('common.disabled', 'Wyłączona')}</span>
       </button>
 
       <div className="flex items-center gap-1">
         <button 
           onClick={() => onEdit(service)} 
-          className="p-2 text-slate-400 hover:text-accent hover:bg-black/[0.04] dark:hover:bg-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-white hover:bg-[#18202d] rounded-md transition-colors cursor-pointer"
           title={t('services.edit_tooltip', 'Edytuj usługę')}
         >
-          <Edit2 className="w-4 h-4" />
+          <Edit2 className="w-3.5 h-3.5" />
         </button>
         <button 
           onClick={() => onDelete(service)} 
-          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
           title={t('services.delete_tooltip', 'Usuń usługę')}
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
@@ -183,25 +176,27 @@ export default function ServiceManager() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#1c2534]">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
             {t('services.title', 'Zarządzanie Usługami')}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             {t('services.subtitle', 'Dodawaj, zmieniaj kolejność (przeciągnij i upuść) oraz konfiguruj kafelki homelabu.')}
           </p>
         </div>
         <Button
+          variant="secondary"
+          size="sm"
           icon={Plus}
           onClick={() => {
             setEditingService(null);
             setIsFormOpen(true);
           }}
-          className="shadow-lg shadow-accent/25 text-xs font-bold"
+          className="text-xs font-medium"
         >
-          {t('services.btn_add', '+ Dodaj usługę')}
+          {t('services.btn_add', 'Dodaj usługę')}
         </Button>
       </div>
 
@@ -214,7 +209,7 @@ export default function ServiceManager() {
           items={services.map((s) => s.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {services.map((service) => (
               <SortableItem
                 key={service.id}
@@ -234,14 +229,15 @@ export default function ServiceManager() {
       </DndContext>
 
       {services.length === 0 && (
-        <div className="py-16 text-center text-slate-500 border border-dashed border-black/[0.1] dark:border-white/10 rounded-[28px] glass-card p-6">
-          <p className="font-bold text-base text-slate-900 dark:text-white mb-1">
+        <div className="py-12 text-center text-slate-400 border border-dashed border-[#1d2635] rounded-lg bg-[#111622] p-6">
+          <p className="font-semibold text-sm text-slate-200 mb-1">
             {t('services.no_services', 'Brak skonfigurowanych usług')}
           </p>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             {t('services.no_services_desc', 'Dodaj swoją pierwszą aplikację homelab lub skorzystaj ze skanera sieci LAN.')}
           </p>
           <Button
+            variant="secondary"
             icon={Plus}
             size="sm"
             onClick={() => {
@@ -249,7 +245,7 @@ export default function ServiceManager() {
               setIsFormOpen(true);
             }}
           >
-            {t('services.add_first', '+ Dodaj pierwszą usługę')}
+            {t('services.add_first', 'Dodaj pierwszą usługę')}
           </Button>
         </div>
       )}

@@ -7,18 +7,18 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export default function ConfirmDialog({ title, message, onConfirm, onCancel, confirmText, cancelText, confirmVariant = 'danger' }) {
   const { t } = useLanguage();
   return (
-    <Modal title={title} onClose={onCancel}>
-      <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0 mt-1">
-          <AlertTriangle className="w-5 h-5 text-red-500" />
+    <Modal title={title} onClose={onCancel} maxWidth="max-w-md">
+      <div className="flex items-start gap-3">
+        <div className="w-8 h-8 rounded-md bg-rose-500/10 border border-rose-500/25 flex items-center justify-center flex-shrink-0">
+          <AlertTriangle className="w-4 h-4 text-rose-400" />
         </div>
         <div>
-          <p className="text-text-primary text-sm leading-relaxed">{message}</p>
+          <p className="text-slate-300 text-xs leading-relaxed">{message}</p>
         </div>
       </div>
-      <div className="flex justify-end gap-3 mt-8">
-        <Button variant="ghost" onClick={onCancel}>{cancelText || t('common.cancel', 'Anuluj')}</Button>
-        <Button variant={confirmVariant} onClick={onConfirm}>{confirmText || t('common.confirm', 'Potwierdź')}</Button>
+      <div className="flex justify-end gap-2.5 pt-3 border-t border-[#1c2534] mt-4">
+        <Button variant="ghost" size="sm" onClick={onCancel}>{cancelText || t('common.cancel', 'Anuluj')}</Button>
+        <Button variant={confirmVariant} size="sm" onClick={onConfirm}>{confirmText || t('common.confirm', 'Potwierdź')}</Button>
       </div>
     </Modal>
   );

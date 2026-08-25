@@ -98,53 +98,55 @@ export default function BackupSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+    <div className="space-y-5">
+      <div className="pb-2 border-b border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
           {t('backup.title', 'Kopia Zapasowa i Reset')}
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs text-slate-400 mt-0.5">
           {t('backup.subtitle', 'Eksportuj konfigurację do pliku, przywracaj kopie zapasowe lub zresetuj NexusPanel do stanu fabrycznego.')}
         </p>
       </div>
       
-      <div className="max-w-3xl space-y-6">
+      <div className="max-w-3xl space-y-5">
         
         {/* 1. Export Section */}
-        <section className="p-6 glass-card border border-black/[0.08] dark:border-white/10 rounded-2xl">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-accent/15 text-accent flex items-center justify-center flex-shrink-0 shadow-md">
-              <Download className="w-6 h-6" />
+        <section className="p-4 sm:p-5 bg-[#111622] border border-[#1d2635] rounded-lg">
+          <div className="flex items-start gap-3.5">
+            <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] text-blue-400 flex items-center justify-center flex-shrink-0">
+              <Download className="w-4 h-4" />
             </div>
             <div className="flex-1 space-y-2">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
                 {t('backup.export_title', 'Eksportuj konfigurację')}
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 {t('backup.export_desc', 'Pobierz plik JSON zawierający wszystkie Twoje usługi, kategorie, tagi oraz ustawienia wyglądu. Hasła i konta użytkowników nie są eksportowane.')}
               </p>
-              <Button onClick={handleExport} isLoading={exporting} icon={Download} size="sm">
-                {t('backup.btn_export', 'Pobierz kopię zapasową (.json)')}
-              </Button>
+              <div className="pt-1">
+                <Button variant="secondary" onClick={handleExport} isLoading={exporting} icon={Download} size="sm">
+                  {t('backup.btn_export', 'Pobierz kopię zapasową (.json)')}
+                </Button>
+              </div>
             </div>
           </div>
         </section>
 
         {/* 2. Import Section */}
-        <section className="p-6 glass-card border border-black/[0.08] dark:border-white/10 rounded-2xl">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
-              <Upload className="w-6 h-6" />
+        <section className="p-4 sm:p-5 bg-[#111622] border border-[#1d2635] rounded-lg">
+          <div className="flex items-start gap-3.5">
+            <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] text-amber-400 flex items-center justify-center flex-shrink-0">
+              <Upload className="w-4 h-4" />
             </div>
-            <div className="flex-1 space-y-3">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+            <div className="flex-1 space-y-2.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
                 {t('backup.import_title', 'Importuj konfigurację')}
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 {t('backup.import_desc', 'Przywróć układ i usługi z wcześniej pobranego pliku JSON kopii zapasowej NexusPanel.')}
               </p>
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-amber-700 dark:text-amber-300 text-xs">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" />
+              <div className="p-2.5 bg-[#18202d] border border-amber-500/25 rounded-md flex items-start gap-2.5 text-amber-300 text-xs font-mono">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-400" />
                 <span>{t('backup.import_warning', 'Uwaga: Import kopii zastąpi obecne usługi, kategorie i motyw zawartością pliku.')}</span>
               </div>
               
@@ -155,49 +157,52 @@ export default function BackupSettings() {
                 className="hidden" 
                 onChange={handleFileChange}
               />
-              <Button 
-                variant="secondary" 
-                onClick={() => fileInputRef.current?.click()} 
-                isLoading={importing} 
-                icon={Upload}
-                size="sm"
-              >
-                {t('backup.btn_import', 'Wybierz plik kopii (.json)')}
-              </Button>
+              <div className="pt-1">
+                <Button 
+                  variant="secondary" 
+                  onClick={() => fileInputRef.current?.click()} 
+                  isLoading={importing} 
+                  icon={Upload}
+                  size="sm"
+                >
+                  {t('backup.btn_import', 'Wybierz plik kopii (.json)')}
+                </Button>
+              </div>
             </div>
           </div>
         </section>
 
         {/* 3. Factory Reset (Danger Zone) */}
-        <section className="p-6 glass-card border border-rose-500/30 bg-gradient-to-b from-rose-500/10 via-transparent to-transparent rounded-2xl">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-500 flex items-center justify-center flex-shrink-0 shadow-md border border-rose-500/30">
-              <RotateCcw className="w-6 h-6" />
+        <section className="p-4 sm:p-5 bg-[#111622] border border-rose-500/30 rounded-lg">
+          <div className="flex items-start gap-3.5">
+            <div className="w-8 h-8 rounded-md bg-rose-500/10 border border-rose-500/25 text-rose-400 flex items-center justify-center flex-shrink-0">
+              <RotateCcw className="w-4 h-4" />
             </div>
-            <div className="flex-1 space-y-3">
+            <div className="flex-1 space-y-2.5">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-rose-600 dark:text-rose-300">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-400">
                   {t('backup.reset_title', 'Przywrócenie ustawień fabrycznych')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-rose-500/10 text-rose-400 border border-rose-500/25">
                   {t('backup.reset_danger_zone', 'Strefa niebezpieczna')}
                 </span>
               </div>
               
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 {t('backup.reset_desc', 'Całkowicie czyści bazę danych i przywraca NexusPanel do stanu czystej instalacji. Wszystkie usługi, kategorie, tagi i personalizacje zostaną trwale usunięte.')}
               </p>
 
-              <Button 
-                variant="danger" 
-                onClick={() => setShowResetConfirm(true)} 
-                isLoading={resetting} 
-                icon={Trash2}
-                size="sm"
-                className="shadow-lg shadow-rose-500/20"
-              >
-                {t('backup.btn_reset', 'Przywróć ustawienia fabryczne ⚠️')}
-              </Button>
+              <div className="pt-1">
+                <Button 
+                  variant="danger" 
+                  onClick={() => setShowResetConfirm(true)} 
+                  isLoading={resetting} 
+                  icon={Trash2}
+                  size="sm"
+                >
+                  {t('backup.btn_reset', 'Przywróć ustawienia fabryczne ⚠️')}
+                </Button>
+              </div>
             </div>
           </div>
         </section>
