@@ -38,7 +38,7 @@ export default function Admin() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+    <div className="p-4 sm:p-8 lg:p-12 w-full">
       <div className="flex flex-col md:flex-row min-h-[calc(100vh-140px)] gap-6">
         
         {/* Mobile nav toggle */}

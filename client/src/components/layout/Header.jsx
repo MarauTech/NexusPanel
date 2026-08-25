@@ -35,8 +35,8 @@ export default function Header() {
 
   return (
     <>
-      <header className="w-full px-4 sm:px-8 pt-5 pb-2">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4 transition-all duration-300">
+      <header className="w-full px-4 sm:px-8 lg:px-12 pt-5 pb-2">
+        <div className="w-full flex items-center justify-between gap-4 transition-all duration-300">
           
           {/* Left: Minimal Clean Logo & Title with High-Contrast Typography */}
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0 select-none">

@@ -93,7 +93,7 @@ export default function Dashboard() {
 
   if (servicesLoading || categoriesLoading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
+      <div className="p-4 sm:p-8 lg:p-12 w-full space-y-6">
         <div className="h-16 rounded-[24px] glass-card animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {[...Array(10)].map((_, i) => <SkeletonCard key={i} />)}
@@ -143,7 +143,7 @@ export default function Dashboard() {
   const showOther = (selectedFilter === 'all' || selectedFilter === 'other') && other.length > 0;
 
   return (
-    <div className="p-3 sm:p-6 lg:p-8 space-y-6 max-w-[1600px] mx-auto">
+    <div className="p-4 sm:p-8 lg:p-12 space-y-6 w-full">
       
       {/* 1. Sleek Startpage Speed-Dial Hero Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-2 border-b border-black/[0.05] dark:border-white/[0.06] pb-4">
