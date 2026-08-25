@@ -24,7 +24,7 @@ export default function FavoritesSection({ services, favorites, gridGap = '12', 
       <div 
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
           gap: `${gridGap}px`
         }}
         className="pt-1"

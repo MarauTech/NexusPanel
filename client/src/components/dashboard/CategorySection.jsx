@@ -70,7 +70,7 @@ export default function CategorySection({ category, services, gridGap = '12', on
         <div 
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 250px), 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
             gap: `${gridGap}px`
           }}
           className="pt-1"

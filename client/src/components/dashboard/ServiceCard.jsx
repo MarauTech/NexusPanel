@@ -15,6 +15,10 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   const isDegraded = healthStatus === 'degraded';
   const isOffline = healthStatus === 'offline';
 
+  const latency = typeof service.health_response_time === 'number' ? service.health_response_time : null;
+  const isElevatedLatency = latency !== null && latency >= 150 && latency < 400;
+  const isHighLatency = latency !== null && latency >= 400;
+
   // Handle Card Click:
   // - Shift + Click: Open Service Details Drawer
   // - Regular Click: Open service directly
@@ -49,7 +53,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
     }
   };
 
-  // Parse hostname & port from URL for clean display
+  // Parse hostname & port from URL for clean, readable display
   let cleanHost = '';
   try {
     const parsed = new URL(service.url);
@@ -85,7 +89,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
 
   // Accessible status label
   const statusLabel = isOnline 
-    ? 'Online' 
+    ? (isHighLatency ? 'Wysokie opóźnienie' : 'Online')
     : (isDegraded ? 'Problem' : (isOffline ? 'Offline' : 'Nieznany'));
 
   // Keyboard accessibility
@@ -102,52 +106,61 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
-      className="group relative flex items-start gap-3 p-3 rounded-lg bg-[#141b27] hover:bg-[#182232] border border-[#1d2635] hover:border-[#2a374d] transition-colors cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none"
+      className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-lg bg-[#141b27] hover:bg-[#182232] border border-[#1d2635] hover:border-[#2a374d] transition-colors cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[78px]"
       aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
-      title={`${service.name} (Klik: Otwórz, Shift+Klik: Szczegóły)`}
+      title={`${service.name} (${cleanHost})\nKlik: Otwórz, Shift+Klik: Szczegóły`}
     >
-      {/* Small, subtle, non-dominating Icon */}
-      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300 group-hover:text-white transition-colors">
-        <BrandIcon name={service.icon} color="#94a3b8" className="w-4 h-4" fallbackText={service.name} />
+      {/* Small, clean authentic brand Icon */}
+      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300 group-hover:text-white transition-colors mt-0.5">
+        <BrandIcon name={service.icon} fallbackText={service.name} className="w-4 h-4" />
       </div>
 
-      {/* Main Content Info */}
-      <div className="flex-1 min-w-0">
-        {/* Row 1: Name + Custom Badge + Semantic Status */}
+      {/* Main Information Block */}
+      <div className="flex-1 min-w-0 pr-1">
+        {/* Row 1: Service Name + Status */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition-colors truncate">
+            <span 
+              className="font-medium text-sm text-slate-100 group-hover:text-blue-400 transition-colors truncate"
+              title={service.name}
+            >
               {service.name}
             </span>
             {service.custom_badge && (
-              <span className="text-[10px] text-slate-400 font-mono flex-shrink-0">
+              <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">
                 [{service.custom_badge}]
               </span>
             )}
           </div>
 
           {/* Semantic Status Indicator */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {isOnline && (
-              <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400">
+          <div className="flex items-center gap-1.5 flex-shrink-0 text-xs font-mono">
+            {isOnline && !isHighLatency && (
+              <span className="flex items-center gap-1 text-emerald-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 Online
               </span>
             )}
+            {isOnline && isHighLatency && (
+              <span className="flex items-center gap-1 text-amber-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Online
+              </span>
+            )}
             {isDegraded && (
-              <span className="flex items-center gap-1 text-[11px] font-mono text-amber-400">
+              <span className="flex items-center gap-1 text-amber-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 Problem
               </span>
             )}
             {isOffline && (
-              <span className="flex items-center gap-1 text-[11px] font-mono text-rose-400">
+              <span className="flex items-center gap-1 text-rose-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
                 Offline
               </span>
             )}
             {!isOnline && !isDegraded && !isOffline && (
-              <span className="flex items-center gap-1 text-[11px] font-mono text-slate-500">
+              <span className="flex items-center gap-1 text-slate-500">
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                 —
               </span>
@@ -155,17 +168,26 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           </div>
         </div>
 
-        {/* Row 2: Host:Port + Latency */}
-        <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-[#1c2534] text-[11px] font-mono text-slate-400">
-          <span className="truncate">{cleanHost}</span>
+        {/* Row 2: IP/Hostname + Ping/Latency */}
+        <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-[#1c2534] text-xs font-mono text-slate-400">
+          <span 
+            className="truncate text-slate-400 select-all" 
+            title={cleanHost}
+          >
+            {cleanHost}
+          </span>
           
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {isOffline ? (
               <span className="text-rose-400 font-medium">OFFLINE</span>
             ) : isDegraded ? (
-              <span className="text-amber-400 font-medium">{service.health_response_time ? `${service.health_response_time} ms` : 'DEGRADED'}</span>
+              <span className="text-amber-400 font-medium">{latency ? `${latency} ms` : 'DEGRADED'}</span>
             ) : isOnline ? (
-              <span className="text-slate-300 font-medium">{service.health_response_time ? `${service.health_response_time} ms` : 'OK'}</span>
+              <span className={`font-medium ${
+                isHighLatency ? 'text-amber-400' : (isElevatedLatency ? 'text-amber-300/90' : 'text-slate-300')
+              }`}>
+                {latency ? `${latency} ms` : 'OK'}
+              </span>
             ) : (
               <span className="text-slate-500">—</span>
             )}
@@ -173,8 +195,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         </div>
       </div>
 
-      {/* Discrete Hover Actions (Top-right corner overlay) */}
-      <div className="absolute top-2 right-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#141b27]/90 px-1 py-0.5 rounded border border-[#222d41] shadow-sm">
+      {/* Subtle Hover Actions (Top-right corner overlay) */}
+      <div className="absolute top-2.5 right-2.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#141b27]/95 px-1 py-0.5 rounded border border-[#222d41] shadow-sm">
         <button 
           onClick={handleFavoriteClick}
           className={`p-1 rounded transition-colors ${

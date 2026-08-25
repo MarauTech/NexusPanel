@@ -26,7 +26,8 @@ export default function GlobalStatusStrip({ services = [] }) {
     ? (uptimeItems.reduce((acc, s) => acc + parseFloat(s.uptime_percentage || 100), 0) / uptimeItems.length).toFixed(1)
     : '100.0';
 
-  const hasIssues = offline > 0 || degraded > 0;
+  const hasOffline = offline > 0;
+  const hasDegraded = degraded > 0;
 
   return (
     <div 
@@ -34,31 +35,42 @@ export default function GlobalStatusStrip({ services = [] }) {
       role="region"
       aria-label="Podsumowanie stanu systemu"
     >
-      {/* Left: Overall Health State */}
+      {/* Left: Overall Health State with precise semantic coloring */}
       <div className="flex items-center gap-2.5">
         <span 
           className={`w-2 h-2 rounded-full flex-shrink-0 ${
-            hasIssues ? (offline > 0 ? 'bg-rose-500' : 'bg-amber-500') : 'bg-emerald-400'
+            hasOffline ? 'bg-rose-500' : (hasDegraded ? 'bg-amber-400' : 'bg-emerald-400')
           }`} 
         />
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-200">
-            {hasIssues 
-              ? (offline > 0 ? `${offline} ${t('status.services_offline', 'usług offline')}` : `${degraded} ${t('status.services_degraded', 'usług ze spadkiem wydajności')}`)
-              : t('status.all_systems_operational', 'Wszystkie systemy sprawne')}
-          </span>
-          <span className="text-slate-500 font-mono text-[11px]">
+          {hasOffline ? (
+            <span className="font-semibold text-rose-400">
+              {offline} {offline === 1 ? 'usługa offline' : (offline < 5 ? 'usługi offline' : 'usług offline')}
+            </span>
+          ) : hasDegraded ? (
+            <span className="font-semibold text-amber-400">
+              {degraded} {degraded === 1 ? 'usługa z problemami' : 'usługi z problemami'}
+            </span>
+          ) : (
+            <span className="font-semibold text-slate-200">
+              {t('status.all_systems_operational', 'Wszystkie systemy sprawne')}
+            </span>
+          )}
+
+          <span className="text-slate-400 font-mono text-xs">
             ({online}/{total} {t('status.services_online', 'usług online')}{unknown > 0 && `, ${unknown} niezweryfikowanych`})
           </span>
         </div>
       </div>
 
       {/* Right: Technical Monospace Metrics */}
-      <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
+      <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
         {avgLatency !== null && (
           <div>
             <span className="text-slate-500">śr. ping: </span>
-            <span className="text-slate-300 font-medium">{avgLatency} ms</span>
+            <span className={`font-medium ${avgLatency >= 200 ? 'text-amber-400' : 'text-slate-300'}`}>
+              {avgLatency} ms
+            </span>
           </div>
         )}
 
