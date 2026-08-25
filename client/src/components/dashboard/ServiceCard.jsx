@@ -86,15 +86,15 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm text-slate-900 dark:text-white truncate group-hover:text-accent transition-colors">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                 {service.name}
               </span>
               {showStatus && (
                 <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
               )}
             </div>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate block">{cleanHost}</span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono block break-all">{cleanHost}</span>
           </div>
         </div>
 
@@ -131,17 +131,17 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
               <BrandIcon name={service.icon} color="#ffffff" className="w-6 h-6 relative z-10" fallbackText={service.name} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-extrabold text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors whitespace-normal break-words">
                   {service.name}
                 </span>
                 {service.custom_badge && (
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/20">
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-accent/15 text-accent border border-accent/20 flex-shrink-0">
                     {service.custom_badge}
                   </span>
                 )}
               </div>
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">{cleanHost}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 block break-all">{cleanHost}</span>
             </div>
           </div>
 
@@ -199,8 +199,8 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
 
         {/* Info Column */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate group-hover:text-accent transition-colors tracking-tight">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors tracking-tight whitespace-normal break-words">
               {service.name}
             </span>
             {service.custom_badge && (
@@ -210,12 +210,12 @@ export default function ServiceCard({ service, onFavoriteToggle, overrideSetting
             )}
           </div>
           
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate block opacity-90">
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono block opacity-90 break-all">
               {cleanHost}
             </span>
             {showStatus && service.health_response_time && (
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-mono">
+              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-mono flex-shrink-0">
                 {service.health_response_time}ms
               </span>
             )}

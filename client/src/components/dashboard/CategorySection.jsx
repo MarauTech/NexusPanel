@@ -57,9 +57,16 @@ export default function CategorySection({ category, services, gridCols = '4', gr
         </div>
       </div>
 
-      {/* Grid of Balanced Cards */}
+      {/* Grid of Balanced Cards with dynamic auto-fit */}
       {isExpanded && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 sm:gap-4.5 transition-all duration-300 animate-in fade-in-50">
+        <div 
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: `${gridGap || 16}px`
+          }}
+          className="transition-all duration-300 animate-in fade-in-50"
+        >
           {services.map(service => (
             <ServiceCard key={service.id} service={service} onFavoriteToggle={onFavoriteToggle} />
           ))}
