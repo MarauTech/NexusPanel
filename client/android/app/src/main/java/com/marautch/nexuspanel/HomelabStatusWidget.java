@@ -63,7 +63,6 @@ public class HomelabStatusWidget extends AppWidgetProvider {
                 context, 1, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_btn_refresh, refreshPendingIntent);
 
-        // Update with initial / fallback data
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
         // 3. Background Network Fetch
@@ -77,10 +76,10 @@ public class HomelabStatusWidget extends AppWidgetProvider {
                 }
             } catch (Exception ignored) {}
 
-            String cpu = "14%";
-            String ram = "42%";
-            String services = "18/18";
-            String nodeBadge = "PVE Online";
+            String cpu = "--%";
+            String ram = "--%";
+            String services = "--";
+            String nodeBadge = "Serwer Online";
 
             try {
                 // Fetch System Resources
@@ -98,10 +97,10 @@ public class HomelabStatusWidget extends AppWidgetProvider {
 
                     JSONObject json = new JSONObject(sb.toString());
                     if (json.has("cpu")) {
-                        cpu = json.getJSONObject("cpu").optInt("usage", 14) + "%";
+                        cpu = json.getJSONObject("cpu").optInt("usage", 0) + "%";
                     }
                     if (json.has("memory")) {
-                        ram = json.getJSONObject("memory").optInt("percentage", 42) + "%";
+                        ram = json.getJSONObject("memory").optInt("percentage", 0) + "%";
                     }
                 }
                 conn.disconnect();
@@ -119,14 +118,14 @@ public class HomelabStatusWidget extends AppWidgetProvider {
                     reader.close();
 
                     JSONObject json = new JSONObject(sb.toString());
-                    int online = json.optInt("online", 18);
-                    int total = json.optInt("total", 18);
+                    int online = json.optInt("online", 0);
+                    int total = json.optInt("total", 0);
                     services = online + "/" + total;
                 }
                 connHealth.disconnect();
 
             } catch (Exception e) {
-                // fallback gracefully
+                nodeBadge = "Brak połączenia";
             }
 
             final String finalCpu = cpu;
@@ -140,7 +139,7 @@ public class HomelabStatusWidget extends AppWidgetProvider {
                 views.setTextViewText(R.id.widget_ram_text, finalRam);
                 views.setTextViewText(R.id.widget_services_text, finalServices);
                 views.setTextViewText(R.id.widget_node_badge, finalBadge);
-                views.setTextViewText(R.id.widget_updated_text, "Aktualizacja: " + timeStr + " · LAN");
+                views.setTextViewText(R.id.widget_updated_text, "Aktualizacja: " + timeStr + " · Sieć lokalna");
                 appWidgetManager.updateAppWidget(appWidgetId, views);
             });
         });

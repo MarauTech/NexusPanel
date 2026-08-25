@@ -7,155 +7,338 @@
     android:background="@drawable/widget_bg"
     android:padding="12dp">
 
-    <!-- Header -->
+    <!-- Header: Logo, Title & Status -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/widget_status_online"
+            android:layout_marginEnd="6dp" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="NexusPanel · Ulubione Usługi"
-            android:textColor="#FFFFFF"
+            android:textColor="#F1F5F9"
             android:textSize="12sp"
             android:textStyle="bold" />
 
         <TextView
-            android:text="Szybki Start"
+            android:id="@+id/widget_fav_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#6366F1"
-            android:textSize="9sp"
-            android:textStyle="bold" />
+            android:text="4 Aktywne"
+            android:textColor="#818CF8"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:background="@drawable/widget_button_bg"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp" />
     </LinearLayout>
 
-    <!-- 4 Quick Shortcut Tiles -->
+    <!-- Grid 2x2 of Horizontal Service Tiles (NexusPanel Desktop Style) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <!-- Shortcut 1: Proxmox -->
+        <!-- Row 1: Tile 1 & Tile 2 -->
         <LinearLayout
-            android:id="@+id/widget_shortcut_1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/widget_item_bg"
-            android:padding="6dp"
-            android:layout_marginEnd="3dp"
-            android:gravity="center">
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/widget_status_online" />
+            <!-- Tile 1: Proxmox -->
+            <LinearLayout
+                android:id="@+id/widget_shortcut_1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_item_bg"
+                android:padding="8dp"
+                android:layout_marginEnd="3dp">
 
-            <TextView
-                android:id="@+id/widget_app_1_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Proxmox"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:singleLine="true" />
+                <!-- Left Icon Container -->
+                <TextView
+                    android:id="@+id/widget_tile_1_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/widget_button_bg"
+                    android:gravity="center"
+                    android:text="P"
+                    android:textColor="#E05638"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- Right Name & Status -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:id="@+id/widget_app_1_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Proxmox VE"
+                        android:textColor="#F1F5F9"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:singleLine="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp">
+
+                        <ImageView
+                            android:id="@+id/widget_tile_1_status"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:src="@drawable/widget_status_online"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/widget_tile_1_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Węzeł PVE"
+                            android:textColor="#94A3B8"
+                            android:textSize="9sp"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Tile 2: Home Assistant -->
+            <LinearLayout
+                android:id="@+id/widget_shortcut_2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_item_bg"
+                android:padding="8dp"
+                android:layout_marginStart="3dp">
+
+                <!-- Left Icon Container -->
+                <TextView
+                    android:id="@+id/widget_tile_2_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/widget_button_bg"
+                    android:gravity="center"
+                    android:text="HA"
+                    android:textColor="#03A9F4"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <!-- Right Name & Status -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:id="@+id/widget_app_2_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Home Assistant"
+                        android:textColor="#F1F5F9"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:singleLine="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp">
+
+                        <ImageView
+                            android:id="@+id/widget_tile_2_status"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:src="@drawable/widget_status_online"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/widget_tile_2_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Smart Home"
+                            android:textColor="#94A3B8"
+                            android:textSize="9sp"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Shortcut 2: Home Assistant -->
+        <!-- Row 2: Tile 3 & Tile 4 -->
         <LinearLayout
-            android:id="@+id/widget_shortcut_2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/widget_item_bg"
-            android:padding="6dp"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
-            android:gravity="center">
+            android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/widget_status_online" />
+            <!-- Tile 3: Portainer / AdGuard -->
+            <LinearLayout
+                android:id="@+id/widget_shortcut_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_item_bg"
+                android:padding="8dp"
+                android:layout_marginEnd="3dp">
 
-            <TextView
-                android:id="@+id/widget_app_2_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Home Assist."
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:singleLine="true" />
-        </LinearLayout>
+                <!-- Left Icon Container -->
+                <TextView
+                    android:id="@+id/widget_tile_3_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/widget_button_bg"
+                    android:gravity="center"
+                    android:text="AG"
+                    android:textColor="#10B981"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
-        <!-- Shortcut 3: AdGuard -->
-        <LinearLayout
-            android:id="@+id/widget_shortcut_3"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/widget_item_bg"
-            android:padding="6dp"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
-            android:gravity="center">
+                <!-- Right Name & Status -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/widget_status_online" />
+                    <TextView
+                        android:id="@+id/widget_app_3_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AdGuard Home"
+                        android:textColor="#F1F5F9"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:singleLine="true" />
 
-            <TextView
-                android:id="@+id/widget_app_3_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AdGuard"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:singleLine="true" />
-        </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp">
 
-        <!-- Shortcut 4: Jellyfin -->
-        <LinearLayout
-            android:id="@+id/widget_shortcut_4"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="@drawable/widget_item_bg"
-            android:padding="6dp"
-            android:layout_marginStart="3dp"
-            android:gravity="center">
+                        <ImageView
+                            android:id="@+id/widget_tile_3_status"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:src="@drawable/widget_status_online"
+                            android:layout_marginEnd="4dp" />
 
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/widget_status_online" />
+                        <TextView
+                            android:id="@+id/widget_tile_3_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="DNS Filter"
+                            android:textColor="#94A3B8"
+                            android:textSize="9sp"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/widget_app_4_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Jellyfin"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:layout_marginTop="4dp"
-                android:singleLine="true" />
+            <!-- Tile 4: Jellyfin -->
+            <LinearLayout
+                android:id="@+id/widget_shortcut_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_item_bg"
+                android:padding="8dp"
+                android:layout_marginStart="3dp">
+
+                <!-- Left Icon Container -->
+                <TextView
+                    android:id="@+id/widget_tile_4_icon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/widget_button_bg"
+                    android:gravity="center"
+                    android:text="J"
+                    android:textColor="#AA5CC8"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <!-- Right Name & Status -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp">
+
+                    <TextView
+                        android:id="@+id/widget_app_4_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Jellyfin"
+                        android:textColor="#F1F5F9"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:singleLine="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="2dp">
+
+                        <ImageView
+                            android:id="@+id/widget_tile_4_status"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:src="@drawable/widget_status_online"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/widget_tile_4_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Media Server"
+                            android:textColor="#94A3B8"
+                            android:textSize="9sp"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
