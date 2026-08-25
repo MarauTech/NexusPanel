@@ -108,17 +108,17 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
       <div className="space-y-4">
         
         {/* Banner with radar explanation & detected subnet info */}
-        <div className="p-3.5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-3">
+        <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-3 shadow-sm dark:shadow-none transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] text-blue-400 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
                 <Radar className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-slate-100">
+                <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                   {scanning ? 'Skanowanie podsieci LAN w toku...' : `Znaleziono ${discovered.length} aktywnych usług`}
                 </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Bada porty Proxmox, Home Assistant, Docker, Portainer, NAS, Plex, Grafana itp.
                 </p>
               </div>
@@ -138,17 +138,17 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
 
           {netInfo && (
             <div className="flex items-center gap-2 pt-1 flex-wrap text-xs">
-              <span className="px-2 py-0.5 rounded bg-[#18202d] border border-[#222d41] font-mono text-[11px] text-slate-300 flex items-center gap-1.5">
-                <Network className="w-3 h-3 text-blue-400" />
-                Podsieć: <b className="text-slate-100">{netInfo.subnet}</b>
+              <span className="px-2 py-0.5 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#222d41] font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 shadow-sm dark:shadow-none">
+                <Network className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                Podsieć: <b className="text-slate-900 dark:text-slate-100">{netInfo.subnet}</b>
               </span>
-              <span className="px-2 py-0.5 rounded bg-[#18202d] border border-[#222d41] font-mono text-[11px] text-slate-300 flex items-center gap-1.5">
-                <Globe className="w-3 h-3 text-emerald-400" />
-                Brama: <b className="text-slate-100">{netInfo.gatewayIp}</b>
+              <span className="px-2 py-0.5 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#222d41] font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 shadow-sm dark:shadow-none">
+                <Globe className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                Brama: <b className="text-slate-900 dark:text-slate-100">{netInfo.gatewayIp}</b>
               </span>
-              <span className="px-2 py-0.5 rounded bg-[#18202d] border border-[#222d41] font-mono text-[11px] text-slate-300 flex items-center gap-1.5">
-                <Cpu className="w-3 h-3 text-purple-400" />
-                Twój IP: <b className="text-slate-100">{netInfo.localIp}</b>
+              <span className="px-2 py-0.5 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#222d41] font-mono text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 shadow-sm dark:shadow-none">
+                <Cpu className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                Twój IP: <b className="text-slate-900 dark:text-slate-100">{netInfo.localIp}</b>
               </span>
             </div>
           )}
@@ -161,7 +161,7 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
             value={customIp}
             onChange={(e) => setCustomIp(e.target.value)}
             placeholder="np. 192.168.10.10, 192.168.10.20 (lub wpisz inny adres IP)"
-            className="flex-1 bg-[#18202d] border border-[#222d41] focus:border-blue-500 rounded-md px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 font-mono focus:outline-none"
+            className="flex-1 bg-white dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] focus:border-blue-500 rounded-md px-3 py-1.5 text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono focus:outline-none shadow-sm dark:shadow-none"
           />
           <Button type="submit" variant="secondary" size="sm" isLoading={scanning}>
             Skanuj IP
@@ -173,22 +173,22 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
           <div className="flex items-center justify-between px-1 text-xs">
             <button
               onClick={toggleSelectAll}
-              className="flex items-center gap-1.5 font-medium text-slate-300 hover:text-white cursor-pointer"
+              className="flex items-center gap-1.5 font-medium text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white cursor-pointer"
             >
               {selectedIds.size === discovered.length ? (
                 <>
-                  <CheckSquare className="w-3.5 h-3.5 text-blue-400" />
+                  <CheckSquare className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>Odznacz wszystkie</span>
                 </>
               ) : (
                 <>
-                  <Square className="w-3.5 h-3.5 text-slate-500" />
+                  <Square className="w-3.5 h-3.5 text-slate-400" />
                   <span>Zaznacz wszystkie</span>
                 </>
               )}
             </button>
-            <span className="text-[11px] text-slate-400 font-mono">
-              Wybrano: <b className="text-slate-100">{selectedIds.size}</b> z {discovered.length}
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+              Wybrano: <b className="text-slate-900 dark:text-slate-100">{selectedIds.size}</b> z {discovered.length}
             </span>
           </div>
         )}
@@ -197,13 +197,13 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
         <div className="max-h-[42vh] overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
           {scanning && discovered.length === 0 ? (
             <div className="p-8 text-center space-y-2">
-              <RefreshCw className="w-5 h-5 animate-spin text-blue-400 mx-auto" />
-              <p className="text-xs text-slate-400 font-medium">Badam urządzenia w sieci LAN...</p>
+              <RefreshCw className="w-5 h-5 animate-spin text-blue-600 dark:text-blue-400 mx-auto" />
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Badam urządzenia w sieci LAN...</p>
             </div>
           ) : discovered.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-[#1d2635] bg-[#111622] rounded-lg">
-              <p className="text-xs font-semibold text-slate-200">Nie wykryto aktywnych portów w podsieci</p>
-              <p className="text-[11px] text-slate-400 mt-1">Użyj pola powyżej, aby przeskanować konkretny adres IP hosta.</p>
+            <div className="p-8 text-center border border-dashed border-slate-300 dark:border-[#1d2635] bg-slate-50 dark:bg-[#111622] rounded-lg">
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">Nie wykryto aktywnych portów w podsieci</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Użyj pola powyżej, aby przeskanować konkretny adres IP hosta.</p>
             </div>
           ) : (
             discovered.map((item) => {
@@ -213,43 +213,43 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
                 <div
                   key={item.id}
                   onClick={() => toggleSelect(item.id)}
-                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer border ${
+                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer border shadow-sm dark:shadow-none ${
                     isSelected 
-                      ? 'bg-[#18202d] border-blue-500/50' 
-                      : 'bg-[#111622] border-[#1d2635] hover:border-[#2b394f]'
+                      ? 'bg-slate-100 dark:bg-[#18202d] border-blue-500/50' 
+                      : 'bg-white dark:bg-[#111622] border-slate-200 dark:border-[#1d2635] hover:border-slate-300 dark:hover:border-[#2b394f]'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => {}}
-                    className="w-4 h-4 rounded accent-blue-500 pointer-events-none flex-shrink-0"
+                    className="w-4 h-4 rounded accent-blue-600 dark:accent-blue-500 pointer-events-none flex-shrink-0"
                   />
 
-                  <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0">
                     <BrandIcon name={item.icon} className="w-4 h-4" fallbackText={item.name} />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-xs text-slate-100 truncate">
+                      <span className="font-medium text-xs text-slate-900 dark:text-slate-100 truncate">
                         {item.name}
                       </span>
                       {item.custom_badge && (
-                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#18202d] border border-[#222d41] text-slate-400">
+                        <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-200 dark:border-[#222d41] text-slate-600 dark:text-slate-400">
                           {item.custom_badge}
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono mt-0.5">
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                       <span className="truncate">{item.url}</span>
-                      <span className="text-slate-600">·</span>
-                      <span className="font-sans text-[10px] text-slate-300 truncate">{item.category_name}</span>
+                      <span className="text-slate-400 dark:text-slate-600">·</span>
+                      <span className="font-sans text-[10px] text-slate-700 dark:text-slate-300 truncate">{item.category_name}</span>
                     </div>
                   </div>
 
                   {item.responseTime && (
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex-shrink-0">
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex-shrink-0">
                       ● {item.responseTime}ms
                     </span>
                   )}
@@ -260,7 +260,7 @@ export default function NetworkDiscoveryModal({ onClose, onSuccess }) {
         </div>
 
         {/* Footer with confirmation button */}
-        <div className="flex items-center justify-between pt-3 border-t border-[#1c2534]">
+        <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-[#1c2534]">
           <Button variant="ghost" size="sm" onClick={onClose}>
             Anuluj
           </Button>

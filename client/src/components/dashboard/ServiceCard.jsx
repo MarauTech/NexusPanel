@@ -106,12 +106,12 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
-      className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-lg bg-[#141b27] hover:bg-[#182232] border border-[#1d2635] hover:border-[#2a374d] transition-colors cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[78px]"
+      className="group relative flex items-start gap-3.5 p-3.5 sm:p-4 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 dark:bg-[#141b27] dark:hover:bg-[#182232] dark:border-[#1d2635] dark:hover:border-[#2a374d] transition-colors cursor-pointer select-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[78px] shadow-sm dark:shadow-none"
       aria-label={`${service.name}, status: ${statusLabel}, adres: ${cleanHost} (Shift+klik: Szczegóły)`}
       title={`${service.name} (${cleanHost})\nKlik: Otwórz, Shift+Klik: Szczegóły`}
     >
       {/* Small, clean authentic brand Icon */}
-      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 mt-0.5">
+      <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 mt-0.5">
         <BrandIcon name={service.icon} fallbackText={service.name} className="w-4 h-4" />
       </div>
 
@@ -121,7 +121,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <span 
-              className="font-medium text-sm text-slate-100 group-hover:text-blue-400 transition-colors line-clamp-2 break-words"
+              className="font-medium text-sm text-slate-800 group-hover:text-blue-600 dark:text-slate-100 dark:group-hover:text-blue-400 transition-colors line-clamp-2 break-words"
               title={service.name}
             >
               {service.name}
@@ -142,32 +142,32 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           {/* Semantic Status Indicator */}
           <div className="flex items-center gap-1.5 flex-shrink-0 text-xs font-mono">
             {isOnline && !isHighLatency && (
-              <span className={`flex items-center gap-1 ${isElevatedLatency ? 'text-emerald-400' : 'text-emerald-400/60'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${isElevatedLatency ? 'bg-emerald-400' : 'bg-emerald-400/60'}`} />
+              <span className={`flex items-center gap-1 ${isElevatedLatency ? 'text-emerald-600 dark:text-emerald-400' : 'text-emerald-600 dark:text-emerald-400/60'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isElevatedLatency ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-emerald-500/80 dark:bg-emerald-400/60'}`} />
                 Online
               </span>
             )}
             {isOnline && isHighLatency && (
-              <span className="flex items-center gap-1 text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
                 Online
               </span>
             )}
             {isDegraded && (
-              <span className="flex items-center gap-1 text-amber-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
                 Problem
               </span>
             )}
             {isOffline && (
-              <span className="flex items-center gap-1 text-rose-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+              <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400" />
                 Offline
               </span>
             )}
             {!isOnline && !isDegraded && !isOffline && (
-              <span className="flex items-center gap-1 text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+              <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
                 —
               </span>
             )}
@@ -175,9 +175,9 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         </div>
 
         {/* Row 2: IP/Hostname + Ping/Latency */}
-        <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-[#1c2534] text-xs font-mono text-slate-400">
+        <div className="flex items-center justify-between gap-2 mt-2 pt-1.5 border-t border-slate-100 dark:border-[#1c2534] text-xs font-mono text-slate-500 dark:text-slate-400">
           <span 
-            className="truncate text-slate-400 select-all" 
+            className="truncate text-slate-500 dark:text-slate-400 select-all" 
             title={cleanHost}
           >
             {cleanHost}
@@ -185,28 +185,28 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
           
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {isOffline ? (
-              <span className="text-rose-400 font-medium">OFFLINE</span>
+              <span className="text-rose-600 dark:text-rose-400 font-medium">OFFLINE</span>
             ) : isDegraded ? (
-              <span className="text-amber-400 font-medium">{latency ? `${latency} ms` : 'DEGRADED'}</span>
+              <span className="text-amber-600 dark:text-amber-400 font-medium">{latency ? `${latency} ms` : 'DEGRADED'}</span>
             ) : isOnline ? (
               <span className={`font-medium ${
-                isHighLatency ? 'text-rose-400' : (isElevatedLatency ? 'text-amber-300' : 'text-slate-300')
+                isHighLatency ? 'text-rose-600 dark:text-rose-400' : (isElevatedLatency ? 'text-amber-600 dark:text-amber-300' : 'text-slate-700 dark:text-slate-300')
               }`}>
                 {latency ? `${latency} ms` : 'OK'}
               </span>
             ) : (
-              <span className="text-slate-500">—</span>
+              <span className="text-slate-400 dark:text-slate-500">—</span>
             )}
           </div>
         </div>
       </div>
 
       {/* Subtle Hover Actions (Top-right corner overlay) */}
-      <div className="absolute top-2.5 right-2.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-[#141b27]/95 px-1 py-0.5 rounded border border-[#222d41] shadow-sm">
+      <div className="absolute top-2.5 right-2.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 border-slate-200 dark:bg-[#141b27]/95 dark:border-[#222d41] px-1 py-0.5 rounded border shadow-sm">
         <button 
           onClick={handleFavoriteClick}
-          className={`p-1 rounded transition-colors ${
-            isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
+          className={`p-1 rounded transition-colors cursor-pointer ${
+            isFavorite ? 'text-amber-500 dark:text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-500'
           }`}
           title="Ulubione"
           aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
@@ -216,7 +216,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
 
         <button
           onClick={handleOpenDrawer}
-          className="p-1 rounded text-slate-400 hover:text-blue-400 transition-colors"
+          className="p-1 rounded text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
           title="Szczegóły (Shift+klik)"
           aria-label="Szczegóły usługi"
         >

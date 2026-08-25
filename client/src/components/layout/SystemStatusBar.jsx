@@ -55,13 +55,13 @@ export default function SystemStatusBar() {
         {/* 1. Host CPU Load */}
         {stats && (
           <div 
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium cursor-default transition-colors hover:bg-white/[0.08]" 
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 font-medium cursor-default transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.08] shadow-sm dark:shadow-none" 
             title={`Serwer Host (CPU): Obciążenie procesora (${stats.cpu.cores} rdzeni)`}
           >
-            <Cpu className="w-3.5 h-3.5 text-accent" />
-            <span className="text-slate-400">CPU</span>
+            <Cpu className="w-3.5 h-3.5 text-blue-600 dark:text-accent" />
+            <span className="text-slate-500 dark:text-slate-400">CPU</span>
             <span className={`font-mono font-bold ${
-              stats.cpu.usagePercent > 80 ? 'text-rose-400' : stats.cpu.usagePercent > 50 ? 'text-amber-400' : 'text-emerald-400'
+              stats.cpu.usagePercent > 80 ? 'text-rose-600 dark:text-rose-400' : stats.cpu.usagePercent > 50 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
             }`}>
               {stats.cpu.usagePercent}%
             </span>
@@ -71,12 +71,12 @@ export default function SystemStatusBar() {
         {/* 2. Host RAM Usage */}
         {stats && (
           <div 
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium cursor-default transition-colors hover:bg-white/[0.08]" 
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 font-medium cursor-default transition-colors hover:bg-slate-200 dark:hover:bg-white/[0.08] shadow-sm dark:shadow-none" 
             title={`Serwer Host (RAM): Pamięć RAM (${stats.memory.usedGb} GB / ${stats.memory.totalGb} GB)`}
           >
-            <HardDrive className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-slate-400">RAM</span>
-            <span className="font-mono font-bold text-white">
+            <HardDrive className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span className="text-slate-500 dark:text-slate-400">RAM</span>
+            <span className="font-mono font-bold text-slate-900 dark:text-white">
               {stats.memory.usedGb} GB
             </span>
             <span className="text-[10px] text-slate-500 font-mono">({stats.memory.percent}%)</span>
@@ -85,12 +85,12 @@ export default function SystemStatusBar() {
 
         {/* 3. Proxmox VE Pill (Only when configured and active) */}
         {pveNode && pveNode.enabled && pveNode.configured !== false && pveNode.cpu && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 font-medium">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 font-medium shadow-sm dark:shadow-none">
             <div className="w-3.5 h-3.5 rounded flex items-center justify-center bg-[#e57000] text-white">
               <BrandIcon name="proxmox" color="#ffffff" className="w-2.5 h-2.5" />
             </div>
-            <span className="text-slate-400">PVE</span>
-            <span className="text-xs text-emerald-400 font-mono font-bold">
+            <span className="text-slate-500 dark:text-slate-400">PVE</span>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-bold">
               {pveNode.cpu?.usagePercent}%
             </span>
           </div>
@@ -101,24 +101,24 @@ export default function SystemStatusBar() {
           <button
             type="button"
             onClick={() => setShowWeatherModal(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 font-medium transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 font-medium transition-all shadow-sm dark:shadow-none cursor-pointer"
             title={t('weather.title', 'Pogoda lokalna')}
           >
             {getWeatherIcon(weather.icon)}
-            <span className="font-mono font-bold text-white">{weather.temperature}°C</span>
-            <span className="text-slate-400 hidden lg:inline text-[11px]">{weather.city}</span>
+            <span className="font-mono font-bold text-slate-900 dark:text-white">{weather.temperature}°C</span>
+            <span className="text-slate-500 dark:text-slate-400 hidden lg:inline text-[11px]">{weather.city}</span>
           </button>
         )}
 
         {/* 5. Language Switcher (PL / EN) */}
-        <div className="flex items-center rounded-xl bg-white/[0.04] border border-white/[0.08] p-0.5 text-[11px] font-bold">
+        <div className="flex items-center rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] p-0.5 text-[11px] font-bold shadow-sm dark:shadow-none">
           <button
             type="button"
             onClick={() => setLanguage('pl')}
-            className={`px-1.5 py-0.5 rounded-lg transition-all ${
+            className={`px-1.5 py-0.5 rounded-lg transition-all cursor-pointer ${
               language === 'pl' 
-                ? 'bg-accent text-white shadow-sm' 
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-slate-800 text-white dark:bg-accent dark:text-white shadow-sm' 
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
             }`}
             title="Polski"
           >
@@ -127,10 +127,10 @@ export default function SystemStatusBar() {
           <button
             type="button"
             onClick={() => setLanguage('en')}
-            className={`px-1.5 py-0.5 rounded-lg transition-all ${
+            className={`px-1.5 py-0.5 rounded-lg transition-all cursor-pointer ${
               language === 'en' 
-                ? 'bg-accent text-white shadow-sm' 
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-slate-800 text-white dark:bg-accent dark:text-white shadow-sm' 
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
             }`}
             title="English"
           >
@@ -147,25 +147,25 @@ export default function SystemStatusBar() {
           maxWidth="max-w-md"
         >
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600/20 via-indigo-600/10 to-transparent border border-white/10 flex items-center justify-between">
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-600/10 via-indigo-600/5 to-transparent dark:from-blue-600/20 dark:via-indigo-600/10 dark:to-transparent border border-slate-200 dark:border-white/10 flex items-center justify-between shadow-sm dark:shadow-none">
               <div className="space-y-1">
-                <span className="text-xs text-slate-400 font-medium">{weather.condition}</span>
-                <div className="text-3xl font-black text-white tracking-tight">{weather.temperature}°C</div>
-                <div className="text-xs text-slate-400">{t('weather.apparent', 'Odczuwalna')}: <strong className="text-white">{weather.apparentTemperature}°C</strong></div>
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{weather.condition}</span>
+                <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{weather.temperature}°C</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{t('weather.apparent', 'Odczuwalna')}: <strong className="text-slate-900 dark:text-white">{weather.apparentTemperature}°C</strong></div>
               </div>
-              <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10 shadow-lg">
+              <div className="w-16 h-16 rounded-2xl bg-white dark:bg-white/10 flex items-center justify-center text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 shadow-sm">
                 {getWeatherIcon(weather.icon)}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-                <span className="text-slate-400 block text-[11px]">{t('weather.humidity', 'Wilgotność')}</span>
-                <span className="text-base font-bold text-white font-mono">{weather.humidity}%</span>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">{t('weather.humidity', 'Wilgotność')}</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{weather.humidity}%</span>
               </div>
-              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-                <span className="text-slate-400 block text-[11px]">{t('weather.wind', 'Wiatr')}</span>
-                <span className="text-base font-bold text-white font-mono">{weather.windSpeed} km/h</span>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08]">
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">{t('weather.wind', 'Wiatr')}</span>
+                <span className="text-base font-bold text-slate-900 dark:text-white font-mono">{weather.windSpeed} km/h</span>
               </div>
             </div>
           </div>

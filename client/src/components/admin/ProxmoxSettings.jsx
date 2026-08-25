@@ -88,28 +88,28 @@ export default function ProxmoxSettings() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200 max-w-3xl">
-      <div className="pb-2 border-b border-[#1c2534]">
-        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
+      <div className="pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
           {t('proxmox.title', 'Integracja z Proxmox VE')}
         </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t('proxmox.subtitle', 'Podłącz swój węzeł Proxmox VE, aby wyświetlać telemetrię CPU/RAM/Dysk oraz stan kontenerów LXC i maszyn VM.')}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Enable Integration Card */}
-        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
+        <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-orange-400">
+              <div className="w-8 h-8 rounded-md bg-white dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 text-orange-500 dark:text-orange-400 shadow-sm dark:shadow-none">
                 <BrandIcon name="proxmox" color="#e57000" className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-semibold text-slate-200">
+                <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                   {t('proxmox.enable_title', 'Włącz telemetrię Proxmox VE')}
                 </h3>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   {t('proxmox.enable_desc', 'Pobiera metryki i statusy maszyn w czasie rzeczywistym')}
                 </p>
               </div>
@@ -121,15 +121,15 @@ export default function ProxmoxSettings() {
                 name="proxmox_enabled"
                 checked={formData.proxmox_enabled === 'true'}
                 onChange={handleChange}
-                className="w-4 h-4 rounded accent-blue-500 cursor-pointer"
+                className="w-4 h-4 rounded accent-blue-600 dark:accent-blue-500 cursor-pointer"
               />
             </label>
           </div>
         </div>
 
         {/* Proxmox API Credentials Card */}
-        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300 pb-2 border-b border-[#1c2534]">
+        <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
             {t('proxmox.creds_title', 'Dane węzła i Token API Proxmox')}
           </h3>
 
@@ -182,13 +182,13 @@ export default function ProxmoxSettings() {
             />
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer pt-1">
+          <label className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer pt-1">
             <input
               type="checkbox"
               name="proxmox_verify_ssl"
               checked={formData.proxmox_verify_ssl === 'true'}
               onChange={handleChange}
-              className="w-4 h-4 rounded accent-blue-500"
+              className="w-4 h-4 rounded accent-blue-600 dark:accent-blue-500 cursor-pointer"
             />
             <span>{t('proxmox.verify_ssl_label', 'Weryfikuj certyfikat SSL (Odznacz, jeśli używasz certyfikatu self-signed)')}</span>
           </label>
@@ -198,8 +198,8 @@ export default function ProxmoxSettings() {
         {testResult && (
           <div className={`p-3 rounded-lg border text-xs flex items-center gap-2.5 font-mono ${
             testResult.success 
-              ? 'bg-[#18202d] border-emerald-500/30 text-emerald-400' 
-              : 'bg-[#18202d] border-rose-500/30 text-rose-400'
+              ? 'bg-emerald-50 dark:bg-[#18202d] border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400' 
+              : 'bg-rose-50 dark:bg-[#18202d] border-rose-300 dark:border-rose-500/30 text-rose-700 dark:text-rose-400'
           }`}>
             {testResult.success ? <CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 flex-shrink-0" />}
             <span className="font-medium">{testResult.message}</span>

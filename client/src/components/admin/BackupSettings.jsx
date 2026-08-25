@@ -99,11 +99,11 @@ export default function BackupSettings() {
 
   return (
     <div className="space-y-5">
-      <div className="pb-2 border-b border-[#1c2534]">
-        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
+      <div className="pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
           {t('backup.title', 'Kopia Zapasowa i Reset')}
         </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t('backup.subtitle', 'Eksportuj konfigurację do pliku, przywracaj kopie zapasowe lub zresetuj NexusPanel do stanu fabrycznego.')}
         </p>
       </div>
@@ -111,16 +111,16 @@ export default function BackupSettings() {
       <div className="max-w-3xl space-y-5">
         
         {/* 1. Export Section */}
-        <section className="p-4 sm:p-5 bg-[#111622] border border-[#1d2635] rounded-lg">
+        <section className="p-4 sm:p-5 bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] rounded-lg shadow-sm dark:shadow-none transition-colors">
           <div className="flex items-start gap-3.5">
-            <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] text-blue-400 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-md bg-white dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 shadow-sm dark:shadow-none">
               <Download className="w-4 h-4" />
             </div>
             <div className="flex-1 space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                 {t('backup.export_title', 'Eksportuj konfigurację')}
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 {t('backup.export_desc', 'Pobierz plik JSON zawierający wszystkie Twoje usługi, kategorie, tagi oraz ustawienia wyglądu. Hasła i konta użytkowników nie są eksportowane.')}
               </p>
               <div className="pt-1">
@@ -133,20 +133,20 @@ export default function BackupSettings() {
         </section>
 
         {/* 2. Import Section */}
-        <section className="p-4 sm:p-5 bg-[#111622] border border-[#1d2635] rounded-lg">
+        <section className="p-4 sm:p-5 bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] rounded-lg shadow-sm dark:shadow-none transition-colors">
           <div className="flex items-start gap-3.5">
-            <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] text-amber-400 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-md bg-white dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] text-amber-500 dark:text-amber-400 flex items-center justify-center flex-shrink-0 shadow-sm dark:shadow-none">
               <Upload className="w-4 h-4" />
             </div>
             <div className="flex-1 space-y-2.5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                 {t('backup.import_title', 'Importuj konfigurację')}
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 {t('backup.import_desc', 'Przywróć układ i usługi z wcześniej pobranego pliku JSON kopii zapasowej NexusPanel.')}
               </p>
-              <div className="p-2.5 bg-[#18202d] border border-amber-500/25 rounded-md flex items-start gap-2.5 text-amber-300 text-xs font-mono">
-                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-400" />
+              <div className="p-2.5 bg-amber-50 dark:bg-[#18202d] border border-amber-300 dark:border-amber-500/25 rounded-md flex items-start gap-2.5 text-amber-800 dark:text-amber-300 text-xs font-mono">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-500 dark:text-amber-400" />
                 <span>{t('backup.import_warning', 'Uwaga: Import kopii zastąpi obecne usługi, kategorie i motyw zawartością pliku.')}</span>
               </div>
               
@@ -173,22 +173,22 @@ export default function BackupSettings() {
         </section>
 
         {/* 3. Factory Reset (Danger Zone) */}
-        <section className="p-4 sm:p-5 bg-[#111622] border border-rose-500/30 rounded-lg">
+        <section className="p-4 sm:p-5 bg-slate-50 dark:bg-[#111622] border border-rose-300 dark:border-rose-500/30 rounded-lg shadow-sm dark:shadow-none transition-colors">
           <div className="flex items-start gap-3.5">
-            <div className="w-8 h-8 rounded-md bg-rose-500/10 border border-rose-500/25 text-rose-400 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-md bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
               <RotateCcw className="w-4 h-4" />
             </div>
             <div className="flex-1 space-y-2.5">
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-400">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                   {t('backup.reset_title', 'Przywrócenie ustawień fabrycznych')}
                 </h3>
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-rose-500/10 text-rose-400 border border-rose-500/25">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/25">
                   {t('backup.reset_danger_zone', 'Strefa niebezpieczna')}
                 </span>
               </div>
               
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 {t('backup.reset_desc', 'Całkowicie czyści bazę danych i przywraca NexusPanel do stanu czystej instalacji. Wszystkie usługi, kategorie, tagi i personalizacje zostaną trwale usunięte.')}
               </p>
 

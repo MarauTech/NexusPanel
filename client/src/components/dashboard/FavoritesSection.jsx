@@ -9,10 +9,10 @@ export default function FavoritesSection({ services, favorites, gridGap = '12', 
   return (
     <section className="space-y-2">
       {/* Header: ULUBIONE (count) ─── */}
-      <div className="flex items-center justify-between gap-3 select-none py-1.5 border-b border-[#1c2434]">
+      <div className="flex items-center justify-between gap-3 select-none py-1.5 border-b border-slate-200 dark:border-[#1c2434]">
         <div className="flex items-center gap-2">
-          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <Star className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400/20" />
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300">
             Ulubione
           </h2>
           <span className="text-[11px] font-mono text-slate-500">

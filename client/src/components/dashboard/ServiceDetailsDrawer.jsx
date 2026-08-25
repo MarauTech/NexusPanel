@@ -183,19 +183,19 @@ export default function ServiceDetailsDrawer({
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         {/* Drawer Panel */}
         <div 
-          className="w-screen max-w-full sm:max-w-md md:max-w-lg bg-[#111622] text-slate-200 border-l border-[#1d2635] shadow-2xl flex flex-col justify-between"
+          className="w-screen max-w-full sm:max-w-md md:max-w-lg bg-white dark:bg-[#111622] text-slate-800 dark:text-slate-200 border-l border-slate-200 dark:border-[#1d2635] shadow-2xl flex flex-col justify-between transition-colors"
         >
           {/* Top Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#1c2534]">
-            <h2 id="drawer-title" className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-[#1c2534]">
+            <h2 id="drawer-title" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {t('drawer.service_details', 'SZCZEGÓŁY USŁUGI')}
             </h2>
 
             <div className="flex items-center gap-1">
               <button
                 onClick={handleToggleFavorite}
-                className={`p-1.5 rounded transition-colors ${
-                  isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-400'
+                className={`p-1.5 rounded transition-colors cursor-pointer ${
+                  isFavorite ? 'text-amber-500 dark:text-amber-400 fill-amber-400' : 'text-slate-400 hover:text-amber-500'
                 }`}
                 title={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
                 aria-label={isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
@@ -205,7 +205,7 @@ export default function ServiceDetailsDrawer({
 
               <button
                 onClick={onClose}
-                className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                className="p-1.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                 aria-label={t('common.close', 'Zamknij')}
               >
                 <X className="w-4 h-4" />
@@ -217,14 +217,14 @@ export default function ServiceDetailsDrawer({
           <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-4 text-xs">
             
             {/* 1. Hero Service Profile */}
-            <div className="flex items-start gap-3.5 p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635]">
-              <div className="w-10 h-10 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300">
+            <div className="flex items-start gap-3.5 p-3.5 rounded-lg bg-slate-50 dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635]">
+              <div className="w-10 h-10 rounded-md bg-white dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-700 dark:text-slate-300 shadow-sm dark:shadow-none">
                 <BrandIcon name={service.icon} className="w-5 h-5" fallbackText={service.name} />
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-sm font-semibold text-slate-100 break-words">
+                  <h1 className="text-sm font-semibold text-slate-900 dark:text-slate-100 break-words">
                     {service.name}
                   </h1>
                   {service.custom_badge && (() => {
@@ -233,26 +233,26 @@ export default function ServiceDetailsDrawer({
                       || /^port\s*(name|na)?$/i.test(b)
                       || /^(online|offline|unknown|degraded|n\/a|none|null|undefined|test|default|badge)$/i.test(b);
                     return isGeneric ? null : (
-                      <span className="text-[10px] text-slate-400 font-mono">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                         {service.custom_badge}
                       </span>
                     );
                   })()}
                 </div>
 
-                <p className="text-[11px] text-slate-400 font-mono mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                   {host}:{port}
                 </p>
 
                 {service.description && (
-                  <p className="text-slate-400 mt-1.5 leading-relaxed text-[11px]">
+                  <p className="text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed text-[11px]">
                     {service.description}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* 2. Launch Button (secondary, not SaaS-style CTA) */}
+            {/* 2. Launch Button */}
             <Button
               variant="secondary"
               onClick={handleOpenService}
@@ -263,19 +263,19 @@ export default function ServiceDetailsDrawer({
             </Button>
 
             {/* 3. Live Health & Availability Card */}
-            <div className="p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635] space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#1c2534]">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   {t('drawer.monitoring_status', 'Status i Dostępność')}
                 </span>
 
                 <button
                   onClick={handleCheckNow}
                   disabled={isProbing}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#18202d] hover:bg-[#202b3d] text-slate-300 text-[11px] font-mono border border-[#222d41] transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-white hover:bg-slate-100 dark:bg-[#18202d] dark:hover:bg-[#202b3d] text-slate-700 dark:text-slate-300 text-[11px] font-mono border border-slate-300 dark:border-[#222d41] transition-colors disabled:opacity-50 cursor-pointer shadow-sm dark:shadow-none"
                   title={t('drawer.check_now', 'Przetestuj połączenie')}
                 >
-                  <RefreshCw className={`w-3 h-3 ${isProbing ? 'animate-spin text-blue-400' : ''}`} />
+                  <RefreshCw className={`w-3 h-3 ${isProbing ? 'animate-spin text-blue-600 dark:text-blue-400' : ''}`} />
                   <span>{isProbing ? t('drawer.checking', 'Sprawdzanie...') : t('drawer.check_now', 'Sprawdź teraz')}</span>
                 </button>
               </div>
@@ -283,32 +283,32 @@ export default function ServiceDetailsDrawer({
               {/* Status Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 {/* Status */}
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-0.5 shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">
                     {t('drawer.status_label', 'Stan połączenia')}
                   </span>
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     {currentStatus === 'online' && (
                       <>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Online</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-emerald-600 dark:text-emerald-400">Online</span>
                       </>
                     )}
                     {currentStatus === 'degraded' && (
                       <>
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-amber-400">Problem</span>
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                        <span className="text-amber-600 dark:text-amber-400">Problem</span>
                       </>
                     )}
                     {currentStatus === 'offline' && (
                       <>
-                        <XCircle className="w-3.5 h-3.5 text-rose-400" />
-                        <span className="text-rose-400">Offline</span>
+                        <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                        <span className="text-rose-600 dark:text-rose-400">Offline</span>
                       </>
                     )}
                     {currentStatus === 'unknown' && (
                       <>
-                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                         <span className="text-slate-500">Nieznany</span>
                       </>
                     )}
@@ -316,31 +316,31 @@ export default function ServiceDetailsDrawer({
                 </div>
 
                 {/* Latency */}
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-0.5 shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">
                     {t('drawer.latency', 'Aktualne opóźnienie')}
                   </span>
-                  <span className="text-slate-200 text-xs font-semibold">
+                  <span className="text-slate-800 dark:text-slate-200 text-xs font-semibold">
                     {currentLatency !== null ? `${currentLatency} ms` : 'N/A'}
                   </span>
                 </div>
 
                 {/* Last Health Check */}
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-0.5 shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">
                     {t('drawer.last_check', 'Ostatnie sprawdzenie')}
                   </span>
-                  <span className="text-slate-300 text-[11px] block truncate">
+                  <span className="text-slate-700 dark:text-slate-300 text-[11px] block truncate">
                     {formatDateTime(lastChecked)}
                   </span>
                 </div>
 
                 {/* Uptime */}
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e] space-y-0.5">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-0.5 shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">
                     {t('drawer.uptime', 'Dostępność (Uptime)')}
                   </span>
-                  <span className="text-emerald-400 text-xs font-semibold">
+                  <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                     {uptimeStr}
                   </span>
                 </div>
@@ -348,8 +348,8 @@ export default function ServiceDetailsDrawer({
             </div>
 
             {/* 4. Network & Technical Details */}
-            <div className="p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635] space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block pb-1 border-b border-[#1c2534]">
+            <div className="p-3.5 rounded-lg bg-slate-50 dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] space-y-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block pb-1 border-b border-slate-200 dark:border-[#1c2534]">
                 {t('drawer.network_details', 'DANE SIECIOWE')}
               </span>
 
@@ -358,33 +358,33 @@ export default function ServiceDetailsDrawer({
                 <span className="text-[11px] text-slate-500">
                   {t('drawer.target_url', 'Pełny adres URL')}
                 </span>
-                <div className="flex items-center gap-2 p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                <div className="flex items-center gap-2 p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] shadow-sm dark:shadow-none">
                   <Globe className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span className="text-xs font-mono text-slate-200 truncate flex-1 select-all">
+                  <span className="text-xs font-mono text-slate-800 dark:text-slate-200 truncate flex-1 select-all">
                     {service.url}
                   </span>
                   <button
                     onClick={handleCopyUrl}
-                    className="p-1 text-slate-400 hover:text-white transition-colors flex-shrink-0"
+                    className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors flex-shrink-0 cursor-pointer"
                     title={t('common.copy', 'Kopiuj')}
                   >
-                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
 
               {/* Host and Port Grid */}
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">Host / IP</span>
-                  <span className="text-slate-200 text-xs truncate block mt-0.5 select-all">
+                  <span className="text-slate-800 dark:text-slate-200 text-xs truncate block mt-0.5 select-all">
                     {host}
                   </span>
                 </div>
 
-                <div className="p-2 rounded bg-[#18202d] border border-[#202c3e]">
+                <div className="p-2 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] shadow-sm dark:shadow-none">
                   <span className="text-[10px] text-slate-500 block">Port</span>
-                  <span className="text-slate-200 text-xs truncate block mt-0.5">
+                  <span className="text-slate-800 dark:text-slate-200 text-xs truncate block mt-0.5">
                     {port}
                   </span>
                 </div>
@@ -393,9 +393,9 @@ export default function ServiceDetailsDrawer({
               {/* Category */}
               <div className="flex items-center justify-between text-xs pt-1">
                 <span className="text-slate-500 flex items-center gap-1.5">
-                  <Folder className="w-3.5 h-3.5 text-slate-500" /> {t('drawer.category', 'Kategoria')}
+                  <Folder className="w-3.5 h-3.5 text-slate-400" /> {t('drawer.category', 'Kategoria')}
                 </span>
-                <span className="text-slate-300 font-medium">
+                <span className="text-slate-700 dark:text-slate-300 font-medium">
                   {service.category_name || service.category?.name || t('dashboard.other_services', 'Inne')}
                 </span>
               </div>
@@ -403,7 +403,7 @@ export default function ServiceDetailsDrawer({
               {/* Tags */}
               <div className="space-y-1 text-xs pt-1">
                 <span className="text-slate-500 flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-slate-500" /> {t('drawer.tags', 'Tagi')}
+                  <Tag className="w-3.5 h-3.5 text-slate-400" /> {t('drawer.tags', 'Tagi')}
                 </span>
                 <div className="flex flex-wrap gap-1.5 font-mono text-[10px]">
                   {Array.isArray(service.tags) && service.tags.length > 0 ? (
@@ -412,14 +412,14 @@ export default function ServiceDetailsDrawer({
                       return (
                         <span 
                           key={idx}
-                          className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-slate-400"
+                          className="px-1.5 py-0.5 rounded bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#222d41] text-slate-600 dark:text-slate-400"
                         >
                           #{tagName}
                         </span>
                       );
                     })
                   ) : (
-                    <span className="text-slate-500 italic text-[11px]">
+                    <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
                       {t('drawer.no_tags', 'Brak przypisanych tagów')}
                     </span>
                   )}
@@ -432,7 +432,7 @@ export default function ServiceDetailsDrawer({
 
           {/* Bottom Actions Footer (Admin Actions: Edit, Delete) */}
           {isAdmin && (
-            <div className="p-4 border-t border-[#1c2534] bg-[#0e131d] flex items-center justify-between gap-2.5">
+            <div className="p-4 border-t border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#0e131d] flex items-center justify-between gap-2.5">
               <Button
                 variant="danger"
                 icon={Trash2}

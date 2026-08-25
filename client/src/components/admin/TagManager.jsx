@@ -89,12 +89,12 @@ export default function TagManager() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#1c2534]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
         <div>
-          <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
             {t('tags.title', 'Zarządzanie Tagami')}
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             {t('tags.subtitle', 'Filtruj i organizuj usługi za pomocą kolorowych etykiet.')}
           </p>
         </div>
@@ -115,15 +115,15 @@ export default function TagManager() {
           return (
             <div 
               key={tag.id} 
-              className="rounded-lg bg-[#111622] border border-[#1d2635] p-3 flex items-center justify-between hover:border-[#2b394f] transition-colors"
+              className="rounded-lg bg-white dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] p-3 flex items-center justify-between hover:border-slate-300 dark:hover:border-[#2b394f] transition-colors shadow-sm dark:shadow-none"
             >
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: tagColor }} />
                 <div className="min-w-0">
-                  <span className="font-medium text-xs text-slate-200 truncate block font-mono">
+                  <span className="font-medium text-xs text-slate-900 dark:text-slate-200 truncate block font-mono">
                     #{tag.name}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                     {formatCount(tag.usage_count)}
                   </span>
                 </div>
@@ -131,7 +131,7 @@ export default function TagManager() {
 
               <button 
                 onClick={() => setDeleteConfirm(tag)}
-                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-colors cursor-pointer"
                 title={t('common.delete', 'Usuń')}
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -141,11 +141,11 @@ export default function TagManager() {
         })}
 
         {tags.length === 0 && (
-          <div className="col-span-full py-12 text-center text-slate-400 border border-dashed border-[#1d2635] rounded-lg bg-[#111622] p-6">
-            <p className="font-semibold text-sm text-slate-200 mb-1">
+          <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-[#1d2635] rounded-lg bg-slate-50 dark:bg-[#111622] p-6">
+            <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-1">
               {t('tags.no_tags', 'Brak utworzonych tagów')}
             </p>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">
               {t('tags.no_tags_desc', 'Tagi pozwalają przypisywać własne etykiety, np. #docker, #media czy #smart-home.')}
             </p>
             <Button variant="secondary" icon={Plus} size="sm" onClick={handleOpenAdd}>
@@ -167,13 +167,13 @@ export default function TagManager() {
               autoFocus
             />
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
                 {t('tags.color_label', 'Kolor tagu')}
               </label>
               <ColorPicker color={formData.color} onChange={c => setFormData(prev => ({ ...prev, color: c }))} />
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-[#1c2534]">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-[#1c2534]">
               <Button type="button" variant="ghost" size="sm" onClick={() => setIsAddOpen(false)}>
                 {t('common.cancel', 'Anuluj')}
               </Button>

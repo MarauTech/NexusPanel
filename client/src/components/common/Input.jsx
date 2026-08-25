@@ -11,13 +11,13 @@ const Input = forwardRef(({
   ...props
 }, ref) => {
   const baseInputClasses = `
-    w-full bg-[#18202d] 
-    border border-[#222d41] 
-    text-slate-200 
-    placeholder:text-slate-500
+    w-full bg-white dark:bg-[#18202d] 
+    border border-slate-300 dark:border-[#222d41] 
+    text-slate-900 dark:text-slate-200 
+    placeholder:text-slate-400 dark:placeholder:text-slate-500
     rounded-md px-3 py-2 text-xs sm:text-sm font-normal
     transition-colors
-    hover:border-[#2f3d56]
+    hover:border-slate-400 dark:hover:border-[#2f3d56]
     focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500
     ${error ? '!border-rose-500 focus:!ring-rose-500' : ''}
     ${className}
@@ -26,8 +26,8 @@ const Input = forwardRef(({
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-xs font-medium text-slate-300 mb-1.5">
-          {label} {props.required && <span className="text-rose-400">*</span>}
+        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          {label} {props.required && <span className="text-rose-500 dark:text-rose-400">*</span>}
         </label>
       )}
       
@@ -45,12 +45,12 @@ const Input = forwardRef(({
             {...props}
           >
             {options.map((opt, i) => (
-              <option key={i} value={opt.value} className="bg-slate-900 text-white py-2">
+              <option key={i} value={opt.value} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white py-2">
                 {opt.label}
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-400">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500 dark:text-slate-400">
             <ChevronDown className="w-4 h-4" />
           </div>
         </div>

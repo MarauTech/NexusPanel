@@ -43,32 +43,32 @@ export default function SecuritySettings() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200 max-w-3xl">
-      <div className="pb-2 border-b border-[#1c2534]">
-        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
+      <div className="pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
           {t('security.title', 'Bezpieczeństwo i Dostęp')}
         </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t('security.subtitle', 'Zarządzaj dostępem w sieci lokalnej, uprawnieniami administratora i zabezpieczeniami API.')}
         </p>
       </div>
 
       <div className="space-y-5">
         {/* Network Access Mode Card */}
-        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-3.5">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-            <Radio className="w-3.5 h-3.5 text-emerald-400" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+        <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-3.5 shadow-sm dark:shadow-none transition-colors">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+            <Radio className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               {t('security.zero_auth_title', 'Lokalny tryb sieci homelab')}
             </h3>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-[#18202d] border border-emerald-500/30 flex items-start gap-3">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-lg bg-white dark:bg-[#18202d] border border-emerald-500/30 flex items-start gap-3 shadow-sm dark:shadow-none">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold text-xs text-emerald-400 block">
+              <span className="font-semibold text-xs text-emerald-600 dark:text-emerald-400 block">
                 {t('security.zero_auth_badge', 'Tryb Zero-Auth aktywny (Otwarty dostęp w sieci LAN)')}
               </span>
-              <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                 {t('security.zero_auth_desc', 'NexusPanel działa w zaufanym trybie homelab. Urządzenia w Twojej sieci lokalnej oraz VPN mają bezpośredni, wygodny dostęp do pulpitu i ustawień bez uciążliwego logowania hasłem.')}
               </p>
             </div>
@@ -76,10 +76,10 @@ export default function SecuritySettings() {
         </div>
 
         {/* Admin Password Change Card */}
-        <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-            <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+        <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+            <KeyRound className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               {t('security.change_password', 'Zmień hasło administratora')}
             </h3>
           </div>

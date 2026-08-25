@@ -82,13 +82,13 @@ export default function SearchModal({ isOpen, onClose }) {
       />
       
       {/* Solid Technical Search Spotlight */}
-      <div className="relative w-full max-w-2xl bg-[#141b27] rounded-lg overflow-hidden shadow-2xl animate-in fade-in duration-150 border border-[#1d2635]">
-        <div className="flex items-center px-4 py-3 border-b border-[#1c2534] bg-[#111622]">
-          <Search className="w-4 h-4 text-blue-400 mr-2.5 flex-shrink-0" />
+      <div className="relative w-full max-w-2xl bg-white dark:bg-[#141b27] rounded-lg overflow-hidden shadow-2xl animate-in fade-in duration-150 border border-slate-200 dark:border-[#1d2635] transition-colors">
+        <div className="flex items-center px-4 py-3 border-b border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#111622]">
+          <Search className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2.5 flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-transparent border-none text-sm text-slate-100 focus:outline-none placeholder-slate-500 font-normal font-mono"
+            className="flex-1 bg-transparent border-none text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-normal font-mono"
             placeholder={t('header.search', 'Szukaj usług, kategorii, tagów, adresów IP... (Ctrl+K)')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -96,7 +96,7 @@ export default function SearchModal({ isOpen, onClose }) {
           />
           <button 
             onClick={onClose}
-            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors ml-2"
+            className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-colors ml-2 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -123,25 +123,25 @@ export default function SearchModal({ isOpen, onClose }) {
                     target={service.open_new_tab === 1 || service.openInNewTab !== false ? "_blank" : "_self"}
                     rel="noreferrer"
                     onClick={() => onClose()}
-                    className={`flex items-center gap-3 p-2.5 rounded-md transition-colors text-xs ${
+                    className={`flex items-center gap-3 p-2.5 rounded-md transition-colors text-xs cursor-pointer ${
                       isSelected 
-                        ? 'bg-[#1c2534] border border-[#2b394f] text-slate-100' 
-                        : 'hover:bg-[#18202d] border border-transparent text-slate-300'
+                        ? 'bg-slate-100 dark:bg-[#1c2534] border border-slate-300 dark:border-[#2b394f] text-slate-900 dark:text-slate-100' 
+                        : 'hover:bg-slate-50 dark:hover:bg-[#18202d] border border-transparent text-slate-700 dark:text-slate-300'
                     }`}
                     onMouseEnter={() => setSelectedIndex(index)}
                   >
                     {/* Brand Icon (Matches ServiceCard) */}
-                    <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0">
                       <BrandIcon name={service.icon} className="w-4 h-4" fallbackText={service.name} />
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-xs text-slate-100">
+                        <span className="font-medium text-xs text-slate-900 dark:text-slate-100">
                           <HighlightText text={service.name} query={query} />
                         </span>
                         {categoryTitle && (
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                             [<HighlightText text={categoryTitle} query={query} />]
                           </span>
                         )}
@@ -150,26 +150,26 @@ export default function SearchModal({ isOpen, onClose }) {
                         </span>
                       </div>
                       {service.description && (
-                        <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                           <HighlightText text={service.description} query={query} />
                         </p>
                       )}
                     </div>
                     
-                    <ExternalLink className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-400 opacity-100' : 'text-slate-500 opacity-0'} transition-opacity`} />
+                    <ExternalLink className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600 dark:text-blue-400 opacity-100' : 'text-slate-400 opacity-0'} transition-opacity`} />
                   </a>
                 );
               })}
             </div>
           ) : query ? (
-            <div className="p-8 text-center text-slate-400 text-xs">
-              <p className="font-medium text-slate-300">{t('scanner.no_results', `Nie znaleziono wyników dla "${query}"`)}</p>
+            <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+              <p className="font-medium text-slate-700 dark:text-slate-300">{t('scanner.no_results', `Nie znaleziono wyników dla "${query}"`)}</p>
             </div>
           ) : (
             <div className="p-4 text-center text-slate-500 text-xs flex items-center justify-center gap-4 font-mono">
-              <span><kbd className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-[10px] text-slate-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-[10px] text-slate-300">↓</kbd> Nawiguj</span>
-              <span><kbd className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-[10px] text-slate-300">Enter</kbd> Otwórz</span>
-              <span><kbd className="px-1.5 py-0.5 rounded bg-[#18202d] border border-[#222d41] text-[10px] text-slate-300">Esc</kbd> Zamknij</span>
+              <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">↓</kbd> Nawiguj</span>
+              <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">Enter</kbd> Otwórz</span>
+              <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">Esc</kbd> Zamknij</span>
             </div>
           )}
         </div>

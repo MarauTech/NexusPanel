@@ -186,11 +186,11 @@ export default function AppearanceSettings() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
-      <div className="pb-2 border-b border-[#1c2534]">
-        <h2 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
+      <div className="pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
           {t('appearance.title', 'Wygląd, Motywy i Custom CSS')}
         </h2>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t('appearance.subtitle', 'Dostosuj styl kafelków, gotowe motywy, własne reguły CSS oraz tapetę pulpitu.')}
         </p>
       </div>
@@ -203,10 +203,10 @@ export default function AppearanceSettings() {
         <form onSubmit={handleSubmit} className="xl:col-span-7 space-y-5">
           
           {/* Theme Presets */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.presets_title', 'Gotowe Motywy Systemowe')}
               </h3>
             </div>
@@ -219,16 +219,16 @@ export default function AppearanceSettings() {
                   onClick={() => applyPreset(preset)}
                   className={`p-3 rounded-lg text-left transition-colors border cursor-pointer ${
                     formData.theme_preset === preset.id 
-                      ? 'border-[#2b394f] bg-[#1c2534] text-white' 
-                      : 'border-[#202c3e] bg-[#18202d] hover:border-[#2f3d56] text-slate-300'
+                      ? 'border-slate-300 dark:border-[#2b394f] bg-slate-200 dark:bg-[#1c2534] text-slate-900 dark:text-white' 
+                      : 'border-slate-200 dark:border-[#202c3e] bg-white dark:bg-[#18202d] hover:border-slate-300 dark:hover:border-[#2f3d56] text-slate-700 dark:text-slate-300 shadow-sm dark:shadow-none'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: preset.accent }} />
-                    {formData.theme_preset === preset.id && <Check className="w-3.5 h-3.5 text-blue-400" />}
+                    <span className="w-3.5 h-3.5 rounded-full shadow-sm" style={{ backgroundColor: preset.accent }} />
+                    {formData.theme_preset === preset.id && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
                   </div>
-                  <span className="font-medium text-xs block truncate text-slate-200">{preset.name}</span>
-                  <span className="text-[10px] text-slate-400 block capitalize mt-0.5">
+                  <span className="font-medium text-xs block truncate text-slate-800 dark:text-slate-200">{preset.name}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block capitalize mt-0.5">
                     {preset.theme === 'dark' ? t('appearance.mode_dark', 'Tryb Ciemny') : t('appearance.mode_light', 'Tryb Jasny')}
                   </span>
                 </button>
@@ -237,27 +237,27 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Color & Mode Toggle */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-              <Palette className="w-3.5 h-3.5 text-blue-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <Palette className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.palette_title', 'Paleta Kolorów i Tryb')}
               </h3>
             </div>
             
-            <div className="flex items-center justify-between p-3 rounded-md bg-[#18202d] border border-[#202c3e]">
+            <div className="flex items-center justify-between p-3 rounded-md bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] shadow-sm dark:shadow-none">
               <div>
-                <span className="font-medium text-xs text-slate-200 block">
+                <span className="font-medium text-xs text-slate-800 dark:text-slate-200 block">
                   {t('appearance.color_mode', 'Tryb Kolorystyczny')}
                 </span>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                   {t('appearance.current_mode', 'Aktualny:')} {theme === 'dark' ? t('appearance.mode_dark', 'Tryb Ciemny') : t('appearance.mode_light', 'Tryb Jasny')}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1b2536] text-slate-200 border border-[#212c3e] text-xs font-medium transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-[#151c28] dark:hover:bg-[#1b2536] text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-[#212c3e] text-xs font-medium transition-colors cursor-pointer"
               >
                 {theme === 'dark' ? t('appearance.switch_to_light', 'Przełącz na Jasny ☀️') : t('appearance.switch_to_dark', 'Przełącz na Ciemny 🌙')}
               </button>
@@ -271,7 +271,7 @@ export default function AppearanceSettings() {
                   type="button"
                   className={`w-7 h-7 rounded-md border transition-all cursor-pointer ${
                     accentColor?.toLowerCase() === color.toLowerCase() 
-                      ? 'border-white ring-2 ring-blue-500/40 scale-105' 
+                      ? 'border-slate-900 dark:border-white ring-2 ring-blue-500/40 scale-105' 
                       : 'border-transparent opacity-85 hover:opacity-100 hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}
@@ -282,24 +282,24 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Dimensions & Grid */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-              <Sliders className="w-3.5 h-3.5 text-blue-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <Sliders className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.grid_title', 'Układ Kafelków i Wymiary')}
               </h3>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   {t('appearance.tile_style', 'Styl Kafelka')}
                 </label>
                 <select
                   name="tile_style"
                   value={formData.tile_style}
                   onChange={handleChange}
-                  className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none"
+                  className="w-full bg-white dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] focus:border-blue-500 text-slate-900 dark:text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none shadow-sm dark:shadow-none"
                 >
                   <option value="default">{t('appearance.style_default', 'Domyślny (Zrównoważony)')}</option>
                   <option value="compact">{t('appearance.style_compact', 'Kompaktowy (Mini Pigułka)')}</option>
@@ -308,14 +308,14 @@ export default function AppearanceSettings() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   {t('appearance.tile_size', 'Rozmiar Kafelka')}
                 </label>
                 <select
                   name="tile_size"
                   value={formData.tile_size}
                   onChange={handleChange}
-                  className="w-full bg-[#18202d] border border-[#222d41] focus:border-blue-500 text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none"
+                  className="w-full bg-white dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] focus:border-blue-500 text-slate-900 dark:text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none shadow-sm dark:shadow-none"
                 >
                   <option value="small">{t('appearance.size_small', 'Mały')}</option>
                   <option value="medium">{t('appearance.size_medium', 'Średni')}</option>
@@ -325,10 +325,10 @@ export default function AppearanceSettings() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              <div className="p-3 rounded-md bg-[#18202d] border border-[#202c3e] space-y-1.5">
-                <div className="flex justify-between text-xs font-medium text-slate-300">
+              <div className="p-3 rounded-md bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-1.5 shadow-sm dark:shadow-none">
+                <div className="flex justify-between text-xs font-medium text-slate-700 dark:text-slate-300">
                   <span>{t('appearance.border_radius', 'Zaokrąglenie narożników')}</span>
-                  <span className="text-slate-400 font-mono">{formData.tile_border_radius}px</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-mono">{formData.tile_border_radius}px</span>
                 </div>
                 <input
                   type="range"
@@ -336,14 +336,14 @@ export default function AppearanceSettings() {
                   min="4" max="32"
                   value={formData.tile_border_radius}
                   onChange={handleChange}
-                  className="w-full accent-blue-500 cursor-pointer"
+                  className="w-full accent-blue-600 dark:accent-blue-500 cursor-pointer"
                 />
               </div>
 
-              <div className="p-3 rounded-md bg-[#18202d] border border-[#202c3e] space-y-1.5">
-                <div className="flex justify-between text-xs font-medium text-slate-300">
+              <div className="p-3 rounded-md bg-white dark:bg-[#18202d] border border-slate-200 dark:border-[#202c3e] space-y-1.5 shadow-sm dark:shadow-none">
+                <div className="flex justify-between text-xs font-medium text-slate-700 dark:text-slate-300">
                   <span>{t('appearance.grid_gap', 'Odstępy między kafelkami (Gap)')}</span>
-                  <span className="text-slate-400 font-mono">{formData.grid_gap}px</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-mono">{formData.grid_gap}px</span>
                 </div>
                 <input
                   type="range"
@@ -351,17 +351,17 @@ export default function AppearanceSettings() {
                   min="8" max="36"
                   value={formData.grid_gap}
                   onChange={handleChange}
-                  className="w-full accent-blue-500 cursor-pointer"
+                  className="w-full accent-blue-600 dark:accent-blue-500 cursor-pointer"
                 />
               </div>
             </div>
           </div>
 
           {/* Wallpaper Upload & URL */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-              <Image className="w-3.5 h-3.5 text-blue-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <Image className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.wallpaper_title', 'Własna Tapeta Pulpitu')}
               </h3>
             </div>
@@ -377,7 +377,7 @@ export default function AppearanceSettings() {
                 />
               </div>
               <div className="pt-6">
-                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#151c28] hover:bg-[#1b2536] border border-[#212c3e] text-xs font-medium text-slate-200 transition-colors">
+                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-white hover:bg-slate-100 dark:bg-[#151c28] dark:hover:bg-[#1b2536] border border-slate-300 dark:border-[#212c3e] text-xs font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-sm dark:shadow-none">
                   <Upload className="w-3.5 h-3.5 text-slate-400" />
                   <span>{uploading ? t('appearance.uploading', 'Wysyłanie...') : t('appearance.upload_btn', 'Wgraj plik')}</span>
                   <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -387,10 +387,10 @@ export default function AppearanceSettings() {
           </div>
 
           {/* Custom CSS Code Editor */}
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#1c2534]">
-              <Code2 className="w-3.5 h-3.5 text-blue-400" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-4 shadow-sm dark:shadow-none transition-colors">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <Code2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.css_title', 'Własne reguły Custom CSS')}
               </h3>
             </div>
@@ -414,15 +414,15 @@ export default function AppearanceSettings() {
             RIGHT: REAL-TIME PREVIEW STAGE (5 cols)
             ============================================ */}
         <div className="xl:col-span-5 sticky top-20 space-y-4">
-          <div className="p-4 sm:p-5 rounded-lg bg-[#111622] border border-[#1d2635] space-y-3 shadow-lg">
-            <div className="flex items-center justify-between pb-2 border-b border-[#1c2534]">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="p-4 sm:p-5 rounded-lg bg-slate-50 dark:bg-[#111622] border border-slate-200 dark:border-[#1d2635] space-y-3 shadow-sm dark:shadow-lg transition-colors">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-[#1c2534]">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                 {t('appearance.preview_title', 'Podgląd kafelka na żywo')}
               </h3>
-              <span className="text-[10px] font-mono text-emerald-400">● LIVE 14ms</span>
+              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">● LIVE 14ms</span>
             </div>
 
-            <div className="p-3 rounded-lg bg-[#0b0f17] border border-[#1d2635]">
+            <div className="p-3 rounded-lg bg-slate-100 dark:bg-[#0b0f17] border border-slate-200 dark:border-[#1d2635]">
               <ServiceCard 
                 service={livePreviewService} 
                 overrideSettings={liveOverrideSettings}

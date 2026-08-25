@@ -24,17 +24,17 @@ export default function Modal({ title, children, onClose, footer, maxWidth = 'ma
       />
       
       {/* Solid Technical Modal Card */}
-      <div className={`relative bg-[#141b27] rounded-lg border border-[#1d2635] shadow-2xl w-full ${maxWidth} max-h-[90vh] flex flex-col animate-in fade-in duration-150 overflow-hidden z-10 my-auto text-slate-200`}>
+      <div className={`relative bg-white dark:bg-[#141b27] rounded-lg border border-slate-200 dark:border-[#1d2635] shadow-2xl w-full ${maxWidth} max-h-[90vh] flex flex-col animate-in fade-in duration-150 overflow-hidden z-10 my-auto text-slate-800 dark:text-slate-200 transition-colors`}>
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#1c2534] bg-[#111622] flex-shrink-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 truncate pr-4">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#111622] flex-shrink-0">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300 truncate pr-4">
             {title}
           </h2>
           <button 
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors flex-shrink-0"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-colors flex-shrink-0 cursor-pointer"
             title="Zamknij (Esc)"
           >
             <X className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function Modal({ title, children, onClose, footer, maxWidth = 'ma
 
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-3.5 border-t border-[#1c2534] bg-[#111622] flex items-center justify-end gap-2.5 flex-shrink-0">
+          <div className="px-5 py-3.5 border-t border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#111622] flex items-center justify-end gap-2.5 flex-shrink-0">
             {footer}
           </div>
         )}

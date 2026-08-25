@@ -39,11 +39,11 @@ export default function SystemOverviewWidget({ services = [], onRefreshServices 
   const unknownPercent = total > 0 ? Math.round((unknown / total) * 100) : 0;
 
   return (
-    <div className="rounded-lg bg-[#141b27] border border-[#1d2635] p-4 space-y-4 text-xs">
+    <div className="rounded-lg bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] p-4 space-y-4 text-xs shadow-sm dark:shadow-none transition-colors">
       {/* 1. Stan Usług */}
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between pb-2 border-b border-[#1c2534]">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#1c2534]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300">
             {t('overview.services_status', 'STAN USŁUG')}
           </h3>
 
@@ -52,62 +52,62 @@ export default function SystemOverviewWidget({ services = [], onRefreshServices 
               fetchStats();
               if (onRefreshServices) onRefreshServices();
             }}
-            className="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors cursor-pointer"
             title={t('common.refresh', 'Odśwież')}
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin text-blue-600 dark:text-blue-400' : ''}`} />
           </button>
         </div>
 
         <div className="flex items-center justify-between text-[11px] font-mono">
-          <span className="text-slate-400">Dostępność usług:</span>
-          <span className="font-semibold text-slate-200">{online}/{total} ({onlinePercent}%)</span>
+          <span className="text-slate-500 dark:text-slate-400">Dostępność usług:</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200">{online}/{total} ({onlinePercent}%)</span>
         </div>
 
         {/* Multi-segment thin line */}
-        <div className="w-full h-1.5 rounded-sm bg-[#1c2534] overflow-hidden flex">
+        <div className="w-full h-1.5 rounded-sm bg-slate-100 dark:bg-[#1c2534] overflow-hidden flex">
           {online > 0 && <div style={{ width: `${onlinePercent}%` }} className="h-full bg-emerald-500" />}
           {degraded > 0 && <div style={{ width: `${degradedPercent}%` }} className="h-full bg-amber-500" />}
           {offline > 0 && <div style={{ width: `${offlinePercent}%` }} className="h-full bg-rose-500" />}
-          {unknown > 0 && <div style={{ width: `${unknownPercent}%` }} className="h-full bg-slate-600" />}
+          {unknown > 0 && <div style={{ width: `${unknownPercent}%` }} className="h-full bg-slate-300 dark:bg-slate-600" />}
         </div>
 
         {/* Clean Monospace Breakdown */}
-        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-0.5">
-          <span className="text-emerald-400">{online} online</span>
-          <span className="text-amber-400">{degraded} problem</span>
-          <span className="text-rose-400">{offline} offline</span>
-          <span className="text-slate-500">{unknown} inne</span>
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-0.5">
+          <span className="text-emerald-600 dark:text-emerald-400">{online} online</span>
+          <span className="text-amber-600 dark:text-amber-400">{degraded} problem</span>
+          <span className="text-rose-600 dark:text-rose-400">{offline} offline</span>
+          <span className="text-slate-400 dark:text-slate-500">{unknown} inne</span>
         </div>
       </div>
 
       {/* 2. Host NexusPanel */}
       {stats && (
-        <div className="space-y-2.5 pt-3 border-t border-[#1c2534]">
+        <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-[#1c2534]">
           <div className="flex items-center justify-between pb-1.5">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300">
               {t('overview.host_nexuspanel', 'HOST NEXUSPANEL')}
             </h3>
 
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
               {stats.system?.hostname || 'nexuspanel'} ({stats.system?.platform || 'linux'})
             </span>
           </div>
 
-          <div className="text-[11px] font-mono text-slate-400 flex justify-between">
+          <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex justify-between">
             <span>Uptime:</span>
-            <span className="text-slate-300">{stats.system?.uptimeFormatted || `${Math.floor((stats.system?.uptimeSeconds || 0) / 3600)}h`}</span>
+            <span className="text-slate-800 dark:text-slate-300 font-medium">{stats.system?.uptimeFormatted || `${Math.floor((stats.system?.uptimeSeconds || 0) / 3600)}h`}</span>
           </div>
 
           {/* CPU Row */}
           <div className="space-y-1">
             <div className="flex justify-between text-[11px] font-mono">
-              <span className="text-slate-400">CPU ({stats.cpu?.cores || 1} rdzeń)</span>
-              <span className="text-slate-200 font-semibold">{stats.cpu?.usagePercent || 0}%</span>
+              <span className="text-slate-500 dark:text-slate-400">CPU ({stats.cpu?.cores || 1} rdzeń)</span>
+              <span className="text-slate-800 dark:text-slate-200 font-semibold">{stats.cpu?.usagePercent || 0}%</span>
             </div>
-            <div className="w-full h-1.5 rounded-sm bg-[#1c2534] overflow-hidden">
+            <div className="w-full h-1.5 rounded-sm bg-slate-100 dark:bg-[#1c2534] overflow-hidden">
               <div 
-                className="h-full bg-blue-500"
+                className="h-full bg-blue-600 dark:bg-blue-500"
                 style={{ width: `${Math.min(100, stats.cpu?.usagePercent || 0)}%` }}
               />
             </div>
@@ -116,12 +116,12 @@ export default function SystemOverviewWidget({ services = [], onRefreshServices 
           {/* RAM Row */}
           <div className="space-y-1">
             <div className="flex justify-between text-[11px] font-mono">
-              <span className="text-slate-400">RAM ({stats.memory?.usedGb || '0'}/{stats.memory?.totalGb || '0'} GB)</span>
-              <span className="text-slate-200 font-semibold">{stats.memory?.percent || 0}%</span>
+              <span className="text-slate-500 dark:text-slate-400">RAM ({stats.memory?.usedGb || '0'}/{stats.memory?.totalGb || '0'} GB)</span>
+              <span className="text-slate-800 dark:text-slate-200 font-semibold">{stats.memory?.percent || 0}%</span>
             </div>
-            <div className="w-full h-1.5 rounded-sm bg-[#1c2534] overflow-hidden">
+            <div className="w-full h-1.5 rounded-sm bg-slate-100 dark:bg-[#1c2534] overflow-hidden">
               <div 
-                className="h-full bg-slate-400"
+                className="h-full bg-slate-400 dark:bg-slate-400"
                 style={{ width: `${Math.min(100, stats.memory?.percent || 0)}%` }}
               />
             </div>
