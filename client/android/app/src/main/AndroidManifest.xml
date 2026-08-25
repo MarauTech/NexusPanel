@@ -38,5 +38,46 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- 1. Homelab Status Homescreen Widget -->
+        <receiver
+            android:name=".HomelabStatusWidget"
+            android:exported="true"
+            android:label="NexusPanel Homelab Monitor">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.marautch.nexuspanel.ACTION_REFRESH_HOMELAB" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_homelab_status_info" />
+        </receiver>
+
+        <!-- 2. Quick Launcher Homescreen Widget -->
+        <receiver
+            android:name=".QuickLauncherWidget"
+            android:exported="true"
+            android:label="NexusPanel Ulubione Usługi">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quick_launcher_info" />
+        </receiver>
+
+        <!-- 3. AdGuard / Pi-hole Toggle Widget -->
+        <receiver
+            android:name=".AdblockWidget"
+            android:exported="true"
+            android:label="NexusPanel AdGuard DNS">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.marautch.nexuspanel.ACTION_PAUSE_ADBLOCK" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_adblock_info" />
+        </receiver>
     </application>
 </manifest>

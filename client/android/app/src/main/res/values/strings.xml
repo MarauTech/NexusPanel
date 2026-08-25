@@ -4,4 +4,7 @@
     <string name="title_activity_main">NexusPanel</string>
     <string name="package_name">com.marautch.nexuspanel</string>
     <string name="custom_url_scheme">com.marautch.nexuspanel</string>
+    <string name="widget_homelab_desc">Stan węzła Proxmox, zużycie CPU/RAM oraz dostępność usług w sieci lokalnej.</string>
+    <string name="widget_launcher_desc">Szybkie skróty do ulubionych aplikacji homelaba na ekranie głównym.</string>
+    <string name="widget_adblock_desc">Statystyki zablokowanych reklam AdGuard / Pi-hole oraz szybka pauza.</string>
 </resources>
