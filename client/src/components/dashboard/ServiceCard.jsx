@@ -16,8 +16,8 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
   const isOffline = healthStatus === 'offline';
 
   const latency = typeof service.health_response_time === 'number' ? service.health_response_time : null;
-  const isElevatedLatency = latency !== null && latency >= 150 && latency < 400;
-  const isHighLatency = latency !== null && latency >= 400;
+  const isElevatedLatency = latency !== null && latency >= 80 && latency < 200;
+  const isHighLatency = latency !== null && latency >= 200;
 
   // Handle Card Click:
   // - Shift + Click: Open Service Details Drawer
@@ -111,7 +111,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
       title={`${service.name} (${cleanHost})\nKlik: Otwórz, Shift+Klik: Szczegóły`}
     >
       {/* Small, clean authentic brand Icon */}
-      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300 group-hover:text-white transition-colors mt-0.5">
+      <div className="w-8 h-8 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 mt-0.5">
         <BrandIcon name={service.icon} fallbackText={service.name} className="w-4 h-4" />
       </div>
 
@@ -121,23 +121,29 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <span 
-              className="font-medium text-sm text-slate-100 group-hover:text-blue-400 transition-colors truncate"
+              className="font-medium text-sm text-slate-100 group-hover:text-blue-400 transition-colors line-clamp-2 break-words"
               title={service.name}
             >
               {service.name}
             </span>
-            {service.custom_badge && (
-              <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">
-                [{service.custom_badge}]
-              </span>
-            )}
+            {service.custom_badge && (() => {
+              const b = service.custom_badge.trim().toLowerCase();
+              const isGeneric = !b || b.length < 2
+                || /^port\s*(name|na)?$/i.test(b)
+                || /^(online|offline|unknown|degraded|n\/a|none|null|undefined|test|default|badge)$/i.test(b);
+              return isGeneric ? null : (
+                <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">
+                  {service.custom_badge}
+                </span>
+              );
+            })()}
           </div>
 
           {/* Semantic Status Indicator */}
           <div className="flex items-center gap-1.5 flex-shrink-0 text-xs font-mono">
             {isOnline && !isHighLatency && (
-              <span className="flex items-center gap-1 text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className={`flex items-center gap-1 ${isElevatedLatency ? 'text-emerald-400' : 'text-emerald-400/60'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isElevatedLatency ? 'bg-emerald-400' : 'bg-emerald-400/60'}`} />
                 Online
               </span>
             )}
@@ -184,7 +190,7 @@ export default function ServiceCard({ service, onFavoriteToggle, onSelectService
               <span className="text-amber-400 font-medium">{latency ? `${latency} ms` : 'DEGRADED'}</span>
             ) : isOnline ? (
               <span className={`font-medium ${
-                isHighLatency ? 'text-amber-400' : (isElevatedLatency ? 'text-amber-300/90' : 'text-slate-300')
+                isHighLatency ? 'text-rose-400' : (isElevatedLatency ? 'text-amber-300' : 'text-slate-300')
               }`}>
                 {latency ? `${latency} ms` : 'OK'}
               </span>

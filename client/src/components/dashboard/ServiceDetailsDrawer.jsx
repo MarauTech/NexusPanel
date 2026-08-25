@@ -219,7 +219,7 @@ export default function ServiceDetailsDrawer({
             {/* 1. Hero Service Profile */}
             <div className="flex items-start gap-3.5 p-3.5 rounded-lg bg-[#141b27] border border-[#1d2635]">
               <div className="w-10 h-10 rounded-md bg-[#192231] border border-[#222d41] flex items-center justify-center flex-shrink-0 text-slate-300">
-                <BrandIcon name={service.icon} color="#94a3b8" className="w-5 h-5" fallbackText={service.name} />
+                <BrandIcon name={service.icon} className="w-5 h-5" fallbackText={service.name} />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -227,11 +227,17 @@ export default function ServiceDetailsDrawer({
                   <h1 className="text-sm font-semibold text-slate-100 break-words">
                     {service.name}
                   </h1>
-                  {service.custom_badge && (
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      [{service.custom_badge}]
-                    </span>
-                  )}
+                  {service.custom_badge && (() => {
+                    const b = service.custom_badge.trim().toLowerCase();
+                    const isGeneric = !b || b.length < 2
+                      || /^port\s*(name|na)?$/i.test(b)
+                      || /^(online|offline|unknown|degraded|n\/a|none|null|undefined|test|default|badge)$/i.test(b);
+                    return isGeneric ? null : (
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {service.custom_badge}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <p className="text-[11px] text-slate-400 font-mono mt-0.5">
@@ -246,11 +252,12 @@ export default function ServiceDetailsDrawer({
               </div>
             </div>
 
-            {/* 2. Primary Launch Button */}
+            {/* 2. Launch Button (secondary, not SaaS-style CTA) */}
             <Button
+              variant="secondary"
               onClick={handleOpenService}
               icon={ExternalLink}
-              className="w-full justify-center py-2.5 text-xs font-medium"
+              className="w-full justify-center py-2 text-xs font-medium"
             >
               {t('drawer.open_service', 'Otwórz usługę')}
             </Button>

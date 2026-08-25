@@ -80,7 +80,7 @@ export default function RecentActivityWidget({ services = [] }) {
                       isOnline ? 'bg-emerald-400' : (isDegraded ? 'bg-amber-400' : 'bg-rose-400')
                     }`}
                   />
-                  <span className="text-slate-300 font-medium truncate">
+                  <span className="text-slate-300 font-medium truncate max-w-[160px]" title={evt.serviceName}>
                     {evt.serviceName}
                   </span>
                 </div>

@@ -178,9 +178,6 @@ export default function Dashboard() {
           <h1 className="text-base sm:text-lg font-semibold text-slate-100 tracking-tight">
             {settings?.user_name ? `${t('dashboard.greeting', 'Witaj')}, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {t('dashboard.subtitle', 'Twój pulpit infrastruktury i usług homelabu.')}
-          </p>
         </div>
 
         {/* Right: Quick Action Buttons */}
@@ -195,7 +192,7 @@ export default function Dashboard() {
           </Button>
 
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             icon={Plus}
             onClick={() => setIsAddModalOpen(true)}
@@ -206,7 +203,9 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Compact Global Status Strip */}
-      <GlobalStatusStrip services={enrichedServices} />
+      <div className="mb-2">
+        <GlobalStatusStrip services={enrichedServices} />
+      </div>
 
       {/* 3. 2-Column Responsive Layout: Left ~68% Services & Categories, Right ~32% System Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full pt-1">
