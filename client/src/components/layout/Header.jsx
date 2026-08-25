@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Hexagon, Search, Sun, Moon, Settings, LayoutDashboard, 
-  Tv, Globe, LogOut, Lock, Menu, X 
+  Tv, Globe, LogOut, Lock, Menu, X, Server 
 } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import SearchModal from '../search/SearchModal';
+import ServerConfigModal from '../common/ServerConfigModal';
+import { getServerUrl } from '../../services/api';
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -18,6 +20,7 @@ export default function Header() {
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [serverModalOpen, setServerModalOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -125,6 +128,16 @@ export default function Header() {
               </Link>
             )}
 
+            {/* Server Connection */}
+            <button
+              onClick={() => setServerModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-[#141b27] dark:hover:bg-[#1c2534] dark:text-slate-400 dark:hover:text-slate-200 dark:border-[#1d2635] transition-colors cursor-pointer shadow-xs"
+              title="Konfiguracja adresu serwera NexusPanel"
+            >
+              <Server className="w-3.5 h-3.5 text-blue-500" />
+              <span className="font-mono text-[11px] hidden xl:inline">{getServerUrl() ? getServerUrl().replace(/^https?:\/\//, '') : 'Serwer'}</span>
+            </button>
+
             {/* Logout / Login */}
             {isAuthenticated ? (
               <button
@@ -209,6 +222,15 @@ export default function Header() {
               </Link>
             </div>
 
+            {/* Mobile Server Connection Button */}
+            <button
+              onClick={() => { setMobileMenuOpen(false); setServerModalOpen(true); }}
+              className="w-full flex items-center justify-center gap-2 p-2.5 rounded-md bg-slate-100 dark:bg-[#141b27] border border-slate-300 dark:border-[#1d2635] text-slate-800 dark:text-slate-200 text-xs font-mono"
+            >
+              <Server className="w-4 h-4 text-blue-500" />
+              <span>Serwer: <strong>{getServerUrl() ? getServerUrl().replace(/^https?:\/\//, '') : 'Domyślny (LAN)'}</strong></span>
+            </button>
+
             <div className="flex items-center justify-between gap-2 pt-1">
               <button
                 onClick={toggleLanguage}
@@ -242,6 +264,14 @@ export default function Header() {
       
       {searchOpen && (
         <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      )}
+
+      {serverModalOpen && (
+        <ServerConfigModal 
+          isOpen={serverModalOpen} 
+          onClose={() => setServerModalOpen(false)}
+          onConnected={() => window.location.reload()}
+        />
       )}
     </>
   );

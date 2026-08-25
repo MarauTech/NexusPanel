@@ -23,3 +23,10 @@ yarn-error.log*
 # System Files
 .DS_Store
 Thumbs.db
+
+# Android build outputs & caches
+client/android/.gradle/
+client/android/build/
+client/android/app/build/
+client/android/capacitor-cordova-android-plugins/build/
+client/android/app/nexuspanel-release.keystore

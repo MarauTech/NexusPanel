@@ -1,5 +1,23 @@
 import axios from 'axios';
 
+export function getServerUrl() {
+  const custom = localStorage.getItem('nexuspanel_server_url');
+  if (custom) return custom.replace(/\/+$/, '');
+  return '';
+}
+
+export function setServerUrl(url) {
+  if (!url) {
+    localStorage.removeItem('nexuspanel_server_url');
+  } else {
+    let clean = url.trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(clean)) {
+      clean = 'http://' + clean;
+    }
+    localStorage.setItem('nexuspanel_server_url', clean);
+  }
+}
+
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
@@ -13,6 +31,17 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  const serverUrl = getServerUrl();
+  if (serverUrl) {
+    // If request URL starts with /api or relative, prepend configured server URL
+    if (config.url?.startsWith('/')) {
+      config.url = `${serverUrl}${config.url.startsWith('/api') ? '' : '/api'}${config.url}`;
+    } else if (!config.url?.startsWith('http')) {
+      config.url = `${serverUrl}/api/${config.url}`;
+    }
+  }
+
   return config;
 });
 

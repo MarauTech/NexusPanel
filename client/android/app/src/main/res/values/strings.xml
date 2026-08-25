@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NexusPanel</string>
+    <string name="title_activity_main">NexusPanel</string>
+    <string name="package_name">com.marautch.nexuspanel</string>
+    <string name="custom_url_scheme">com.marautch.nexuspanel</string>
+</resources>
