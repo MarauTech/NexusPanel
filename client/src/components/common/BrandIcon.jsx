@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { OFFICIAL_SERVICE_SVGS, matchServiceIconKey } from '../../utils/serviceIcons';
 
@@ -10,8 +10,29 @@ function resolveLucide(name) {
 }
 
 export default function BrandIcon({ name, color, className = "w-5 h-5", fallbackText = "" }) {
-  // 1. Try matching official brand SVG by icon name or service name
-  const iconKey = matchServiceIconKey(name) || matchServiceIconKey(fallbackText);
+  const [imgError, setImgError] = useState(false);
+
+  // Clean the icon identifier
+  const cleanName = name ? String(name).toLowerCase().trim().replace(/\.svg$/, '') : '';
+  const iconKey = matchServiceIconKey(cleanName) || matchServiceIconKey(fallbackText);
+
+  // 1. Try public SVG icon asset (/icons/{name}.svg)
+  const candidateFile = cleanName || iconKey;
+  if (candidateFile && !imgError && candidateFile !== 'globe' && candidateFile !== 'server') {
+    return (
+      <div className={`${className} flex items-center justify-center flex-shrink-0`}>
+        <img
+          src={`/icons/${candidateFile}.svg`}
+          alt={fallbackText || candidateFile}
+          className="w-full h-full object-contain"
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+
+  // 2. Try inline official SVG icon map
   if (iconKey && OFFICIAL_SERVICE_SVGS[iconKey]) {
     const brand = OFFICIAL_SERVICE_SVGS[iconKey];
     return (
@@ -25,12 +46,12 @@ export default function BrandIcon({ name, color, className = "w-5 h-5", fallback
     );
   }
 
-  // 2. Try Lucide Icon by name
+  // 3. Try Lucide Icon by name
   const LucideComponent = resolveLucide(name);
   if (LucideComponent) {
     return <LucideComponent className={className} style={{ color: color || '#94a3b8' }} />;
   }
 
-  // 3. Fallback: Calm, neutral, monochromatic sysadmin icon (Server/Globe)
+  // 4. Fallback: Calm, neutral, monochromatic sysadmin icon (Server/Globe)
   return <LucideIcons.Server className={className} style={{ color: color || '#64748b' }} />;
 }
