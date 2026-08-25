@@ -39,45 +39,82 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
-        <!-- 1. Homelab Status Homescreen Widget -->
+        <!-- 1. Ulubione Aplikacje Widget (Favorite Apps - Max 4) -->
         <receiver
-            android:name=".HomelabStatusWidget"
+            android:name=".FavoriteAppsWidget"
             android:exported="true"
-            android:label="NexusPanel Homelab Monitor">
+            android:label="NexusPanel · Ulubione Aplikacje">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.marautch.nexuspanel.ACTION_REFRESH_HOMELAB" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_homelab_status_info" />
+                android:resource="@xml/widget_favorite_apps_info" />
         </receiver>
 
-        <!-- 2. Quick Launcher Homescreen Widget -->
+        <!-- 2. Status Serwera Widget (CPU, RAM, Temp, Uptime) -->
         <receiver
-            android:name=".QuickLauncherWidget"
+            android:name=".ServerStatusWidget"
             android:exported="true"
-            android:label="NexusPanel Ulubione Usługi">
+            android:label="NexusPanel · Status Serwera">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_quick_launcher_info" />
+                android:resource="@xml/widget_server_status_info" />
         </receiver>
 
-        <!-- 3. AdGuard / Pi-hole Toggle Widget -->
+        <!-- 3. Status Usług Widget (Online, Warning, Offline) -->
         <receiver
-            android:name=".AdblockWidget"
+            android:name=".ServicesStatusWidget"
             android:exported="true"
-            android:label="NexusPanel AdGuard DNS">
+            android:label="NexusPanel · Status Usług">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.marautch.nexuspanel.ACTION_PAUSE_ADBLOCK" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_adblock_info" />
+                android:resource="@xml/widget_services_status_info" />
+        </receiver>
+
+        <!-- 4. Uptime Widget (24h, 7d, 30d) -->
+        <receiver
+            android:name=".UptimeWidget"
+            android:exported="true"
+            android:label="NexusPanel · Uptime">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_uptime_info" />
+        </receiver>
+
+        <!-- 5. Monitoring Konkretnej Usługi Widget (Single Service Monitor) -->
+        <receiver
+            android:name=".SingleServiceWidget"
+            android:exported="true"
+            android:label="NexusPanel · Monitoring Usługi">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_single_service_info" />
+        </receiver>
+
+        <!-- 6. Nexus Overview Widget (Master Overview Card) -->
+        <receiver
+            android:name=".NexusOverviewWidget"
+            android:exported="true"
+            android:label="NexusPanel · Nexus Overview">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_nexus_overview_info" />
         </receiver>
     </application>
 </manifest>

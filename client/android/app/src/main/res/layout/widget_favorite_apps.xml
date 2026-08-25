@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_launcher_root"
+    android:id="@+id/widget_fav_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/widget_bg_compact"
     android:padding="8dp">
 
-    <!-- 1. Minimal Header Bar -->
+    <!-- Header Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" · Ulubione"
+            android:text=" · Ulubione Aplikacje"
             android:textColor="#F1F5F9"
             android:textSize="10.5sp"
             android:textStyle="bold" />
@@ -45,10 +45,10 @@
             android:layout_weight="1" />
 
         <TextView
-            android:id="@+id/widget_fav_count"
+            android:id="@+id/widget_fav_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="6/6 Online"
+            android:text="4/4 Online"
             android:textColor="#34D399"
             android:textSize="9.5sp"
             android:textStyle="bold"
@@ -59,14 +59,14 @@
             android:paddingBottom="1.5dp" />
     </LinearLayout>
 
-    <!-- 2. Dense 6-Item Grid (3 Rows x 2 Columns) -->
+    <!-- 2x2 Grid of 4 Favorite Apps (With IP & Status) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- ROW 1: Slot 1 & Slot 2 -->
+        <!-- Row 1: App 1 & App 2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -74,30 +74,30 @@
             android:orientation="horizontal"
             android:layout_marginBottom="4dp">
 
-            <!-- Slot 1 -->
+            <!-- App 1: Proxmox -->
             <LinearLayout
-                android:id="@+id/widget_shortcut_1"
+                android:id="@+id/widget_fav_card_1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
                 android:layout_marginEnd="2dp">
 
                 <TextView
-                    android:id="@+id/widget_tile_1_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:id="@+id/widget_fav_icon_1"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
                     android:background="@drawable/widget_icon_badge_indigo"
                     android:gravity="center"
                     android:text="PX"
                     android:textColor="#818CF8"
-                    android:textSize="10sp"
+                    android:textSize="10.5sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -109,7 +109,7 @@
                     android:layout_marginEnd="4dp">
 
                     <TextView
-                        android:id="@+id/widget_app_1_name"
+                        android:id="@+id/widget_fav_name_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Proxmox"
@@ -120,47 +120,48 @@
                         android:ellipsize="end" />
 
                     <TextView
-                        android:id="@+id/widget_tile_1_desc"
+                        android:id="@+id/widget_fav_ip_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Infrastruktura"
-                        android:textColor="#64748B"
+                        android:text="192.168.10.96"
+                        android:textColor="#94A3B8"
                         android:textSize="8.5sp"
+                        android:fontFamily="monospace"
                         android:singleLine="true"
                         android:ellipsize="end" />
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/widget_tile_1_status"
+                    android:id="@+id/widget_fav_status_1"
                     android:layout_width="6dp"
                     android:layout_height="6dp"
                     android:src="@drawable/widget_status_online" />
             </LinearLayout>
 
-            <!-- Slot 2 -->
+            <!-- App 2: Plex / Jellyfin -->
             <LinearLayout
-                android:id="@+id/widget_shortcut_2"
+                android:id="@+id/widget_fav_card_2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
                 android:layout_marginStart="2dp">
 
                 <TextView
-                    android:id="@+id/widget_tile_2_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:id="@+id/widget_fav_icon_2"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
                     android:background="@drawable/widget_icon_badge_indigo"
                     android:gravity="center"
-                    android:text="HA"
-                    android:textColor="#38BDF8"
-                    android:textSize="10sp"
+                    android:text="PL"
+                    android:textColor="#E5A00D"
+                    android:textSize="10.5sp"
                     android:textStyle="bold" />
 
                 <LinearLayout
@@ -172,7 +173,143 @@
                     android:layout_marginEnd="4dp">
 
                     <TextView
-                        android:id="@+id/widget_app_2_name"
+                        android:id="@+id/widget_fav_name_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Plex"
+                        android:textColor="#F1F5F9"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/widget_fav_ip_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="192.168.10.20"
+                        android:textColor="#94A3B8"
+                        android:textSize="8.5sp"
+                        android:fontFamily="monospace"
+                        android:singleLine="true"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/widget_fav_status_2"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:src="@drawable/widget_status_online" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Row 2: App 3 & App 4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <!-- App 3: Pi-hole / AdGuard -->
+            <LinearLayout
+                android:id="@+id/widget_fav_card_3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_chip_bg"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:layout_marginEnd="2dp">
+
+                <TextView
+                    android:id="@+id/widget_fav_icon_3"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/widget_icon_badge_indigo"
+                    android:gravity="center"
+                    android:text="PH"
+                    android:textColor="#F43F5E"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:id="@+id/widget_fav_name_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pi-hole"
+                        android:textColor="#F1F5F9"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/widget_fav_ip_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="192.168.10.15"
+                        android:textColor="#94A3B8"
+                        android:textSize="8.5sp"
+                        android:fontFamily="monospace"
+                        android:singleLine="true"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/widget_fav_status_3"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:src="@drawable/widget_status_online" />
+            </LinearLayout>
+
+            <!-- App 4: Home Assistant -->
+            <LinearLayout
+                android:id="@+id/widget_fav_card_4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/widget_chip_bg"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:layout_marginStart="2dp">
+
+                <TextView
+                    android:id="@+id/widget_fav_icon_4"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/widget_icon_badge_indigo"
+                    android:gravity="center"
+                    android:text="HA"
+                    android:textColor="#0284C7"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="4dp">
+
+                    <TextView
+                        android:id="@+id/widget_fav_name_4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Home Assistant"
@@ -183,287 +320,19 @@
                         android:ellipsize="end" />
 
                     <TextView
-                        android:id="@+id/widget_tile_2_desc"
+                        android:id="@+id/widget_fav_ip_4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Smart Home"
-                        android:textColor="#64748B"
+                        android:text="192.168.10.30"
+                        android:textColor="#94A3B8"
                         android:textSize="8.5sp"
+                        android:fontFamily="monospace"
                         android:singleLine="true"
                         android:ellipsize="end" />
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/widget_tile_2_status"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/widget_status_online" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ROW 2: Slot 3 & Slot 4 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:layout_marginBottom="4dp">
-
-            <!-- Slot 3 -->
-            <LinearLayout
-                android:id="@+id/widget_shortcut_3"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:layout_marginEnd="2dp">
-
-                <TextView
-                    android:id="@+id/widget_tile_3_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/widget_icon_badge_indigo"
-                    android:gravity="center"
-                    android:text="AG"
-                    android:textColor="#34D399"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginEnd="4dp">
-
-                    <TextView
-                        android:id="@+id/widget_app_3_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="AdGuard Home"
-                        android:textColor="#F1F5F9"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-
-                    <TextView
-                        android:id="@+id/widget_tile_3_desc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="DNS &amp; Blokada"
-                        android:textColor="#64748B"
-                        android:textSize="8.5sp"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/widget_tile_3_status"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/widget_status_online" />
-            </LinearLayout>
-
-            <!-- Slot 4 -->
-            <LinearLayout
-                android:id="@+id/widget_shortcut_4"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:layout_marginStart="2dp">
-
-                <TextView
-                    android:id="@+id/widget_tile_4_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/widget_icon_badge_indigo"
-                    android:gravity="center"
-                    android:text="JF"
-                    android:textColor="#C084FC"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginEnd="4dp">
-
-                    <TextView
-                        android:id="@+id/widget_app_4_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Jellyfin"
-                        android:textColor="#F1F5F9"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-
-                    <TextView
-                        android:id="@+id/widget_tile_4_desc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Multimedia"
-                        android:textColor="#64748B"
-                        android:textSize="8.5sp"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/widget_tile_4_status"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/widget_status_online" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- ROW 3: Slot 5 & Slot 6 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <!-- Slot 5 -->
-            <LinearLayout
-                android:id="@+id/widget_shortcut_5"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:layout_marginEnd="2dp">
-
-                <TextView
-                    android:id="@+id/widget_tile_5_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/widget_icon_badge_indigo"
-                    android:gravity="center"
-                    android:text="PT"
-                    android:textColor="#38BDF8"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginEnd="4dp">
-
-                    <TextView
-                        android:id="@+id/widget_app_5_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Portainer"
-                        android:textColor="#F1F5F9"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-
-                    <TextView
-                        android:id="@+id/widget_tile_5_desc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Docker &amp; Kontenery"
-                        android:textColor="#64748B"
-                        android:textSize="8.5sp"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/widget_tile_5_status"
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/widget_status_online" />
-            </LinearLayout>
-
-            <!-- Slot 6 -->
-            <LinearLayout
-                android:id="@+id/widget_shortcut_6"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/widget_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:layout_marginStart="2dp">
-
-                <TextView
-                    android:id="@+id/widget_tile_6_icon"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="@drawable/widget_icon_badge_indigo"
-                    android:gravity="center"
-                    android:text="GF"
-                    android:textColor="#F97316"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginEnd="4dp">
-
-                    <TextView
-                        android:id="@+id/widget_app_6_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Grafana"
-                        android:textColor="#F1F5F9"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-
-                    <TextView
-                        android:id="@+id/widget_tile_6_desc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Monitoring"
-                        android:textColor="#64748B"
-                        android:textSize="8.5sp"
-                        android:singleLine="true"
-                        android:ellipsize="end" />
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/widget_tile_6_status"
+                    android:id="@+id/widget_fav_status_4"
                     android:layout_width="6dp"
                     android:layout_height="6dp"
                     android:src="@drawable/widget_status_online" />

@@ -4,7 +4,10 @@
     <string name="title_activity_main">NexusPanel</string>
     <string name="package_name">com.marautch.nexuspanel</string>
     <string name="custom_url_scheme">com.marautch.nexuspanel</string>
-    <string name="widget_homelab_desc">Stan węzła Proxmox, zużycie CPU/RAM oraz dostępność usług w sieci lokalnej.</string>
-    <string name="widget_launcher_desc">Szybkie skróty do ulubionych aplikacji homelaba na ekranie głównym.</string>
-    <string name="widget_adblock_desc">Statystyki zablokowanych reklam AdGuard / Pi-hole oraz szybka pauza.</string>
+    <string name="widget_fav_apps_desc">Maksymalnie 4 ulubione usługi z logo, adresem IP i statusem na żywo.</string>
+    <string name="widget_server_status_desc">Obciążenie CPU, pamięć RAM, temperatura i czas pracy serwera (uptime).</string>
+    <string name="widget_services_status_desc">Podsumowanie dostępności usług (online, ostrzeżenia, offline).</string>
+    <string name="widget_uptime_desc">Wskaźnik dostępności panelu: 24h, 7 dni oraz 30 dni.</string>
+    <string name="widget_single_service_desc">Szczegółowy monitor jednej wybranej usługi: IP, latency i uptime.</string>
+    <string name="widget_nexus_overview_desc">Zbiorczy pulpit: ogólny stan, CPU/RAM, liczba usług i alerty.</string>
 </resources>

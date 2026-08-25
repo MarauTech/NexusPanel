@@ -14,6 +14,8 @@ import TagManager from '../components/admin/TagManager';
 import SecuritySettings from '../components/admin/SecuritySettings';
 import BackupSettings from '../components/admin/BackupSettings';
 import ProxmoxSettings from '../components/admin/ProxmoxSettings';
+import HomescreenWidgetsManager from '../components/admin/HomescreenWidgetsManager';
+import { Smartphone } from 'lucide-react';
 
 export default function Admin() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,6 +31,7 @@ export default function Admin() {
   const tabs = [
     { id: 'general', label: t('admin.tab_general', 'Ogólne'), icon: Settings, path: 'general' },
     { id: 'appearance', label: t('admin.tab_appearance', 'Wygląd i Motywy'), icon: Palette, path: 'appearance' },
+    { id: 'widgets', label: 'Widżety Pulpitu Android', icon: Smartphone, path: 'widgets' },
     { id: 'proxmox', label: t('admin.tab_proxmox', 'Węzeł Proxmox VE'), icon: Server, path: 'proxmox' },
     { id: 'services', label: t('admin.tab_services', 'Zarządzanie Usługami'), icon: LayoutGrid, path: 'services' },
     { id: 'categories', label: t('admin.tab_categories', 'Kategorie'), icon: FolderTree, path: 'categories' },
@@ -102,6 +105,7 @@ export default function Admin() {
               <Route path="/" element={<Navigate to="general" replace />} />
               <Route path="general" element={<GeneralSettings />} />
               <Route path="appearance" element={<AppearanceSettings />} />
+              <Route path="widgets" element={<HomescreenWidgetsManager />} />
               <Route path="proxmox" element={<ProxmoxSettings />} />
               <Route path="services" element={<ServiceManager />} />
               <Route path="categories" element={<CategoryManager />} />
