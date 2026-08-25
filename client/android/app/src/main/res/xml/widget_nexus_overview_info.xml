@@ -9,7 +9,6 @@
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget_nexus_overview"
     android:previewLayout="@layout/widget_nexus_overview"
-    android:configure="com.marautch.nexuspanel.WidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/widget_nexus_overview_desc" />

@@ -9,7 +9,6 @@
     android:updatePeriodMillis="900000"
     android:initialLayout="@layout/widget_server_status"
     android:previewLayout="@layout/widget_server_status"
-    android:configure="com.marautch.nexuspanel.WidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/widget_server_status_desc" />

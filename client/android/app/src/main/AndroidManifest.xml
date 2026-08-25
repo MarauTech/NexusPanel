@@ -29,16 +29,6 @@
 
         </activity>
 
-        <!-- Widget Configuration Activity (Per-Instance Setup) -->
-        <activity
-            android:name=".WidgetConfigureActivity"
-            android:exported="true"
-            android:theme="@style/AppTheme.NoActionBarLaunch">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
