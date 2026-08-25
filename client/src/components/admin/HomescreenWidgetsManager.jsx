@@ -337,8 +337,9 @@ export default function HomescreenWidgetsManager() {
           {/* =========================================================
               CUSTOM CONFIGURATOR FOR SPECIFIC WIDGETS
               ========================================================= */}
+          {/* 1. Favorite Apps Config Card */}
           {selectedWidget === 'favorite_apps' && (
-            <div className="bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] rounded-xl p-4 space-y-3.5 shadow-sm">
+            <div className="bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] rounded-xl p-4 space-y-3.5 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -397,9 +398,9 @@ export default function HomescreenWidgetsManager() {
 
               {/* Add dropdown if < 4 */}
               {favApps.length < 4 && (
-                <div className="flex items-center gap-2 pt-1">
+                <div className="w-full min-w-0 pt-1 overflow-hidden">
                   <select
-                    className="flex-1 bg-slate-50 dark:bg-[#101622] border border-slate-200 dark:border-[#1e293b] rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full min-w-0 max-w-full bg-slate-50 dark:bg-[#101622] border border-slate-200 dark:border-[#1e293b] rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 truncate cursor-pointer"
                     onChange={(e) => {
                       if (e.target.value) {
                         handleAddApp(e.target.value);
@@ -408,7 +409,9 @@ export default function HomescreenWidgetsManager() {
                     }}
                     defaultValue=""
                   >
-                    <option value="" disabled>+ Dodaj usługę z panelu ({4 - favApps.length} wolnych miejsc)...</option>
+                    <option value="" disabled>
+                      + Dodaj usługę z panelu ({4 - favApps.length === 1 ? '1 wolne miejsce' : `${4 - favApps.length} wolne miejsca`})...
+                    </option>
                     {services
                       .filter(s => !favApps.some(f => f.id === s.id))
                       .map(s => (
@@ -422,7 +425,7 @@ export default function HomescreenWidgetsManager() {
           )}
 
           {selectedWidget === 'single_service' && (
-            <div className="bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] rounded-xl p-4 space-y-3 shadow-sm">
+            <div className="bg-white dark:bg-[#141b27] border border-slate-200 dark:border-[#1d2635] rounded-xl p-4 space-y-3 shadow-sm overflow-hidden">
               <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                 <MonitorCheck className="w-3.5 h-3.5 text-indigo-400" />
                 Wybór Monitorowanej Usługi
@@ -431,15 +434,17 @@ export default function HomescreenWidgetsManager() {
                 Wskaż usługę, której status, czas odpowiedzi i uptime chcesz mieć na pulpicie:
               </p>
 
-              <select
-                value={selectedServiceId}
-                onChange={(e) => handleSelectSingleService(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-[#101622] border border-slate-200 dark:border-[#1e293b] rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                {services.map(s => (
-                  <option key={s.id} value={s.id}>{s.name} — {s.url}</option>
-                ))}
-              </select>
+              <div className="w-full min-w-0 overflow-hidden">
+                <select
+                  value={selectedServiceId}
+                  onChange={(e) => handleSelectSingleService(e.target.value)}
+                  className="w-full min-w-0 max-w-full truncate bg-slate-50 dark:bg-[#101622] border border-slate-200 dark:border-[#1e293b] rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                >
+                  {services.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} — {s.url}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
 
