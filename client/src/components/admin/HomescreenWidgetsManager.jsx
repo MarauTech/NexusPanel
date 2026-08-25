@@ -41,15 +41,37 @@ export default function HomescreenWidgetsManager() {
         API.widgets.getOverview()
       ]);
 
-      if (favRes.status === 'fulfilled') setFavApps(favRes.value.data || []);
-      if (srvRes.status === 'fulfilled') setServerStats(srvRes.value.data || null);
-      if (sumRes.status === 'fulfilled') setServicesSummary(sumRes.value.data || null);
-      if (upRes.status === 'fulfilled') setUptimeStats(upRes.value.data || null);
-      if (singleRes.status === 'fulfilled') {
-        setSingleService(singleRes.value.data || null);
-        if (singleRes.value.data?.id) setSelectedServiceId(String(singleRes.value.data.id));
+      if (favRes.status === 'fulfilled') {
+        const data = favRes.value.data || [];
+        setFavApps(data);
+        try { window.AndroidWidgetBridge?.syncWidgetData('favorite_apps', JSON.stringify(data)); } catch (e) {}
       }
-      if (overRes.status === 'fulfilled') setOverviewData(overRes.value.data || null);
+      if (srvRes.status === 'fulfilled') {
+        const data = srvRes.value.data || null;
+        setServerStats(data);
+        try { window.AndroidWidgetBridge?.syncWidgetData('server_status', JSON.stringify(data)); } catch (e) {}
+      }
+      if (sumRes.status === 'fulfilled') {
+        const data = sumRes.value.data || null;
+        setServicesSummary(data);
+        try { window.AndroidWidgetBridge?.syncWidgetData('services_summary', JSON.stringify(data)); } catch (e) {}
+      }
+      if (upRes.status === 'fulfilled') {
+        const data = upRes.value.data || null;
+        setUptimeStats(data);
+        try { window.AndroidWidgetBridge?.syncWidgetData('uptime_stats', JSON.stringify(data)); } catch (e) {}
+      }
+      if (singleRes.status === 'fulfilled') {
+        const data = singleRes.value.data || null;
+        setSingleService(data);
+        if (data?.id) setSelectedServiceId(String(data.id));
+        try { window.AndroidWidgetBridge?.syncWidgetData('single_service', JSON.stringify(data)); } catch (e) {}
+      }
+      if (overRes.status === 'fulfilled') {
+        const data = overRes.value.data || null;
+        setOverviewData(data);
+        try { window.AndroidWidgetBridge?.syncWidgetData('overview', JSON.stringify(data)); } catch (e) {}
+      }
     } catch (err) {
       console.error('Error fetching widget data', err);
     } finally {

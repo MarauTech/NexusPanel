@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.RemoteViews;
@@ -33,26 +32,25 @@ public class UptimeWidget extends AppWidgetProvider {
         Intent launchIntent = new Intent(context, MainActivity.class);
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent rootPendingIntent = PendingIntent.getActivity(
-                context, 400, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                context, 400 + appWidgetId, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_uptime_root, rootPendingIntent);
+
+        String cached = WidgetUpdateHelper.getCachedJson(context, "uptime_stats");
+        if (cached != null && !cached.isEmpty()) {
+            try {
+                applyUptimeStats(views, new JSONObject(cached));
+            } catch (Exception ignored) {}
+        }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            String serverUrl = "http://192.168.10.96:3000";
-            try {
-                SharedPreferences prefs = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
-                String saved = prefs.getString("nexuspanel_server_url", null);
-                if (saved != null && !saved.isEmpty()) {
-                    serverUrl = saved;
-                }
-            } catch (Exception ignored) {}
-
+            String serverUrl = WidgetUpdateHelper.getServerUrl(context);
             try {
                 URL url = new URL(serverUrl + "/api/widgets/uptime-stats");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(3500);
-                conn.setReadTimeout(3500);
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
                 if (conn.getResponseCode() == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder sb = new StringBuilder();
@@ -60,23 +58,30 @@ public class UptimeWidget extends AppWidgetProvider {
                     while ((line = reader.readLine()) != null) sb.append(line);
                     reader.close();
 
-                    JSONObject json = new JSONObject(sb.toString());
-                    final double u30d = json.optDouble("uptime30d", 99.98);
-                    final double u24h = json.optDouble("uptime24h", 99.98);
-                    final double u7d = json.optDouble("uptime7d", 99.95);
-                    final String hostUptime = json.optString("uptimeFormatted", "42d 6h");
+                    String raw = sb.toString();
+                    WidgetUpdateHelper.setCachedJson(context, "uptime_stats", raw);
+                    JSONObject json = new JSONObject(raw);
 
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        views.setTextViewText(R.id.widget_uptime_big_percent, String.format("%.2f%%", u30d));
-                        views.setTextViewText(R.id.widget_uptime_host_text, "Host: " + hostUptime);
-                        views.setTextViewText(R.id.widget_uptime_24h, String.format("%.2f%%", u24h));
-                        views.setTextViewText(R.id.widget_uptime_7d, String.format("%.2f%%", u7d));
-                        views.setTextViewText(R.id.widget_uptime_30d, String.format("%.2f%%", u30d));
+                        applyUptimeStats(views, json);
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     });
                 }
                 conn.disconnect();
             } catch (Exception ignored) {}
         });
+    }
+
+    private static void applyUptimeStats(RemoteViews views, JSONObject json) {
+        final double u30d = json.optDouble("uptime30d", 100.0);
+        final double u24h = json.optDouble("uptime24h", 100.0);
+        final double u7d = json.optDouble("uptime7d", 100.0);
+        final String hostUptime = json.optString("uptimeFormatted", "0m");
+
+        views.setTextViewText(R.id.widget_uptime_big_percent, String.format("%.2f%%", u30d));
+        views.setTextViewText(R.id.widget_uptime_host_text, "Host: " + hostUptime);
+        views.setTextViewText(R.id.widget_uptime_24h, String.format("%.2f%%", u24h));
+        views.setTextViewText(R.id.widget_uptime_7d, String.format("%.2f%%", u7d));
+        views.setTextViewText(R.id.widget_uptime_30d, String.format("%.2f%%", u30d));
     }
 }

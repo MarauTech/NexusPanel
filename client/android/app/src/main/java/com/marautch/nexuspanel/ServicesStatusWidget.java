@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.RemoteViews;
@@ -33,26 +32,25 @@ public class ServicesStatusWidget extends AppWidgetProvider {
         Intent launchIntent = new Intent(context, MainActivity.class);
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent rootPendingIntent = PendingIntent.getActivity(
-                context, 300, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                context, 300 + appWidgetId, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_services_root, rootPendingIntent);
+
+        String cached = WidgetUpdateHelper.getCachedJson(context, "services_summary");
+        if (cached != null && !cached.isEmpty()) {
+            try {
+                applyServicesSummary(views, new JSONObject(cached));
+            } catch (Exception ignored) {}
+        }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            String serverUrl = "http://192.168.10.96:3000";
-            try {
-                SharedPreferences prefs = context.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
-                String saved = prefs.getString("nexuspanel_server_url", null);
-                if (saved != null && !saved.isEmpty()) {
-                    serverUrl = saved;
-                }
-            } catch (Exception ignored) {}
-
+            String serverUrl = WidgetUpdateHelper.getServerUrl(context);
             try {
                 URL url = new URL(serverUrl + "/api/widgets/services-summary");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(3500);
-                conn.setReadTimeout(3500);
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
                 if (conn.getResponseCode() == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     StringBuilder sb = new StringBuilder();
@@ -60,22 +58,29 @@ public class ServicesStatusWidget extends AppWidgetProvider {
                     while ((line = reader.readLine()) != null) sb.append(line);
                     reader.close();
 
-                    JSONObject json = new JSONObject(sb.toString());
-                    final int total = json.optInt("total", 24);
-                    final int online = json.optInt("online", 24);
-                    final int warning = json.optInt("warning", 0);
-                    final int offline = json.optInt("offline", 0);
+                    String raw = sb.toString();
+                    WidgetUpdateHelper.setCachedJson(context, "services_summary", raw);
+                    JSONObject json = new JSONObject(raw);
 
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        views.setTextViewText(R.id.widget_services_total_badge, total + " Usług");
-                        views.setTextViewText(R.id.widget_services_online_count, String.valueOf(online));
-                        views.setTextViewText(R.id.widget_services_warning_count, String.valueOf(warning));
-                        views.setTextViewText(R.id.widget_services_offline_count, String.valueOf(offline));
+                        applyServicesSummary(views, json);
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     });
                 }
                 conn.disconnect();
             } catch (Exception ignored) {}
         });
+    }
+
+    private static void applyServicesSummary(RemoteViews views, JSONObject json) {
+        final int total = json.optInt("total", 0);
+        final int online = json.optInt("online", 0);
+        final int warning = json.optInt("warning", 0);
+        final int offline = json.optInt("offline", 0);
+
+        views.setTextViewText(R.id.widget_services_total_badge, total + " Usług");
+        views.setTextViewText(R.id.widget_services_online_count, String.valueOf(online));
+        views.setTextViewText(R.id.widget_services_warning_count, String.valueOf(warning));
+        views.setTextViewText(R.id.widget_services_offline_count, String.valueOf(offline));
     }
 }

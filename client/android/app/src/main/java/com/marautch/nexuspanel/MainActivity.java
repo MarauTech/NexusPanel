@@ -1,6 +1,7 @@
 package com.marautch.nexuspanel;
 
 import android.os.Bundle;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
@@ -19,9 +20,21 @@ public class MainActivity extends BridgeActivity {
                 settings.setDatabaseEnabled(true);
                 settings.setAllowFileAccess(true);
                 settings.setAllowContentAccess(true);
+
+                webView.addJavascriptInterface(new Object() {
+                    @JavascriptInterface
+                    public void syncServerUrl(String serverUrl) {
+                        WidgetUpdateHelper.setServerUrl(MainActivity.this, serverUrl);
+                        WidgetUpdateHelper.updateAllWidgets(MainActivity.this);
+                    }
+
+                    @JavascriptInterface
+                    public void syncWidgetData(String widgetType, String jsonPayload) {
+                        WidgetUpdateHelper.setCachedJson(MainActivity.this, widgetType, jsonPayload);
+                        WidgetUpdateHelper.updateAllWidgets(MainActivity.this);
+                    }
+                }, "AndroidWidgetBridge");
             }
-        } catch (Exception e) {
-            // Ignore if bridge initialization order differs
-        }
+        } catch (Exception ignored) {}
     }
 }

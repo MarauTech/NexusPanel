@@ -15,8 +15,21 @@ export function setServerUrl(url) {
       clean = 'http://' + clean;
     }
     localStorage.setItem('nexuspanel_server_url', clean);
+    try {
+      if (window.AndroidWidgetBridge?.syncServerUrl) {
+        window.AndroidWidgetBridge.syncServerUrl(clean);
+      }
+    } catch (e) {}
   }
 }
+
+// Initial sync if server url exists in localStorage
+try {
+  const currentUrl = getServerUrl();
+  if (currentUrl && window.AndroidWidgetBridge?.syncServerUrl) {
+    window.AndroidWidgetBridge.syncServerUrl(currentUrl);
+  }
+} catch (e) {}
 
 const api = axios.create({
   baseURL: '/api',
