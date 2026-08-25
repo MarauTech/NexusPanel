@@ -74,7 +74,7 @@ export default function SearchModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4 sm:px-6">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh] sm:pt-[10vh] px-3 sm:px-6">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/75 transition-opacity animate-in fade-in duration-150"
@@ -82,14 +82,14 @@ export default function SearchModal({ isOpen, onClose }) {
       />
       
       {/* Solid Technical Search Spotlight */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-[#141b27] rounded-lg overflow-hidden shadow-2xl animate-in fade-in duration-150 border border-slate-200 dark:border-[#1d2635] transition-colors">
-        <div className="flex items-center px-4 py-3 border-b border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#111622]">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-[#141b27] rounded-lg overflow-hidden shadow-2xl animate-in fade-in duration-150 border border-slate-300 dark:border-[#1d2635] transition-colors">
+        <div className="flex items-center px-3.5 sm:px-4 py-3 border-b border-slate-200 dark:border-[#1c2534] bg-slate-50 dark:bg-[#111622]">
           <Search className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2.5 flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-transparent border-none text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-normal font-mono"
-            placeholder={t('header.search', 'Szukaj usług, kategorii, tagów, adresów IP... (Ctrl+K)')}
+            className="flex-1 bg-transparent border-none text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 font-normal font-mono"
+            placeholder={t('header.search', 'Szukaj usług, kategorii, tagów, adresów IP...')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -97,12 +97,13 @@ export default function SearchModal({ isOpen, onClose }) {
           <button 
             onClick={onClose}
             className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.06] transition-colors ml-2 cursor-pointer"
+            title="Zamknij (Esc)"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="max-h-[55vh] overflow-y-auto p-2 space-y-1">
+        <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
           {results.length > 0 ? (
             <div>
               {results.map((service, index) => {
@@ -136,16 +137,16 @@ export default function SearchModal({ isOpen, onClose }) {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-xs text-slate-900 dark:text-slate-100">
+                      <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
+                        <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
                           <HighlightText text={service.name} query={query} />
                         </span>
                         {categoryTitle && (
-                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono flex-shrink-0">
                             [<HighlightText text={categoryTitle} query={query} />]
                           </span>
                         )}
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-[10px] text-slate-500 font-mono truncate max-w-[150px] sm:max-w-none">
                           {cleanHost}
                         </span>
                       </div>
@@ -156,7 +157,7 @@ export default function SearchModal({ isOpen, onClose }) {
                       )}
                     </div>
                     
-                    <ExternalLink className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600 dark:text-blue-400 opacity-100' : 'text-slate-400 opacity-0'} transition-opacity`} />
+                    <ExternalLink className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? 'text-blue-600 dark:text-blue-400 opacity-100' : 'text-slate-400 opacity-0'} transition-opacity`} />
                   </a>
                 );
               })}
@@ -166,7 +167,7 @@ export default function SearchModal({ isOpen, onClose }) {
               <p className="font-medium text-slate-700 dark:text-slate-300">{t('scanner.no_results', `Nie znaleziono wyników dla "${query}"`)}</p>
             </div>
           ) : (
-            <div className="p-4 text-center text-slate-500 text-xs flex items-center justify-center gap-4 font-mono">
+            <div className="p-3 text-center text-slate-500 text-xs flex flex-wrap items-center justify-center gap-3 sm:gap-4 font-mono">
               <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">↓</kbd> Nawiguj</span>
               <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">Enter</kbd> Otwórz</span>
               <span><kbd className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] text-[10px] text-slate-700 dark:text-slate-300">Esc</kbd> Zamknij</span>

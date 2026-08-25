@@ -24,7 +24,7 @@ export default function Layout() {
   } : {};
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-bg-primary" style={bgStyle}>
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden bg-bg-primary" style={bgStyle}>
       {/* Optional custom background overlay */}
       {settings?.background_url && (
         <div 

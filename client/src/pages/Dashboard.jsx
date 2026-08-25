@@ -169,24 +169,25 @@ export default function Dashboard() {
   const showOther = (selectedFilter === 'all' || selectedFilter === 'other') && other.length > 0;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-5 w-full max-w-[1920px] mx-auto animate-in fade-in duration-200">
+    <div className="p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 w-full max-w-[1920px] mx-auto animate-in fade-in duration-200">
       
       {/* 1. Sleek Technical Hero Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-slate-300 dark:border-[#1c2534]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-slate-300 dark:border-[#1c2534]">
         {/* Title / Subtitle */}
         <div className="text-left">
-          <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             {settings?.user_name ? `${t('dashboard.greeting', 'Witaj')}, ${settings.user_name}` : t('dashboard.welcome', 'Witaj w NexusPanel')}
           </h1>
         </div>
 
         {/* Right: Quick Action Buttons */}
-        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             variant="secondary"
             size="sm"
             icon={Radar}
             onClick={() => setIsScanModalOpen(true)}
+            className="flex-1 sm:flex-initial justify-center text-xs"
           >
             {t('dashboard.btn_scan', 'Skanuj sieć LAN')}
           </Button>
@@ -196,6 +197,7 @@ export default function Dashboard() {
             size="sm"
             icon={Plus}
             onClick={() => setIsAddModalOpen(true)}
+            className="flex-1 sm:flex-initial justify-center text-xs"
           >
             {t('dashboard.add_app', 'Dodaj aplikację')}
           </Button>
@@ -203,11 +205,11 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Compact Global Status Strip */}
-      <div className="mb-2">
+      <div className="mb-1">
         <GlobalStatusStrip services={enrichedServices} />
       </div>
 
-      {/* 3. 2-Column Responsive Layout: Left ~68% Services & Categories, Right ~32% System Overview */}
+      {/* 3. 2-Column Responsive Layout: Left ~68% Services & Categories, Right ~32% System Overview (Stacked on Mobile/Tablet < 1024px) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start w-full pt-1">
         
         {/* ============================================
@@ -216,9 +218,9 @@ export default function Dashboard() {
         <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 space-y-4 min-w-0">
           
           {/* Dual Filter Bar: Category Tabs + Status Chips */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            {/* Category Filter Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5">
+            {/* Category Filter Tabs (Scrollable on touch/small screens) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full md:w-auto -mx-1 px-1 sm:mx-0 sm:px-0">
               <button
                 onClick={() => setSelectedFilter('all')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-all flex-shrink-0 cursor-pointer shadow-xs ${
@@ -294,10 +296,10 @@ export default function Dashboard() {
             </div>
 
             {/* Right: Quick Status Chips */}
-            <div className="flex items-center gap-1 p-0.5 rounded-md bg-white dark:bg-[#141b27] border border-slate-300 dark:border-[#1d2635] text-[11px] font-mono self-end sm:self-auto shadow-xs">
+            <div className="flex items-center gap-1 p-0.5 rounded-md bg-white dark:bg-[#141b27] border border-slate-300 dark:border-[#1d2635] text-[11px] font-mono w-full md:w-auto overflow-x-auto no-scrollbar shadow-xs">
               <button
                 onClick={() => setStatusFilter('all')}
-                className={`px-2.5 py-1 rounded font-medium transition-colors cursor-pointer ${
+                className={`flex-1 md:flex-initial text-center px-2.5 py-1 rounded font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   statusFilter === 'all' 
                     ? 'bg-slate-200 text-slate-900 font-bold dark:bg-[#1c2534] dark:text-white' 
                     : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-100 dark:hover:text-slate-200'
@@ -307,7 +309,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setStatusFilter('online')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer ${
+                className={`flex-1 md:flex-initial flex items-center justify-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   statusFilter === 'online' 
                     ? 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30' 
                     : 'text-slate-700 dark:text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:text-emerald-400'
@@ -318,7 +320,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setStatusFilter('offline')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer ${
+                className={`flex-1 md:flex-initial flex items-center justify-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   statusFilter === 'offline' 
                     ? 'bg-rose-100 text-rose-800 font-bold border border-rose-300 dark:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/30' 
                     : 'text-slate-700 dark:text-slate-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:text-rose-400'
@@ -329,7 +331,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setStatusFilter('issues')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer ${
+                className={`flex-1 md:flex-initial flex items-center justify-center gap-1 px-2.5 py-1 rounded font-medium transition-colors cursor-pointer whitespace-nowrap ${
                   statusFilter === 'issues' 
                     ? 'bg-amber-100 text-amber-800 font-bold border border-amber-300 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30' 
                     : 'text-slate-700 dark:text-slate-400 hover:text-amber-700 hover:bg-amber-50 dark:hover:text-amber-400'
