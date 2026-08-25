@@ -9,8 +9,8 @@ import api from '../../services/api';
 import { useCategories } from '../../hooks/useCategories';
 import { useToast } from '../../contexts/ToastContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { detectHomelabService } from '../../utils/homelabCatalog';
-import { Sparkles, Layers, Palette, Sliders, Activity, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { suggestIconForServiceName } from '../../data/homelabIconCatalog';
+import { Sparkles, Layers, Palette, Sliders, Activity, CheckCircle2, ChevronRight, ChevronLeft, Image as ImageIcon } from 'lucide-react';
 
 export default function ServiceForm({ service, onClose, onSuccess }) {
   const isEdit = !!service;
@@ -43,6 +43,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
+  const [userCustomizedIcon, setUserCustomizedIcon] = useState(false);
 
   useEffect(() => {
     if (service) {
@@ -50,6 +51,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
         ? service.tags.map(t => (typeof t === 'string' ? t : t.name)).join(', ') 
         : '';
       
+      setUserCustomizedIcon(true);
       setFormData({
         name: service.name || '',
         description: service.description || '',
@@ -71,14 +73,26 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
     }
   }, [service]);
 
-  // Check auto-detection suggestions on name change when creating new service
+  // Real-time automatic icon suggestion on service name change
   const handleNameChange = (e) => {
     const val = e.target.value;
-    setFormData(prev => ({ ...prev, name: val }));
+    setFormData(prev => {
+      const updated = { ...prev, name: val };
+      if (!userCustomizedIcon && val.trim().length >= 2) {
+        const detected = suggestIconForServiceName(val);
+        if (detected) {
+          updated.icon = detected.slug;
+          if (detected.color && prev.color === '#6366f1') {
+            updated.color = detected.color;
+          }
+        }
+      }
+      return updated;
+    });
 
-    if (!isEdit && val.length >= 3) {
-      const detected = detectHomelabService(val);
-      if (detected && detected.icon !== formData.icon) {
+    if (val.trim().length >= 2) {
+      const detected = suggestIconForServiceName(val);
+      if (detected) {
         setSuggestion(detected);
         return;
       }
@@ -88,20 +102,21 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
 
   const applySuggestion = (sug) => {
     let matchedCatId = formData.category_id;
-    if (sug.categoryName && categories.length > 0) {
-      const foundCat = categories.find(c => c.name.toLowerCase().includes(sug.categoryName.toLowerCase()));
+    if (sug.category && categories.length > 0) {
+      const foundCat = categories.find(c => c.name.toLowerCase().includes(sug.category.toLowerCase()));
       if (foundCat) matchedCatId = foundCat.id;
     }
 
     setFormData(prev => ({
       ...prev,
       name: sug.name || prev.name,
-      icon: sug.icon || prev.icon,
+      icon: sug.slug || prev.icon,
       color: sug.color || prev.color,
       category_id: matchedCatId
     }));
+    setUserCustomizedIcon(true);
     setSuggestion(null);
-    addToast(`${t('form.detected', `Rozpoznano: ${sug.name}`).replace('{name}', sug.name)}`, 'info');
+    addToast(`Przypisano oficjalną ikonę ${sug.name}`, 'info');
   };
 
   const handleChange = (e) => {
@@ -230,19 +245,27 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
           <div className="space-y-4 animate-in fade-in duration-150">
             {/* Auto Catalog Suggestion Pill */}
             {suggestion && (
-              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#18202d] border border-blue-500/30 flex items-center justify-between gap-3 animate-in fade-in shadow-sm dark:shadow-none">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span className="text-xs text-slate-800 dark:text-slate-200 font-medium">
-                    {t('form.detected', `Rozpoznano: ${suggestion.name} (Katalog Homelabu)`).replace('{name}', suggestion.name)}
-                  </span>
+              <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#18202d] border border-blue-500/40 flex items-center justify-between gap-3 animate-in fade-in shadow-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-6 h-6 rounded bg-white dark:bg-[#141b27] border border-slate-300 dark:border-[#222d41] flex items-center justify-center p-0.5 flex-shrink-0">
+                    <BrandIcon name={suggestion.slug} className="w-4 h-4" fallbackText={suggestion.name} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs text-slate-900 dark:text-slate-100 font-bold truncate">
+                      Rozpoznano: {suggestion.name}
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-mono">
+                      Kategoria: {suggestion.category} · Oficjalna ikona SVG
+                    </div>
+                  </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => applySuggestion(suggestion)}
-                  className="px-2.5 py-1 bg-white hover:bg-slate-100 dark:bg-[#151c28] dark:hover:bg-[#1b2536] border border-slate-300 dark:border-[#212c3e] text-slate-800 dark:text-slate-200 text-xs font-medium rounded-md transition-colors cursor-pointer shadow-sm dark:shadow-none"
+                  className="px-3 py-1 bg-white hover:bg-slate-100 dark:bg-[#151c28] dark:hover:bg-[#1b2536] border border-slate-300 dark:border-[#212c3e] text-slate-900 dark:text-slate-100 text-xs font-semibold rounded-md transition-colors cursor-pointer shadow-xs flex-shrink-0"
                 >
-                  {t('form.use_detected', 'Użyj ikony ➔')}
+                  Użyj ➔
                 </button>
               </div>
             )}
@@ -253,7 +276,7 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
                 name="name"
                 value={formData.name}
                 onChange={handleNameChange}
-                placeholder="np. Proxmox VE, Plex, Home Assistant"
+                placeholder="np. Proxmox VE, Plex, Home Assistant, Pi-hole"
                 required
                 autoFocus
               />
@@ -270,14 +293,14 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-800 dark:text-slate-300 mb-1.5">
                   {t('form.category', 'Kategoria')}
                 </label>
                 <select
                   name="category_id"
                   value={formData.category_id}
                   onChange={handleChange}
-                  className="w-full bg-white dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] focus:border-blue-500 text-slate-900 dark:text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none shadow-sm dark:shadow-none"
+                  className="w-full bg-white dark:bg-[#18202d] border border-slate-300 dark:border-[#222d41] focus:border-blue-500 text-slate-900 dark:text-slate-200 rounded-md px-3 py-2 text-xs font-normal focus:outline-none shadow-xs dark:shadow-none"
                 >
                   <option value="">{t('form.uncategorized', 'Bez kategorii (Inne)')}</option>
                   {categories.map(cat => (
@@ -289,23 +312,24 @@ export default function ServiceForm({ service, onClose, onSuccess }) {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-800 dark:text-slate-300 mb-1.5">
                   {t('form.icon', 'Ikona aplikacji')}
                 </label>
                 <div className="flex items-center gap-2">
                   <div 
-                    className="w-8 h-8 rounded-md bg-slate-100 dark:bg-[#192231] border border-slate-200 dark:border-[#222d41] flex items-center justify-center flex-shrink-0"
+                    className="w-9 h-9 rounded-md bg-white dark:bg-[#192231] border border-slate-300 dark:border-[#222d41] flex items-center justify-center flex-shrink-0 p-1 shadow-xs"
+                    title={formData.icon || 'Domyślna ikona'}
                   >
-                    <BrandIcon name={formData.icon} color={formData.color} className="w-4 h-4" fallbackText={formData.name} />
+                    <BrandIcon name={formData.icon} color={formData.color} className="w-5 h-5" fallbackText={formData.name} />
                   </div>
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
                     onClick={() => setShowIconPicker(true)}
-                    className="flex-1 text-xs"
+                    className="flex-1 text-xs font-medium justify-center"
                   >
-                    {t('form.icon_btn', 'Wybierz ikonę z biblioteki')}
+                    {formData.icon ? `Zmień ikonę (${formData.icon.length > 18 ? formData.icon.slice(0, 15) + '...' : formData.icon})` : 'Wybierz ikonę z katalogu'}
                   </Button>
                 </div>
               </div>

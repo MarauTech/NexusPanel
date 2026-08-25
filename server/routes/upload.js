@@ -42,16 +42,16 @@ const storage = multer.diskStorage({
 
 // File filter checking MIME & extension
 const fileFilter = (req, file, cb) => {
-  const allowedMime = /^(image\/jpeg|image\/png|image\/gif|image\/webp|image\/x-icon|image\/vnd\.microsoft\.icon)$/i;
+  const allowedMime = /^(image\/jpeg|image\/png|image\/gif|image\/webp|image\/x-icon|image\/vnd\.microsoft\.icon|image\/svg\+xml|text\/xml)$/i;
   const rawExt = path.extname(file.originalname).toLowerCase();
   
-  const isMimeValid = allowedMime.test(file.mimetype);
+  const isMimeValid = allowedMime.test(file.mimetype) || rawExt === '.svg';
   const isExtValid = Boolean(EXT_MAP[rawExt]);
   
   if (isMimeValid && isExtValid) {
     cb(null, true);
   } else {
-    cb(new Error('Dozwolone są wyłącznie bezpieczne pliki graficzne (PNG, JPG, WEBP, GIF, ICO)'));
+    cb(new Error('Dozwolone są wyłącznie bezpieczne pliki graficzne (SVG, PNG, JPG, WEBP, GIF, ICO)'));
   }
 };
 
@@ -66,9 +66,9 @@ const upload = multer({
 
 // Magic byte / File Signature validator
 function validateMagicBytes(filePath) {
-  const buffer = Buffer.alloc(16);
+  const buffer = Buffer.alloc(512);
   const fd = fs.openSync(filePath, 'r');
-  fs.readSync(fd, buffer, 0, 16, 0);
+  const bytesRead = fs.readSync(fd, buffer, 0, 512, 0);
   fs.closeSync(fd);
 
   // PNG: 89 50 4E 47 0D 0A 1A 0A
@@ -92,11 +92,25 @@ function validateMagicBytes(filePath) {
   if (buffer[0] === 0x00 && buffer[1] === 0x00 && buffer[2] === 0x01 && buffer[3] === 0x00) {
     return 'image/x-icon';
   }
+  // SVG: text check for <svg
+  const headerStr = buffer.toString('utf8', 0, bytesRead).trim().toLowerCase();
+  if (headerStr.includes('<svg') || (headerStr.startsWith('<?xml') && headerStr.includes('<svg'))) {
+    return 'image/svg+xml';
+  }
 
   return null;
 }
 
 function validateImageDimensionsAndStructure(filePath, mimeType) {
+  if (mimeType === 'image/svg+xml') {
+    const content = fs.readFileSync(filePath, 'utf8');
+    // Basic sanitization: block active script tags in SVG
+    if (/<script[\s>]/i.test(content) || /javascript:/i.test(content) || /onload\s*=/i.test(content) || /onerror\s*=/i.test(content)) {
+      throw new Error('Plik SVG zawiera niedozwolone skrypty lub aktywne procedury');
+    }
+    return true;
+  }
+
   const MAX_DIMENSION = 4096;
   const buffer = Buffer.alloc(128);
   const fd = fs.openSync(filePath, 'r');

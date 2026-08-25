@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { OFFICIAL_SERVICE_SVGS, matchServiceIconKey } from '../../utils/serviceIcons';
+import { Server } from 'lucide-react';
 
 function resolveLucide(name) {
   if (!name) return null;
@@ -12,19 +12,25 @@ function resolveLucide(name) {
 export default function BrandIcon({ name, color, className = "w-5 h-5", fallbackText = "" }) {
   const [imgError, setImgError] = useState(false);
 
-  // Clean the icon identifier
-  const cleanName = name ? String(name).toLowerCase().trim().replace(/\.svg$/, '') : '';
-  const iconKey = matchServiceIconKey(cleanName) || matchServiceIconKey(fallbackText);
+  if (!name) {
+    return <Server className={className} style={{ color: color || '#64748b' }} />;
+  }
 
-  // 1. Try public SVG icon asset (/icons/{name}.svg)
-  const candidateFile = cleanName || iconKey;
-  if (candidateFile && !imgError && candidateFile !== 'globe' && candidateFile !== 'server') {
+  const rawName = String(name).trim();
+
+  // 1. Direct URL (Uploads, external or explicit path)
+  const isDirectUrl = rawName.startsWith('/') || rawName.startsWith('http://') || rawName.startsWith('https://') || rawName.startsWith('data:image/');
+  
+  if (isDirectUrl) {
+    if (imgError) {
+      return <Server className={className} style={{ color: color || '#64748b' }} />;
+    }
     return (
-      <div className={`${className} flex items-center justify-center flex-shrink-0`}>
+      <div className={`${className} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
         <img
-          src={`/icons/${candidateFile}.svg`}
-          alt={fallbackText || candidateFile}
-          className="w-full h-full object-contain"
+          src={rawName}
+          alt={fallbackText || 'Icon'}
+          className="max-w-full max-h-full w-auto h-auto object-contain"
           onError={() => setImgError(true)}
           loading="lazy"
         />
@@ -32,26 +38,29 @@ export default function BrandIcon({ name, color, className = "w-5 h-5", fallback
     );
   }
 
-  // 2. Try inline official SVG icon map
-  if (iconKey && OFFICIAL_SERVICE_SVGS[iconKey]) {
-    const brand = OFFICIAL_SERVICE_SVGS[iconKey];
+  const cleanSlug = rawName.toLowerCase().replace(/\.svg$/, '').replace(/\s+/g, '-');
+
+  // 2. Local SVG icon file (/icons/{slug}.svg)
+  if (!imgError && cleanSlug && cleanSlug !== 'globe' && cleanSlug !== 'server' && cleanSlug !== 'folder') {
     return (
-      <div 
-        className={`${className} flex items-center justify-center flex-shrink-0 transition-opacity`}
-        style={{ color: brand.color || color || 'currentColor' }}
-        title={brand.name}
-      >
-        {brand.svg}
+      <div className={`${className} flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+        <img
+          src={`/icons/${cleanSlug}.svg`}
+          alt={fallbackText || cleanSlug}
+          className="max-w-full max-h-full w-auto h-auto object-contain"
+          onError={() => setImgError(true)}
+          loading="lazy"
+        />
       </div>
     );
   }
 
-  // 3. Try Lucide Icon by name
+  // 3. Lucide Icon Fallback
   const LucideComponent = resolveLucide(name);
   if (LucideComponent) {
     return <LucideComponent className={className} style={{ color: color || '#94a3b8' }} />;
   }
 
-  // 4. Fallback: Calm, neutral, monochromatic sysadmin icon (Server/Globe)
-  return <LucideIcons.Server className={className} style={{ color: color || '#64748b' }} />;
+  // 4. Default Calm Sysadmin Icon
+  return <Server className={className} style={{ color: color || '#64748b' }} />;
 }
