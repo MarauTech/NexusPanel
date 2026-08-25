@@ -26,7 +26,14 @@ public class NexusOverviewWidget extends AppWidgetProvider {
         }
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
+        }
+    }
+
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_nexus_overview);
 
         Intent launchIntent = new Intent(context, MainActivity.class);
@@ -40,6 +47,13 @@ public class NexusOverviewWidget extends AppWidgetProvider {
             try {
                 applyOverview(views, new JSONObject(cached));
             } catch (Exception ignored) {}
+        } else {
+            views.setTextViewText(R.id.widget_overview_cpu, "--");
+            views.setTextViewText(R.id.widget_overview_ram, "--");
+            views.setTextViewText(R.id.widget_overview_services_ratio, "--");
+            views.setTextViewText(R.id.widget_overview_alerts, "--");
+            views.setTextViewText(R.id.widget_overview_uptime, "--");
+            views.setTextViewText(R.id.widget_overview_system_status, "⚪ Unknown");
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -73,26 +87,28 @@ public class NexusOverviewWidget extends AppWidgetProvider {
     }
 
     private static void applyOverview(RemoteViews views, JSONObject json) {
-        final String systemStatus = json.optString("systemStatus", "System OK");
-        final String statusTone = json.optString("statusTone", "online");
-        final int cpu = json.optInt("cpuPercent", 0);
-        final int ram = json.optInt("ramPercent", 0);
-        final String servicesRatio = json.optString("servicesRatio", "0 / 0 usług");
-        final int alerts = json.optInt("alertsCount", 0);
-        final String uptime = json.optString("uptimeFormatted", "0m");
+        final String systemStatus = json.optString("systemStatus", "Unknown");
+        final String statusTone = json.optString("statusTone", "unknown");
+        final String cpu = json.has("cpuPercent") && !json.isNull("cpuPercent") ? (json.optInt("cpuPercent") + "%") : "--";
+        final String ram = json.has("ramPercent") && !json.isNull("ramPercent") ? (json.optInt("ramPercent") + "%") : "--";
+        final String servicesRatio = json.optString("servicesRatio", "--");
+        final String alerts = json.has("alertsCount") ? (json.optInt("alertsCount") + " alertów") : "--";
+        final String uptime = json.optString("uptimeFormatted", "--");
 
-        views.setTextViewText(R.id.widget_overview_cpu, cpu + "%");
-        views.setTextViewText(R.id.widget_overview_ram, ram + "%");
+        views.setTextViewText(R.id.widget_overview_cpu, cpu);
+        views.setTextViewText(R.id.widget_overview_ram, ram);
         views.setTextViewText(R.id.widget_overview_services_ratio, servicesRatio);
-        views.setTextViewText(R.id.widget_overview_alerts, alerts + " alertów");
+        views.setTextViewText(R.id.widget_overview_alerts, alerts);
         views.setTextViewText(R.id.widget_overview_uptime, uptime);
 
-        if ("offline".equalsIgnoreCase(statusTone)) {
-            views.setTextViewText(R.id.widget_overview_system_status, "🔴 " + systemStatus);
-        } else if ("warning".equalsIgnoreCase(statusTone)) {
-            views.setTextViewText(R.id.widget_overview_system_status, "🟡 " + systemStatus);
-        } else {
+        if ("online".equalsIgnoreCase(statusTone)) {
             views.setTextViewText(R.id.widget_overview_system_status, "🟢 " + systemStatus);
+        } else if ("warning".equalsIgnoreCase(statusTone) || "degraded".equalsIgnoreCase(statusTone)) {
+            views.setTextViewText(R.id.widget_overview_system_status, "🟡 " + systemStatus);
+        } else if ("offline".equalsIgnoreCase(statusTone)) {
+            views.setTextViewText(R.id.widget_overview_system_status, "🔴 " + systemStatus);
+        } else {
+            views.setTextViewText(R.id.widget_overview_system_status, "⚪ " + systemStatus);
         }
     }
 }

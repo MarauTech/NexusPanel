@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.RemoteViews;
 
+import org.json.JSONObject;
+
 public class WidgetUpdateHelper {
 
     public static final String PREFS_NAME = "NexusPanelWidgetPrefs";
@@ -36,64 +38,64 @@ public class WidgetUpdateHelper {
         getPrefs(context).edit().putString(KEY_SERVER_URL, clean).apply();
     }
 
-    public static void setCachedJson(Context context, String widgetType, String jsonPayload) {
-        if (widgetType == null || jsonPayload == null) return;
-        getPrefs(context).edit().putString("widget_data_" + widgetType, jsonPayload).apply();
+    public static void saveWidgetConfig(Context context, int appWidgetId, String jsonPayload) {
+        getPrefs(context).edit().putString("widget_config_" + appWidgetId, jsonPayload).apply();
     }
 
-    public static String getCachedJson(Context context, String widgetType) {
-        return getPrefs(context).getString("widget_data_" + widgetType, null);
+    public static JSONObject getWidgetConfig(Context context, int appWidgetId) {
+        String json = getPrefs(context).getString("widget_config_" + appWidgetId, null);
+        if (json != null && !json.trim().isEmpty()) {
+            try {
+                return new JSONObject(json);
+            } catch (Exception ignored) {}
+        }
+        return new JSONObject();
+    }
+
+    public static void removeWidgetConfig(Context context, int appWidgetId) {
+        getPrefs(context).edit().remove("widget_config_" + appWidgetId).apply();
+    }
+
+    public static void setCachedJson(Context context, String key, String jsonPayload) {
+        if (key == null || jsonPayload == null) return;
+        getPrefs(context).edit().putString("cache_" + key, jsonPayload).apply();
+    }
+
+    public static String getCachedJson(Context context, String key) {
+        return getPrefs(context).getString("cache_" + key, null);
     }
 
     public static void updateAllWidgets(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
 
         int[] favIds = manager.getAppWidgetIds(new ComponentName(context, FavoriteAppsWidget.class));
-        if (favIds.length > 0) {
-            Intent intent = new Intent(context, FavoriteAppsWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, favIds);
-            context.sendBroadcast(intent);
+        for (int id : favIds) {
+            FavoriteAppsWidget.updateAppWidget(context, manager, id);
         }
 
         int[] srvIds = manager.getAppWidgetIds(new ComponentName(context, ServerStatusWidget.class));
-        if (srvIds.length > 0) {
-            Intent intent = new Intent(context, ServerStatusWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, srvIds);
-            context.sendBroadcast(intent);
+        for (int id : srvIds) {
+            ServerStatusWidget.updateAppWidget(context, manager, id);
         }
 
         int[] sumIds = manager.getAppWidgetIds(new ComponentName(context, ServicesStatusWidget.class));
-        if (sumIds.length > 0) {
-            Intent intent = new Intent(context, ServicesStatusWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, sumIds);
-            context.sendBroadcast(intent);
+        for (int id : sumIds) {
+            ServicesStatusWidget.updateAppWidget(context, manager, id);
         }
 
         int[] upIds = manager.getAppWidgetIds(new ComponentName(context, UptimeWidget.class));
-        if (upIds.length > 0) {
-            Intent intent = new Intent(context, UptimeWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, upIds);
-            context.sendBroadcast(intent);
+        for (int id : upIds) {
+            UptimeWidget.updateAppWidget(context, manager, id);
         }
 
         int[] singleIds = manager.getAppWidgetIds(new ComponentName(context, SingleServiceWidget.class));
-        if (singleIds.length > 0) {
-            Intent intent = new Intent(context, SingleServiceWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, singleIds);
-            context.sendBroadcast(intent);
+        for (int id : singleIds) {
+            SingleServiceWidget.updateAppWidget(context, manager, id);
         }
 
         int[] overIds = manager.getAppWidgetIds(new ComponentName(context, NexusOverviewWidget.class));
-        if (overIds.length > 0) {
-            Intent intent = new Intent(context, NexusOverviewWidget.class);
-            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, overIds);
-            context.sendBroadcast(intent);
+        for (int id : overIds) {
+            NexusOverviewWidget.updateAppWidget(context, manager, id);
         }
     }
 
@@ -123,5 +125,15 @@ public class WidgetUpdateHelper {
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             views.setOnClickPendingIntent(viewId, pi);
         }
+    }
+
+    public static String makeMonogram(String name) {
+        if (name == null || name.trim().isEmpty()) return "NP";
+        String clean = name.trim();
+        String[] parts = clean.split("\\s+");
+        if (parts.length >= 2 && parts[0].length() > 0 && parts[1].length() > 0) {
+            return ("" + parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+        }
+        return (clean.length() >= 2 ? clean.substring(0, 2) : clean).toUpperCase();
     }
 }

@@ -495,9 +495,7 @@ export default function HomescreenWidgetsManager() {
 
               {/* =================================================
                   2. WIDGET: STATUS SERWERA (Server Status)
-                  ================================================= */}
-              {selectedWidget === 'server_status' && (
-                <div className={`rounded-2xl p-3.5 border shadow-xl ${
+                  =================                <div className={`rounded-2xl p-3.5 border shadow-xl ${
                   isDark ? 'bg-[#0f1523]/95 border-[#1e293b] text-white' : 'bg-white/95 border-slate-200 text-slate-900'
                 }`}>
                   <div className="flex items-center justify-between mb-3 px-0.5">
@@ -505,28 +503,36 @@ export default function HomescreenWidgetsManager() {
                       <Activity className="w-3.5 h-3.5 text-indigo-400" />
                       <span className="text-[11.5px] font-bold">Status Serwera</span>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      Online
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
+                      serverStats?.status === 'offline' ? 'bg-rose-500/15 text-rose-400' :
+                      serverStats?.status === 'warning' ? 'bg-amber-500/15 text-amber-400' :
+                      'bg-emerald-500/15 text-emerald-400'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        serverStats?.status === 'offline' ? 'bg-rose-400' :
+                        serverStats?.status === 'warning' ? 'bg-amber-400' :
+                        'bg-emerald-400'
+                      }`} />
+                      {serverStats?.status === 'offline' ? 'Offline' : serverStats?.status === 'warning' ? 'Warning' : 'Online'}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-4 gap-1.5 text-center">
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] font-bold text-slate-400">CPU</div>
-                      <div className="text-[14px] font-bold text-indigo-400 mt-0.5">{serverStats?.cpu || 14}%</div>
+                      <div className="text-[14px] font-bold text-indigo-400 mt-0.5">{serverStats?.cpu !== null && serverStats?.cpu !== undefined ? `${serverStats.cpu}%` : '--'}</div>
                     </div>
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] font-bold text-slate-400">RAM</div>
-                      <div className="text-[14px] font-bold text-emerald-400 mt-0.5">{serverStats?.ram || 42}%</div>
+                      <div className="text-[14px] font-bold text-emerald-400 mt-0.5">{serverStats?.ram !== null && serverStats?.ram !== undefined ? `${serverStats.ram}%` : '--'}</div>
                     </div>
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] font-bold text-slate-400">TEMP</div>
-                      <div className="text-[14px] font-bold text-amber-400 mt-0.5">{serverStats?.temperature || '48°C'}</div>
+                      <div className="text-[14px] font-bold text-amber-400 mt-0.5">{serverStats?.temperature || '--'}</div>
                     </div>
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] font-bold text-slate-400">UPTIME</div>
-                      <div className="text-[13px] font-bold text-cyan-400 mt-0.5">{serverStats?.uptimeFormatted || '42d 6h'}</div>
+                      <div className="text-[13px] font-bold text-cyan-400 mt-0.5">{serverStats?.uptimeFormatted || '--'}</div>
                     </div>
                   </div>
                 </div>
@@ -544,14 +550,14 @@ export default function HomescreenWidgetsManager() {
                       <Layers className="w-3.5 h-3.5 text-indigo-400" />
                       <span className="text-[11.5px] font-bold">Status Usług</span>
                     </div>
-                    <span className="text-[10px] text-slate-400 font-semibold">{servicesSummary?.total || services.length} monitorowanych</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">{servicesSummary?.total ?? services.length} monitorowanych</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
                     <div className={`p-2.5 rounded-xl border flex items-center gap-2 ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
                       <div>
-                        <div className="text-[14px] font-bold text-emerald-400 leading-tight">{servicesSummary?.online || services.length}</div>
+                        <div className="text-[14px] font-bold text-emerald-400 leading-tight">{servicesSummary?.online ?? '--'}</div>
                         <div className="text-[9px] font-semibold text-slate-400">online</div>
                       </div>
                     </div>
@@ -559,7 +565,7 @@ export default function HomescreenWidgetsManager() {
                     <div className={`p-2.5 rounded-xl border flex items-center gap-2 ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
                       <div>
-                        <div className="text-[14px] font-bold text-amber-400 leading-tight">{servicesSummary?.warning || 0}</div>
+                        <div className="text-[14px] font-bold text-amber-400 leading-tight">{servicesSummary?.warning ?? '--'}</div>
                         <div className="text-[9px] font-semibold text-slate-400">warning</div>
                       </div>
                     </div>
@@ -567,7 +573,7 @@ export default function HomescreenWidgetsManager() {
                     <div className={`p-2.5 rounded-xl border flex items-center gap-2 ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
                       <div>
-                        <div className="text-[14px] font-bold text-rose-400 leading-tight">{servicesSummary?.offline || 0}</div>
+                        <div className="text-[14px] font-bold text-rose-400 leading-tight">{servicesSummary?.offline ?? '--'}</div>
                         <div className="text-[9px] font-semibold text-slate-400">offline</div>
                       </div>
                     </div>
@@ -594,25 +600,25 @@ export default function HomescreenWidgetsManager() {
 
                   <div className="flex items-baseline justify-between mb-2">
                     <div className="text-2xl font-black text-emerald-400 tracking-tight">
-                      {uptimeStats?.uptime30d || 99.98}%
+                      {uptimeStats?.uptime30d !== undefined ? `${uptimeStats.uptime30d}%` : '--%'}
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono">
-                      Host: {uptimeStats?.uptimeFormatted || '42d 6h'}
+                      Host: {uptimeStats?.uptimeFormatted || '--'}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-1.5 text-center pt-2 border-t border-slate-200 dark:border-[#1e293b]">
                     <div>
                       <div className="text-[8.5px] text-slate-400">24 GODZINY</div>
-                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime24h || 99.98}%</div>
+                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime24h !== undefined ? `${uptimeStats.uptime24h}%` : '--%'}</div>
                     </div>
                     <div>
                       <div className="text-[8.5px] text-slate-400">7 DNI</div>
-                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime7d || 99.95}%</div>
+                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime7d !== undefined ? `${uptimeStats.uptime7d}%` : '--%'}</div>
                     </div>
                     <div>
                       <div className="text-[8.5px] text-slate-400">30 DNI</div>
-                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime30d || 99.90}%</div>
+                      <div className="text-[11px] font-bold text-emerald-400">{uptimeStats?.uptime30d !== undefined ? `${uptimeStats.uptime30d}%` : '--%'}</div>
                     </div>
                   </div>
                 </div>
@@ -631,28 +637,40 @@ export default function HomescreenWidgetsManager() {
                         className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
                         style={{ backgroundColor: `${singleService?.color || '#6366f1'}20`, color: singleService?.color || '#6366f1' }}
                       >
-                        {(singleService?.name || 'Plex').substring(0, 2).toUpperCase()}
+                        {(singleService?.name || 'US').substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-xs font-bold">{singleService?.name || 'Plex Media Server'}</div>
-                        <div className="text-[9.5px] text-slate-400 font-mono">{singleService?.ip || '192.168.1.20'}</div>
+                        <div className="text-xs font-bold">{singleService?.name || 'Brak wybranej usługi'}</div>
+                        <div className="text-[9.5px] text-slate-400 font-mono">{singleService?.ip || '--'}</div>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      Online
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
+                      singleService?.status === 'offline' ? 'bg-rose-500/10 text-rose-400' :
+                      singleService?.status === 'degraded' || singleService?.status === 'warning' ? 'bg-amber-500/10 text-amber-400' :
+                      singleService?.status === 'online' ? 'bg-emerald-500/10 text-emerald-400' :
+                      'bg-slate-500/10 text-slate-400'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        singleService?.status === 'offline' ? 'bg-rose-400' :
+                        singleService?.status === 'degraded' || singleService?.status === 'warning' ? 'bg-amber-400' :
+                        singleService?.status === 'online' ? 'bg-emerald-400' :
+                        'bg-slate-400'
+                      }`} />
+                      {singleService?.status === 'online' ? 'Online' :
+                       singleService?.status === 'degraded' || singleService?.status === 'warning' ? 'Warning' :
+                       singleService?.status === 'offline' ? 'Offline' : 'Unknown'}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-200 dark:border-[#1e293b] text-xs">
                     <div className={`p-2 rounded-lg ${isDark ? 'bg-[#172033]' : 'bg-slate-50'}`}>
                       <div className="text-[9px] text-slate-400">Uptime</div>
-                      <div className="font-bold text-cyan-400 mt-0.5">{singleService?.uptimeFormatted || '14d 6h'}</div>
+                      <div className="font-bold text-cyan-400 mt-0.5">{singleService?.uptimeFormatted || '--'}</div>
                     </div>
                     <div className={`p-2 rounded-lg ${isDark ? 'bg-[#172033]' : 'bg-slate-50'}`}>
                       <div className="text-[9px] text-slate-400">Czas odpowiedzi</div>
-                      <div className="font-bold text-emerald-400 mt-0.5">{singleService?.latencyMs || 8} ms</div>
+                      <div className="font-bold text-emerald-400 mt-0.5">{singleService?.latencyMs !== null && singleService?.latencyMs !== undefined ? `${singleService.latencyMs} ms` : '--'}</div>
                     </div>
                   </div>
                 </div>
@@ -668,9 +686,17 @@ export default function HomescreenWidgetsManager() {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-2.5">
                     <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">NEXUS OVERVIEW</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      {overviewData?.systemStatus || 'System OK'}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
+                      overviewData?.statusTone === 'offline' ? 'bg-rose-500/10 text-rose-400' :
+                      overviewData?.statusTone === 'warning' ? 'bg-amber-500/10 text-amber-400' :
+                      'bg-emerald-500/10 text-emerald-400'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        overviewData?.statusTone === 'offline' ? 'bg-rose-400' :
+                        overviewData?.statusTone === 'warning' ? 'bg-amber-400' :
+                        'bg-emerald-400'
+                      }`} />
+                      {overviewData?.systemStatus || 'Unknown'}
                     </span>
                   </div>
 
@@ -678,11 +704,11 @@ export default function HomescreenWidgetsManager() {
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] text-slate-400 font-bold">CPU</div>
-                      <div className="text-sm font-bold text-indigo-400 mt-0.5">{overviewData?.cpuPercent || 18}%</div>
+                      <div className="text-sm font-bold text-indigo-400 mt-0.5">{overviewData?.cpuPercent !== null && overviewData?.cpuPercent !== undefined ? `${overviewData.cpuPercent}%` : '--'}</div>
                     </div>
                     <div className={`p-2 rounded-xl border ${isDark ? 'bg-[#172033] border-[#24324f]' : 'bg-slate-50 border-slate-200'}`}>
                       <div className="text-[9px] text-slate-400 font-bold">RAM</div>
-                      <div className="text-sm font-bold text-emerald-400 mt-0.5">{overviewData?.ramPercent || 42}%</div>
+                      <div className="text-sm font-bold text-emerald-400 mt-0.5">{overviewData?.ramPercent !== null && overviewData?.ramPercent !== undefined ? `${overviewData.ramPercent}%` : '--'}</div>
                     </div>
                   </div>
 
@@ -690,15 +716,15 @@ export default function HomescreenWidgetsManager() {
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center justify-between px-1">
                       <span className="text-slate-400 text-[11px]">Usługi:</span>
-                      <span className="font-bold text-slate-200">{overviewData?.servicesRatio || `${services.length} / ${services.length} usług`}</span>
+                      <span className="font-bold text-slate-200">{overviewData?.servicesRatio || '--'}</span>
                     </div>
                     <div className="flex items-center justify-between px-1">
                       <span className="text-slate-400 text-[11px]">Alerty:</span>
-                      <span className="font-bold text-emerald-400">{overviewData?.alertsCount || 0} alertów</span>
+                      <span className="font-bold text-emerald-400">{overviewData?.alertsCount !== undefined ? `${overviewData.alertsCount} alertów` : '--'}</span>
                     </div>
                     <div className="flex items-center justify-between px-1">
                       <span className="text-slate-400 text-[11px]">Uptime hosta:</span>
-                      <span className="font-bold text-cyan-400">{overviewData?.uptimeFormatted || '42d 6h'}</span>
+                      <span className="font-bold text-cyan-400">{overviewData?.uptimeFormatted || '--'}</span>
                     </div>
                   </div>
                 </div>

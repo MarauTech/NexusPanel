@@ -26,7 +26,14 @@ public class UptimeWidget extends AppWidgetProvider {
         }
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
+        }
+    }
+
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_uptime);
 
         Intent launchIntent = new Intent(context, MainActivity.class);
@@ -40,6 +47,12 @@ public class UptimeWidget extends AppWidgetProvider {
             try {
                 applyUptimeStats(views, new JSONObject(cached));
             } catch (Exception ignored) {}
+        } else {
+            views.setTextViewText(R.id.widget_uptime_big_percent, "--%");
+            views.setTextViewText(R.id.widget_uptime_host_text, "Host: --");
+            views.setTextViewText(R.id.widget_uptime_24h, "--%");
+            views.setTextViewText(R.id.widget_uptime_7d, "--%");
+            views.setTextViewText(R.id.widget_uptime_30d, "--%");
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -73,10 +86,10 @@ public class UptimeWidget extends AppWidgetProvider {
     }
 
     private static void applyUptimeStats(RemoteViews views, JSONObject json) {
-        final double u30d = json.optDouble("uptime30d", 100.0);
-        final double u24h = json.optDouble("uptime24h", 100.0);
-        final double u7d = json.optDouble("uptime7d", 100.0);
-        final String hostUptime = json.optString("uptimeFormatted", "0m");
+        final double u30d = json.optDouble("uptime30d", 0.0);
+        final double u24h = json.optDouble("uptime24h", 0.0);
+        final double u7d = json.optDouble("uptime7d", 0.0);
+        final String hostUptime = json.optString("uptimeFormatted", "--");
 
         views.setTextViewText(R.id.widget_uptime_big_percent, String.format("%.2f%%", u30d));
         views.setTextViewText(R.id.widget_uptime_host_text, "Host: " + hostUptime);

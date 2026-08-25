@@ -28,18 +28,32 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
         }
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
+        }
+    }
+
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_favorite_apps);
 
         // Header click opens NexusPanel
         Intent launchIntent = new Intent(context, MainActivity.class);
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent rootPendingIntent = PendingIntent.getActivity(
-                context, 100, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                context, 100 + appWidgetId, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_fav_badge, rootPendingIntent);
 
-        // 1. Try to render cached JSON immediately
-        String cachedJson = WidgetUpdateHelper.getCachedJson(context, "favorite_apps");
+        // Read specific configuration for this widget instance
+        JSONObject config = WidgetUpdateHelper.getWidgetConfig(context, appWidgetId);
+        JSONArray configuredIds = config.optJSONArray("service_ids");
+
+        // Try cached data first
+        String cachedJson = WidgetUpdateHelper.getCachedJson(context, "fav_apps_" + appWidgetId);
+        if (cachedJson == null) {
+            cachedJson = WidgetUpdateHelper.getCachedJson(context, "favorite_apps");
+        }
         if (cachedJson != null && !cachedJson.isEmpty()) {
             try {
                 applyAppsJson(context, views, appWidgetId, new JSONArray(cachedJson));
@@ -48,11 +62,22 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
-        // 2. Fetch live data from server in background
+        // Fetch live metrics in background
         Executors.newSingleThreadExecutor().execute(() -> {
             String serverUrl = WidgetUpdateHelper.getServerUrl(context);
+            StringBuilder idsParam = new StringBuilder();
+            if (configuredIds != null && configuredIds.length() > 0) {
+                for (int i = 0; i < configuredIds.length(); i++) {
+                    if (i > 0) idsParam.append(",");
+                    idsParam.append(configuredIds.optInt(i));
+                }
+            }
+
+            String endpoint = serverUrl + "/api/widgets/favorite-apps" 
+                    + (idsParam.length() > 0 ? ("?ids=" + idsParam.toString()) : "");
+
             try {
-                URL url = new URL(serverUrl + "/api/widgets/favorite-apps");
+                URL url = new URL(endpoint);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(4000);
                 conn.setReadTimeout(4000);
@@ -64,7 +89,7 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
                     reader.close();
 
                     String raw = sb.toString();
-                    WidgetUpdateHelper.setCachedJson(context, "favorite_apps", raw);
+                    WidgetUpdateHelper.setCachedJson(context, "fav_apps_" + appWidgetId, raw);
                     JSONArray apps = new JSONArray(raw);
 
                     new Handler(Looper.getMainLooper()).post(() -> {
@@ -87,8 +112,8 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
         int onlineCount = 0;
         for (int i = 0; i < apps.length(); i++) {
             try {
-                String st = apps.getJSONObject(i).optString("health_status", "online");
-                if (!"offline".equalsIgnoreCase(st)) onlineCount++;
+                String st = apps.getJSONObject(i).optString("health_status", "unknown");
+                if ("online".equalsIgnoreCase(st)) onlineCount++;
             } catch (Exception ignored) {}
         }
         views.setTextViewText(R.id.widget_fav_badge, onlineCount + "/" + apps.length() + " Online");
@@ -98,41 +123,31 @@ public class FavoriteAppsWidget extends AppWidgetProvider {
                 try {
                     JSONObject app = apps.getJSONObject(i);
                     String name = app.optString("name", "Usługa");
-                    String ip = app.optString("ip", "192.168.1.1");
+                    String ip = app.optString("ip", "--");
                     String svcUrl = app.optString("url", "");
-                    String status = app.optString("health_status", "online");
+                    String status = app.optString("health_status", "unknown");
 
                     views.setViewVisibility(cardViews[i], View.VISIBLE);
                     views.setTextViewText(nameViews[i], name);
                     views.setTextViewText(ipViews[i], ip);
+                    views.setTextViewText(iconViews[i], WidgetUpdateHelper.makeMonogram(name));
 
-                    String mono = makeMonogram(name);
-                    views.setTextViewText(iconViews[i], mono);
-
-                    if ("offline".equalsIgnoreCase(status)) {
-                        views.setImageViewResource(statusViews[i], R.drawable.widget_status_offline);
-                    } else if ("degraded".equalsIgnoreCase(status)) {
-                        views.setImageViewResource(statusViews[i], R.drawable.widget_status_warning);
-                    } else {
+                    if ("online".equalsIgnoreCase(status)) {
                         views.setImageViewResource(statusViews[i], R.drawable.widget_status_online);
+                    } else if ("degraded".equalsIgnoreCase(status) || "warning".equalsIgnoreCase(status)) {
+                        views.setImageViewResource(statusViews[i], R.drawable.widget_status_warning);
+                    } else if ("offline".equalsIgnoreCase(status)) {
+                        views.setImageViewResource(statusViews[i], R.drawable.widget_status_offline);
+                    } else {
+                        views.setImageViewResource(statusViews[i], R.drawable.widget_status_warning);
                     }
 
-                    // OPEN BROWSER DIRECTLY TO THE SERVICE URL
+                    // Open exact URL in default browser!
                     WidgetUpdateHelper.setBrowserPendingIntent(context, views, cardViews[i], svcUrl, (appWidgetId * 100) + i);
                 } catch (Exception ignored) {}
             } else {
                 views.setViewVisibility(cardViews[i], View.INVISIBLE);
             }
         }
-    }
-
-    private static String makeMonogram(String name) {
-        if (name == null || name.trim().isEmpty()) return "NP";
-        String clean = name.trim();
-        String[] parts = clean.split("\\s+");
-        if (parts.length >= 2 && parts[0].length() > 0 && parts[1].length() > 0) {
-            return ("" + parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-        }
-        return (clean.length() >= 2 ? clean.substring(0, 2) : clean).toUpperCase();
     }
 }

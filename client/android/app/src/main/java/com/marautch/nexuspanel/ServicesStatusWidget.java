@@ -26,7 +26,14 @@ public class ServicesStatusWidget extends AppWidgetProvider {
         }
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
+        }
+    }
+
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_services_status);
 
         Intent launchIntent = new Intent(context, MainActivity.class);
@@ -40,6 +47,11 @@ public class ServicesStatusWidget extends AppWidgetProvider {
             try {
                 applyServicesSummary(views, new JSONObject(cached));
             } catch (Exception ignored) {}
+        } else {
+            views.setTextViewText(R.id.widget_services_total_badge, "-- Usług");
+            views.setTextViewText(R.id.widget_services_online_count, "--");
+            views.setTextViewText(R.id.widget_services_warning_count, "--");
+            views.setTextViewText(R.id.widget_services_offline_count, "--");
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);

@@ -26,7 +26,14 @@ public class ServerStatusWidget extends AppWidgetProvider {
         }
     }
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            WidgetUpdateHelper.removeWidgetConfig(context, appWidgetId);
+        }
+    }
+
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_server_status);
 
         Intent launchIntent = new Intent(context, MainActivity.class);
@@ -40,6 +47,13 @@ public class ServerStatusWidget extends AppWidgetProvider {
             try {
                 applyServerStatus(views, new JSONObject(cached));
             } catch (Exception ignored) {}
+        } else {
+            // Initial graceful state (NO random numbers!)
+            views.setTextViewText(R.id.widget_srv_cpu, "--");
+            views.setTextViewText(R.id.widget_srv_ram, "--");
+            views.setTextViewText(R.id.widget_srv_temp, "--");
+            views.setTextViewText(R.id.widget_srv_uptime, "--");
+            views.setTextViewText(R.id.widget_srv_status_badge, "⚪ Unknown");
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -73,27 +87,30 @@ public class ServerStatusWidget extends AppWidgetProvider {
     }
 
     private static void applyServerStatus(RemoteViews views, JSONObject json) {
-        final String cpu = json.optInt("cpu", 0) + "%";
-        final String ram = json.optInt("ram", 0) + "%";
+        final String cpu = json.has("cpu") && !json.isNull("cpu") ? (json.optInt("cpu") + "%") : "--";
+        final String ram = json.has("ram") && !json.isNull("ram") ? (json.optInt("ram") + "%") : "--";
         final String temp = json.has("temperature") && !json.isNull("temperature") 
-                ? json.optString("temperature", "N/A") : "N/A";
-        final String uptime = json.optString("uptimeFormatted", "0m");
-        final String status = json.optString("status", "online");
+                ? json.optString("temperature", "--") : "--";
+        final String uptime = json.optString("uptimeFormatted", "--");
+        final String status = json.optString("status", "unknown");
 
         views.setTextViewText(R.id.widget_srv_cpu, cpu);
         views.setTextViewText(R.id.widget_srv_ram, ram);
         views.setTextViewText(R.id.widget_srv_temp, temp);
         views.setTextViewText(R.id.widget_srv_uptime, uptime);
 
-        if ("offline".equalsIgnoreCase(status)) {
-            views.setTextViewText(R.id.widget_srv_status_badge, "🔴 Offline");
-            views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_offline);
-        } else if ("warning".equalsIgnoreCase(status)) {
-            views.setTextViewText(R.id.widget_srv_status_badge, "🟡 Warning");
-            views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_warning);
-        } else {
+        if ("online".equalsIgnoreCase(status)) {
             views.setTextViewText(R.id.widget_srv_status_badge, "🟢 Online");
             views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_online);
+        } else if ("warning".equalsIgnoreCase(status) || "degraded".equalsIgnoreCase(status)) {
+            views.setTextViewText(R.id.widget_srv_status_badge, "🟡 Warning");
+            views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_warning);
+        } else if ("offline".equalsIgnoreCase(status)) {
+            views.setTextViewText(R.id.widget_srv_status_badge, "🔴 Offline");
+            views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_offline);
+        } else {
+            views.setTextViewText(R.id.widget_srv_status_badge, "⚪ Unknown");
+            views.setImageViewResource(R.id.widget_srv_dot, R.drawable.widget_status_warning);
         }
     }
 }

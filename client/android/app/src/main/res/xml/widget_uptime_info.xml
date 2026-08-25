@@ -9,6 +9,7 @@
     android:updatePeriodMillis="3600000"
     android:initialLayout="@layout/widget_uptime"
     android:previewLayout="@layout/widget_uptime"
+    android:configure="com.marautch.nexuspanel.WidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/widget_uptime_desc" />
