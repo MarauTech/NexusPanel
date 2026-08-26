@@ -3,9 +3,10 @@ node_modules/
 client/node_modules/
 server/node_modules/
 
-# Local databases & uploads
-data/
-uploads/
+# Local databases & uploads (root and server data folders only)
+/data/
+/server/data/
+/uploads/
 *.db
 *.sqlite
 
