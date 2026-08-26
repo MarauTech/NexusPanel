@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexusPanel — Dashboard Homelabu i Widżety Android</title>
-  <meta name="description" content="Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.">
+  <title id="pageTitle">NexusPanel — Dashboard Homelabu i Widżety Android</title>
+  <meta name="description" id="metaDescription" content="Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
 
   <!-- Google Fonts: Inter & JetBrains Mono -->
@@ -50,7 +50,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Technical, clean styling without excessive blurs or artificial AI gradients */
     body {
       background-color: #080b11;
       color: #e2e8f0;
@@ -63,20 +62,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .subtle-border {
-      border: 1px solid #1a2234;
-    }
-
-    .subtle-card {
-      background-color: #0e131f;
-      border: 1px solid #1a2234;
-    }
-
-    .subtle-card:hover {
-      border-color: #243048;
-    }
-
-    /* Scrollbar styling */
+    /* Clean scrollbars */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -121,7 +107,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
         </a>
         <a href="#install" class="hover:text-white transition-colors" data-i18n="nav.install">Instalacja</a>
-        <a href="https://github.com/MarauTech/NexusPanel" target="_blank" class="hover:text-white transition-colors flex items-center gap-1">
+        <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-1">
           <span>GitHub</span>
           <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
         </a>
@@ -130,7 +116,7 @@
       <!-- Right controls -->
       <div class="flex items-center gap-2.5">
         <!-- Lang Toggle -->
-        <button id="langToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-[#0e131f] hover:bg-[#141b2b] border border-app-border text-[11px] font-mono font-semibold text-slate-300 transition-colors cursor-pointer">
+        <button id="langToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-[#0e131f] hover:bg-[#141b2b] border border-app-border text-[11px] font-mono font-semibold text-slate-300 transition-colors cursor-pointer" aria-label="Toggle language">
           <i data-lucide="globe" class="w-3 h-3 text-accent-blue"></i>
           <span id="langLabel">PL</span>
         </button>
@@ -156,14 +142,14 @@
         
         <div class="inline-flex items-center gap-2 text-xs font-mono text-slate-400">
           <span class="text-accent-blue font-bold">●</span>
-          <span>Self-hosted</span>
+          <span data-i18n="hero.badgeSelfHosted">Self-hosted</span>
           <span class="text-slate-600">/</span>
-          <span>Open source (MIT)</span>
+          <span data-i18n="hero.badgeOpenSource">Open source (MIT)</span>
           <span class="text-slate-600">/</span>
-          <span>Zero chmury</span>
+          <span data-i18n="hero.badgeNoCloud">Zero chmury</span>
         </div>
 
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight" data-i18n="hero.title">
           Ekran startowy dla Twojego homelabu i widżety na telefon.
         </h1>
 
@@ -178,9 +164,9 @@
             <span data-i18n="hero.btnInstall">Zainstaluj na serwerze</span>
           </a>
 
-          <a href="https://github.com/MarauTech/NexusPanel" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-app-card hover:bg-app-surface border border-app-border text-slate-200 text-xs font-semibold transition-colors">
+          <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-app-card hover:bg-app-surface border border-app-border text-slate-200 text-xs font-semibold transition-colors">
             <i data-lucide="github" class="w-3.5 h-3.5"></i>
-            <span>GitHub (MarauTech/NexusPanel)</span>
+            <span data-i18n="hero.btnGithub">GitHub (MarauTech/NexusPanel)</span>
           </a>
         </div>
 
@@ -224,9 +210,9 @@
           <div class="flex items-center gap-3 font-mono text-[11px]">
             <span class="text-accent-emerald flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
-              11/12 Online
+              <span data-i18n="mockup.onlineCount">11/12 Online</span>
             </span>
-            <span class="text-slate-500 hidden sm:inline">Ctrl + K</span>
+            <span class="text-slate-500 hidden sm:inline font-mono">Ctrl + K</span>
           </div>
         </div>
 
@@ -236,19 +222,19 @@
           <!-- System Status Bar -->
           <div class="p-3 rounded-lg bg-[#0a0e17] border border-app-border grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
             <div>
-              <div class="text-[10px] text-slate-500 uppercase">CPU Host</div>
-              <div class="font-bold text-slate-200 mt-0.5">14.2% <span class="text-slate-500 font-normal">(4 rdzenie)</span></div>
+              <div class="text-[10px] text-slate-500 uppercase" data-i18n="mockup.hostCpu">CPU Host</div>
+              <div class="font-bold text-slate-200 mt-0.5">14.2% <span class="text-slate-500 font-normal" data-i18n="mockup.cores">(4 rdzenie)</span></div>
             </div>
             <div>
-              <div class="text-[10px] text-slate-500 uppercase">RAM Host</div>
+              <div class="text-[10px] text-slate-500 uppercase" data-i18n="mockup.hostRam">RAM Host</div>
               <div class="font-bold text-slate-200 mt-0.5">4.8 / 32 GB <span class="text-slate-500 font-normal">(15%)</span></div>
             </div>
             <div>
-              <div class="text-[10px] text-slate-500 uppercase">Uptime Serwera</div>
-              <div class="font-bold text-accent-emerald mt-0.5">48 dni 12h</div>
+              <div class="text-[10px] text-slate-500 uppercase" data-i18n="mockup.serverUptime">Uptime Serwera</div>
+              <div class="font-bold text-accent-emerald mt-0.5">48 <span data-i18n="mockup.days">dni</span> 12<span data-i18n="mockup.hours">godz</span></div>
             </div>
             <div>
-              <div class="text-[10px] text-slate-500 uppercase">Średni Ping LAN</div>
+              <div class="text-[10px] text-slate-500 uppercase" data-i18n="mockup.avgLanPing">Średni Ping LAN</div>
               <div class="font-bold text-slate-200 mt-0.5">3.4 ms</div>
             </div>
           </div>
@@ -258,9 +244,9 @@
             <div class="flex items-center justify-between mb-3 text-xs">
               <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
                 <i data-lucide="star" class="w-3.5 h-3.5 text-accent-amber fill-accent-amber"></i>
-                <span>Ulubione Usługi</span>
+                <span data-i18n="mockup.favoritesTitle">Ulubione Usługi</span>
               </span>
-              <span class="text-slate-500 font-mono text-[11px]">8 kafelków</span>
+              <span class="text-slate-500 font-mono text-[11px]" data-i18n="mockup.tilesCount">8 kafelków</span>
             </div>
 
             <!-- Service Cards Grid (Realistic Homelab Data with Real Statuses) -->
@@ -336,7 +322,7 @@
                   </div>
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
-                  <span class="text-accent-rose font-bold">Offline</span>
+                  <span class="text-accent-rose font-bold" data-i18n="mockup.offline">Offline</span>
                   <div class="w-1.5 h-1.5 rounded-full bg-accent-rose ml-auto mt-1"></div>
                 </div>
               </div>
@@ -396,43 +382,43 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- 3. MAIN PRODUCT AREAS (3 CONCRETE SHOWCASE BLOCKS) -->
+    <!-- 3. MAIN PRODUCT AREAS -->
     <!-- ========================================================================= -->
     
-    <!-- AREA 1: DASHBOARD I MONITORING -->
+    <!-- AREA 1: DASHBOARD -->
     <section id="dashboard-section" class="py-16 border-t border-app-border bg-[#0a0e17]">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div class="lg:col-span-5 space-y-4">
-            <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider">01 / Panel Usług</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider" data-i18n="area1.tag">01 / Panel Usług</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="area1.title">
               Wszystkie usługi homelaba pod jednym adresem.
             </h2>
-            <p class="text-sm text-slate-400 leading-relaxed">
+            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="area1.desc">
               Zamiast dziesiątek zakładek w przeglądarce i pamiętania nietypowych portów (<code>:8006</code>, <code>:8123</code>, <code>:32400</code>), NexusPanel daje Ci centralny pulpit z kategoryzacją, wyszukiwarką Spotlight (<code>Ctrl + K</code>) i oznaczaniem ulubionych.
             </p>
             
             <div class="space-y-2 pt-2 text-xs text-slate-300">
               <div class="flex items-center gap-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-emerald"></i>
-                <span>Ciągły monitoring dostępności (Health Check w milisekundach)</span>
+                <i data-lucide="check" class="w-4 h-4 text-accent-emerald shrink-0"></i>
+                <span data-i18n="area1.check1">Ciągły monitoring dostępności (Health Check w milisekundach)</span>
               </div>
               <div class="flex items-center gap-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-emerald"></i>
-                <span>Baza ponad 900 oryginalnych logotypów homelabowych</span>
+                <i data-lucide="check" class="w-4 h-4 text-accent-emerald shrink-0"></i>
+                <span data-i18n="area1.check2">Baza ponad 900 oryginalnych logotypów homelabowych</span>
               </div>
               <div class="flex items-center gap-2">
-                <i data-lucide="check" class="w-4 h-4 text-accent-emerald"></i>
-                <span>Przeciąganie kafelków (Drag & Drop) i własne kategorie</span>
+                <i data-lucide="check" class="w-4 h-4 text-accent-emerald shrink-0"></i>
+                <span data-i18n="area1.check3">Przeciąganie kafelków (Drag & Drop) i własne kategorie</span>
               </div>
             </div>
           </div>
 
           <div class="lg:col-span-7 rounded-xl bg-app-card border border-app-border p-5 space-y-3">
             <div class="text-xs font-mono text-slate-400 flex items-center justify-between pb-2 border-b border-app-border">
-              <span>Widok kategorii: <b>Infrastruktura & Virtualization</b></span>
-              <span class="text-accent-emerald">3 aktywne</span>
+              <span data-i18n="area1.categoryTitle">Widok kategorii: Infrastruktura & Virtualization</span>
+              <span class="text-accent-emerald" data-i18n="area1.categoryActive">3 aktywne</span>
             </div>
             
             <div class="space-y-2">
@@ -464,17 +450,17 @@
       </div>
     </section>
 
-    <!-- AREA 2: SKANER SIECI LAN (INTERACTIVE DEMO) -->
+    <!-- AREA 2: LAN SCANNER -->
     <section id="scanner-section" class="py-16 border-t border-app-border">
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
           <div class="lg:col-span-5 space-y-4">
-            <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider">02 / Skaner LAN</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider" data-i18n="area2.tag">02 / Skaner LAN</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="area2.title">
               Wykrywanie urządzeń w sieci bez ręcznego wpisywania.
             </h2>
-            <p class="text-sm text-slate-400 leading-relaxed">
+            <p class="text-sm text-slate-400 leading-relaxed" data-i18n="area2.desc">
               Wbudowany skaner bada podsieć Twojego routera (wszystkie 254 adresy IP) pod kątem znanych portów homelaba i pozwala dodać znalezione serwery jednym kliknięciem.
             </p>
             
@@ -490,7 +476,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-app-border">
               <div class="flex items-center gap-2">
                 <i data-lucide="terminal" class="w-4 h-4 text-accent-blue"></i>
-                <span class="text-xs font-mono font-bold text-white">Skaner Podsieci (192.168.10.1 - 254)</span>
+                <span class="text-xs font-mono font-bold text-white" data-i18n="scanner.title">Skaner Podsieci (192.168.10.1 - 254)</span>
               </div>
               <button id="demoScanBtn" onclick="runScannerDemo()" class="flex items-center gap-1.5 px-3 py-1 rounded bg-accent-blue hover:bg-accent-blueHover text-white text-xs font-semibold transition-colors cursor-pointer">
                 <i data-lucide="play" class="w-3 h-3"></i>
@@ -500,7 +486,7 @@
 
             <!-- Terminal output list -->
             <div class="space-y-2 min-h-[180px]" id="scannerTerminalOutput">
-              <div class="text-xs font-mono text-slate-500 py-6 text-center">
+              <div class="text-xs font-mono text-slate-500 py-6 text-center" data-i18n="scanner.initialMsg">
                 Kliknij „Uruchom skan”, aby zobaczyć proces automatycznego wykrywania usług.
               </div>
             </div>
@@ -520,11 +506,11 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6">
         
         <div class="max-w-3xl mb-10 space-y-2">
-          <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider">03 / Mobilność</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider" data-i18n="area3.tag">03 / Mobilność</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="area3.title">
             6 Natywnych Widżetów na Pulpit Androida.
           </h2>
-          <p class="text-sm text-slate-400">
+          <p class="text-sm text-slate-400" data-i18n="area3.desc">
             Dedykowana aplikacja z natywnymi widżetami na ekran główny telefonu. Bez mocków — widżety czytają prawdziwe metryki z Twojego NexusPanela i otwierają usługi bezpośrednio w przeglądarce.
           </p>
         </div>
@@ -536,44 +522,44 @@
             
             <button onclick="setPhoneWidget('fav')" id="tab-fav" class="w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">⭐ Ulubione Aplikacje (2x2)</div>
-                <div class="text-[11px] text-slate-400">4 wybrane usługi z logotypami i bezpośrednim linkiem</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.fav.title">⭐ Ulubione Aplikacje (2x2)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.fav.desc">4 wybrane usługi z logotypami i bezpośrednim linkiem</div>
               </div>
-              <span class="text-[10px] font-mono text-accent-blue font-bold">Aktywny</span>
+              <span class="text-[10px] font-mono text-accent-blue font-bold active-badge" data-i18n="wtab.activeBadge">Aktywny</span>
             </button>
 
             <button onclick="setPhoneWidget('single')" id="tab-single" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">🎯 Monitoring Wybranej Usługi (2x2)</div>
-                <div class="text-[11px] text-slate-400">Pojedynczy kafelek z czasem odpowiedzi ping (ms) i SLA</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.single.title">🎯 Monitoring Wybranej Usługi (2x2)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.single.desc">Pojedynczy kafelek z czasem odpowiedzi ping (ms) i SLA</div>
               </div>
             </button>
 
             <button onclick="setPhoneWidget('server')" id="tab-server" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">🖥️ Status Serwera Host (4x2 / 4x1)</div>
-                <div class="text-[11px] text-slate-400">Obciążenie procesora CPU %, pamięci RAM, temperatura i Uptime</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.server.title">🖥️ Status Serwera Host (4x2 / 4x1)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.server.desc">Obciążenie procesora CPU %, pamięci RAM, temperatura i Uptime</div>
               </div>
             </button>
 
             <button onclick="setPhoneWidget('summary')" id="tab-summary" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">📊 Podsumowanie Usług (4x1)</div>
-                <div class="text-[11px] text-slate-400">Liczniki stanu wszystkich usług (Online / Warning / Offline)</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.summary.title">📊 Podsumowanie Usług (4x1)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.summary.desc">Liczniki stanu wszystkich usług (Online / Warning / Offline)</div>
               </div>
             </button>
 
             <button onclick="setPhoneWidget('uptime')" id="tab-uptime" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">⏱️ Wskaźnik Uptime (2x2)</div>
-                <div class="text-[11px] text-slate-400">Historia dostępności z ostatnich 24 godzin, 7 dni i 30 dni</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.uptime.title">⏱️ Wskaźnik Uptime (2x2)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.uptime.desc">Historia dostępności z ostatnich 24 godzin, 7 dni i 30 dni</div>
               </div>
             </button>
 
             <button onclick="setPhoneWidget('overview')" id="tab-overview" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
               <div>
-                <div class="text-xs font-bold text-white">🌐 Nexus Overview (4x2)</div>
-                <div class="text-[11px] text-slate-400">Kompaktowy panel kondycji całego homelabu</div>
+                <div class="text-xs font-bold text-white" data-i18n="wtab.overview.title">🌐 Nexus Overview (4x2)</div>
+                <div class="text-[11px] text-slate-400" data-i18n="wtab.overview.desc">Kompaktowy panel kondycji całego homelabu</div>
               </div>
             </button>
 
@@ -602,7 +588,7 @@
                     <div class="flex items-center justify-between mb-2 px-0.5">
                       <span class="text-[11px] font-bold text-white flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
-                        NexusPanel · Ulubione
+                        <span data-i18n="pwidget.favHeader">NexusPanel · Ulubione</span>
                       </span>
                       <span class="text-[9px] font-mono text-accent-emerald bg-emerald-500/10 px-1.5 py-0.5 rounded">4/4 Online</span>
                     </div>
@@ -652,11 +638,11 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-app-border text-center font-mono">
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[8px] text-slate-400">UPTIME</div>
+                        <div class="text-[8px] text-slate-400" data-i18n="pwidget.uptime">UPTIME</div>
                         <div class="text-[11px] font-bold text-cyan-400">48d 12h</div>
                       </div>
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[8px] text-slate-400">PING</div>
+                        <div class="text-[8px] text-slate-400" data-i18n="pwidget.ping">PING</div>
                         <div class="text-[11px] font-bold text-accent-emerald">4 ms</div>
                       </div>
                     </div>
@@ -667,25 +653,25 @@
                     <div class="flex items-center justify-between mb-2">
                       <span class="text-[11px] font-bold text-white flex items-center gap-1">
                         <i data-lucide="activity" class="w-3 h-3 text-accent-blue"></i>
-                        Status Serwera
+                        <span data-i18n="pwidget.serverHeader">Status Serwera</span>
                       </span>
                       <span class="text-[9px] font-mono text-accent-emerald">🟢 Online</span>
                     </div>
                     <div class="grid grid-cols-4 gap-1 text-center font-mono">
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[7.5px] text-slate-400">CPU</div>
+                        <div class="text-[7.5px] text-slate-400" data-i18n="pwidget.cpu">CPU</div>
                         <div class="text-[11px] font-bold text-accent-blue">14%</div>
                       </div>
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[7.5px] text-slate-400">RAM</div>
+                        <div class="text-[7.5px] text-slate-400" data-i18n="pwidget.ram">RAM</div>
                         <div class="text-[11px] font-bold text-blue-400">18%</div>
                       </div>
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[7.5px] text-slate-400">TEMP</div>
+                        <div class="text-[7.5px] text-slate-400" data-i18n="pwidget.temp">TEMP</div>
                         <div class="text-[11px] font-bold text-accent-amber">41°C</div>
                       </div>
                       <div class="p-1.5 rounded bg-black/40">
-                        <div class="text-[7.5px] text-slate-400">UPTIME</div>
+                        <div class="text-[7.5px] text-slate-400" data-i18n="pwidget.uptime">UPTIME</div>
                         <div class="text-[10px] font-bold text-accent-emerald">48d</div>
                       </div>
                     </div>
@@ -694,8 +680,8 @@
                   <!-- 4. Summary (Hidden) -->
                   <div id="pw-summary" class="hidden rounded-xl p-3 bg-[#0f1523] border border-app-border shadow-lg">
                     <div class="flex items-center justify-between mb-2">
-                      <span class="text-[11px] font-bold text-white">Podsumowanie Usług</span>
-                      <span class="text-[9px] font-mono text-slate-300 font-bold bg-white/10 px-1.5 py-0.5 rounded">12 Łącznie</span>
+                      <span class="text-[11px] font-bold text-white" data-i18n="pwidget.summaryHeader">Podsumowanie Usług</span>
+                      <span class="text-[9px] font-mono text-slate-300 font-bold bg-white/10 px-1.5 py-0.5 rounded" data-i18n="pwidget.totalBadge">12 Łącznie</span>
                     </div>
                     <div class="grid grid-cols-3 gap-1 text-center font-mono">
                       <div class="p-1.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -716,8 +702,8 @@
                   <!-- 5. Uptime (Hidden) -->
                   <div id="pw-uptime" class="hidden rounded-xl p-3 bg-[#0f1523] border border-app-border shadow-lg">
                     <div class="flex items-center justify-between mb-1">
-                      <span class="text-[11px] font-bold text-white">Dostępność Homelaba</span>
-                      <span class="text-[9px] font-mono text-accent-emerald">30 DNI</span>
+                      <span class="text-[11px] font-bold text-white" data-i18n="pwidget.uptimeHeader">Dostępność Homelaba</span>
+                      <span class="text-[9px] font-mono text-accent-emerald" data-i18n="pwidget.days30">30 DNI</span>
                     </div>
                     <div class="text-xl font-bold font-mono text-accent-emerald my-1">99.98%</div>
                     <div class="grid grid-cols-3 gap-1 text-center font-mono pt-1.5 border-t border-white/10 text-[8px] text-slate-400">
@@ -730,16 +716,16 @@
                   <!-- 6. Overview (Hidden) -->
                   <div id="pw-overview" class="hidden rounded-xl p-3 bg-[#0f1523] border border-app-border shadow-lg space-y-2">
                     <div class="flex items-center justify-between">
-                      <span class="text-[11px] font-bold text-white">Nexus Overview</span>
-                      <span class="text-[9px] font-bold text-accent-emerald bg-emerald-500/15 px-1.5 py-0.5 rounded">System OK</span>
+                      <span class="text-[11px] font-bold text-white" data-i18n="pwidget.overviewHeader">Nexus Overview</span>
+                      <span class="text-[9px] font-bold text-accent-emerald bg-emerald-500/15 px-1.5 py-0.5 rounded" data-i18n="pwidget.overviewStatus">System OK</span>
                     </div>
                     <div class="text-[10px] text-slate-300 space-y-1 font-mono">
                       <div class="flex justify-between">
-                        <span class="text-slate-400">Aktywne usługi:</span>
+                        <span class="text-slate-400" data-i18n="pwidget.overviewActive">Aktywne usługi:</span>
                         <span class="text-white font-bold">11 / 12</span>
                       </div>
                       <div class="flex justify-between">
-                        <span class="text-slate-400">Średni ping:</span>
+                        <span class="text-slate-400" data-i18n="pwidget.overviewAvgPing">Średni ping:</span>
                         <span class="text-accent-emerald font-bold">3.4 ms</span>
                       </div>
                     </div>
@@ -760,59 +746,59 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- 4. INSTALLATION SECTION (TECHNICAL DOCS STYLE) -->
+    <!-- 4. INSTALLATION SECTION -->
     <!-- ========================================================================= -->
     <section id="install" class="py-16 border-t border-app-border">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
         
         <div class="space-y-1">
-          <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider">Instalacja</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider" data-i18n="install.tag">Instalacja</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="install.title">
             Wybierz środowisko uruchomieniowe
           </h2>
         </div>
 
         <!-- Tabs -->
         <div class="flex flex-wrap gap-2 border-b border-app-border pb-3">
-          <button onclick="switchTab('pve')" id="btn-tab-pve" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-accent-blue text-white transition-colors cursor-pointer">
+          <button onclick="switchTab('pve')" id="btn-tab-pve" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-accent-blue text-white transition-colors cursor-pointer" data-i18n="install.tabPve">
             Proxmox VE (LXC)
           </button>
-          <button onclick="switchTab('linux')" id="btn-tab-linux" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer">
+          <button onclick="switchTab('linux')" id="btn-tab-linux" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabLinux">
             Linux / Raspberry Pi
           </button>
-          <button onclick="switchTab('docker')" id="btn-tab-docker" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer">
+          <button onclick="switchTab('docker')" id="btn-tab-docker" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabDocker">
             Docker Compose
           </button>
-          <button onclick="switchTab('apk')" id="btn-tab-apk" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer">
+          <button onclick="switchTab('apk')" id="btn-tab-apk" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabApk">
             Android APK
           </button>
         </div>
 
         <!-- Tab 1: Proxmox -->
         <div id="content-tab-pve" class="space-y-3">
-          <p class="text-xs text-slate-400">
+          <p class="text-xs text-slate-400" data-i18n="install.pveDesc">
             Wklej poniższe polecenie bezpośrednio w konsoli węzła Proxmox VE (PVE Node Shell):
           </p>
           <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
             <code id="codePve">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer">
+            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn">
               Kopiuj
             </button>
           </div>
           <div class="text-[11px] text-slate-500 font-mono space-y-1">
-            <div>• Pobiera szablon Debian 12 i tworzy dedykowany kontener LXC (512 MB RAM, 1 vCPU, 4 GB SSD).</div>
-            <div>• Konfiguruje usługę autostartu systemd i wyświetla gotowy adres URL panelu.</div>
+            <div data-i18n="install.pveFeature1">• Pobiera szablon Debian 12 i tworzy dedykowany kontener LXC (512 MB RAM, 1 vCPU, 4 GB SSD).</div>
+            <div data-i18n="install.pveFeature2">• Konfiguruje usługę autostartu systemd i wyświetla gotowy adres URL panelu.</div>
           </div>
         </div>
 
         <!-- Tab 2: Linux (Hidden) -->
         <div id="content-tab-linux" class="hidden space-y-3">
-          <p class="text-xs text-slate-400">
+          <p class="text-xs text-slate-400" data-i18n="install.linuxDesc">
             Wklej w terminalu systemu Debian / Ubuntu / Raspberry Pi OS jako root:
           </p>
           <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
             <code id="codeLinux">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer">
+            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn">
               Kopiuj
             </button>
           </div>
@@ -821,8 +807,8 @@
         <!-- Tab 3: Docker (Hidden) -->
         <div id="content-tab-docker" class="hidden space-y-3">
           <div class="flex items-center justify-between text-xs text-slate-400">
-            <span>Utwórz plik <code>docker-compose.yml</code>:</span>
-            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer">
+            <span data-i18n="install.dockerDesc">Utwórz plik docker-compose.yml i uruchom docker compose up -d:</span>
+            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer copy-btn">
               Kopiuj
             </button>
           </div>
@@ -846,18 +832,18 @@
         <div id="content-tab-apk" class="hidden space-y-3 text-xs text-slate-300">
           <div class="p-3 rounded-lg bg-[#0e131f] border border-app-border flex items-center justify-between">
             <div>
-              <div class="font-bold text-white">NexusPanel.apk</div>
-              <div class="text-slate-400 text-[11px] font-mono">Wersja 1.2.0 · Android 8.0+ · 11.1 MB</div>
+              <div class="font-bold text-white" data-i18n="install.apkTitle">NexusPanel.apk</div>
+              <div class="text-slate-400 text-[11px] font-mono" data-i18n="install.apkSubtitle">Wersja 1.2.0 · Android 8.0+ · 11.1 MB</div>
             </div>
             <a href="NexusPanel.apk" download class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent-emerald hover:bg-emerald-600 text-white font-semibold text-xs transition-colors">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>Pobierz plik APK</span>
+              <span data-i18n="install.apkBtn">Pobierz plik APK</span>
             </a>
           </div>
           <ol class="list-decimal list-inside space-y-1 text-slate-400 text-[11px] font-mono">
-            <li>Zainstaluj pobrany plik APK na telefonie.</li>
-            <li>Wpisz adres swojego serwera (np. <code>http://192.168.10.96:3000</code>).</li>
-            <li>Przytrzymaj palec na pulpicie telefonu, wybierz menu „Widżety” i przeciągnij wybrany widżet NexusPanel.</li>
+            <li data-i18n="install.apkStep1">Zainstaluj pobrany plik APK na telefonie.</li>
+            <li data-i18n="install.apkStep2">Wpisz adres swojego serwera (np. http://192.168.10.96:3000).</li>
+            <li data-i18n="install.apkStep3">Przytrzymaj palec na pulpicie telefonu, wybierz menu „Widżety” i przeciągnij wybrany widżet NexusPanel.</li>
           </ol>
         </div>
 
@@ -873,16 +859,16 @@
           <div class="flex items-center gap-3">
             <i data-lucide="github" class="w-8 h-8 text-white shrink-0"></i>
             <div>
-              <div class="text-sm font-bold text-white">MarauTech / NexusPanel</div>
-              <div class="text-xs text-slate-400">Projekt otwartoźródłowy udostępniony na licencji MIT. Brak telemetrii i zewnętrznych zależności.</div>
+              <div class="text-sm font-bold text-white" data-i18n="github.cardTitle">MarauTech / NexusPanel</div>
+              <div class="text-xs text-slate-400" data-i18n="github.cardDesc">NexusPanel jest projektem open source. Kod źródłowy, zgłoszenia i aktualności znajdziesz na GitHub.</div>
             </div>
           </div>
           <div class="flex items-center gap-2.5 shrink-0">
-            <a href="https://github.com/MarauTech/NexusPanel" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-xs font-semibold text-slate-200 transition-colors">
-              Repozytorium GitHub
+            <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-lg bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-xs font-semibold text-slate-200 transition-colors" data-i18n="github.btnRepo">
+              Otwórz GitHub
             </a>
-            <a href="https://github.com/MarauTech/NexusPanel/issues" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-xs font-semibold text-slate-200 transition-colors">
-              Zgłoś błąd / Issue
+            <a href="https://github.com/MarauTech/NexusPanel/issues" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-lg bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-xs font-semibold text-slate-200 transition-colors" data-i18n="github.btnIssues">
+              Zgłoś problem
             </a>
           </div>
         </div>
@@ -897,69 +883,357 @@
   <footer class="border-t border-app-border bg-[#080b11] py-8 text-xs text-slate-500 font-mono">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
-        <span>NexusPanel · Self-Hosted Homelab Dashboard & Android Widgets</span>
+        <span data-i18n="footer.tagline">NexusPanel · Self-Hosted Homelab Dashboard & Android Widgets</span>
       </div>
       <div class="flex items-center gap-4">
-        <a href="https://github.com/MarauTech/NexusPanel/blob/main/LICENSE" target="_blank" class="hover:text-slate-300">Licencja MIT</a>
-        <a href="https://github.com/MarauTech/NexusPanel" target="_blank" class="hover:text-slate-300">GitHub</a>
-        <a href="NexusPanel.apk" download class="text-accent-blue hover:underline">Pobierz APK</a>
+        <a href="https://github.com/MarauTech/NexusPanel/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300" data-i18n="footer.license">Licencja MIT</a>
+        <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300" data-i18n="footer.github">GitHub</a>
+        <a href="NexusPanel.apk" download class="text-accent-blue hover:underline" data-i18n="footer.downloadApk">Pobierz APK</a>
       </div>
     </div>
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- 7. JAVASCRIPT LOGIC (Interactive features & Translations) -->
+  <!-- 7. UNIFIED TRANSLATIONS & JAVASCRIPT ENGINE -->
   <!-- ========================================================================= -->
   <script>
-    // Initialize Lucide Icons
-    lucide.createIcons();
-
-    // 1. Language Dictionary (PL / EN)
-    let currentLang = 'pl';
-    const i18n = {
+    // Complete 1-to-1 parity translations dictionary
+    const translations = {
       pl: {
+        'meta.title': 'NexusPanel — Dashboard Homelabu i Widżety Android',
+        'meta.description': 'Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.',
+        
         'nav.dashboard': 'Dashboard',
         'nav.scanner': 'Skaner LAN',
         'nav.widgets': 'Widżety Android',
         'nav.install': 'Instalacja',
         'btn.downloadApk': 'Pobierz APK',
+        
+        'hero.badgeSelfHosted': 'Self-hosted',
+        'hero.badgeOpenSource': 'Open source (MIT)',
+        'hero.badgeNoCloud': 'Zero chmury',
+        'hero.title': 'Ekran startowy dla Twojego homelabu i widżety na telefon.',
         'hero.desc': 'NexusPanel zbiera wszystkie lokalne usługi (Proxmox, NAS, Docker, Home Assistant, Plex, Immich) w jednym czytelnym panelu. Koniec z zapamiętywaniem portów i adresów IP.',
         'hero.btnInstall': 'Zainstaluj na serwerze',
-        'hero.pveNote': 'Tworzy lekki kontener Debian 12 LXC na Proxmox VE lub instaluje usługę systemd na Linuxie.'
+        'hero.btnGithub': 'GitHub (MarauTech/NexusPanel)',
+        'hero.pveNote': 'Tworzy lekki kontener Debian 12 LXC na Proxmox VE lub instaluje usługę systemd na Linuxie.',
+        'common.copy': 'Kopiuj',
+        'common.copied': 'Skopiowano!',
+        
+        'mockup.onlineCount': '11/12 Online',
+        'mockup.hostCpu': 'CPU Host',
+        'mockup.cores': '(4 rdzenie)',
+        'mockup.hostRam': 'RAM Host',
+        'mockup.serverUptime': 'Uptime Serwera',
+        'mockup.days': 'dni',
+        'mockup.hours': 'godz',
+        'mockup.avgLanPing': 'Średni Ping LAN',
+        'mockup.favoritesTitle': 'Ulubione Usługi',
+        'mockup.tilesCount': '8 kafelków',
+        'mockup.offline': 'Offline',
+        
+        'area1.tag': '01 / Panel Usług',
+        'area1.title': 'Wszystkie usługi homelaba pod jednym adresem.',
+        'area1.desc': 'Zamiast dziesiątek zakładek w przeglądarce i pamiętania nietypowych portów (:8006, :8123, :32400), NexusPanel daje Ci centralny pulpit z kategoryzacją, wyszukiwarką Spotlight (Ctrl + K) i oznaczaniem ulubionych.',
+        'area1.check1': 'Ciągły monitoring dostępności (Health Check w milisekundach)',
+        'area1.check2': 'Baza ponad 900 oryginalnych logotypów homelabowych',
+        'area1.check3': 'Przeciąganie kafelków (Drag & Drop) i własne kategorie',
+        'area1.categoryTitle': 'Widok kategorii: Infrastruktura & Virtualization',
+        'area1.categoryActive': '3 aktywne',
+        
+        'area2.tag': '02 / Skaner LAN',
+        'area2.title': 'Wykrywanie urządzeń w sieci bez ręcznego wpisywania.',
+        'area2.desc': 'Wbudowany skaner bada podsieć Twojego routera (wszystkie 254 adresy IP) pod kątem znanych portów homelaba i pozwala dodać znalezione serwery jednym kliknięciem.',
+        'scanner.title': 'Skaner Podsieci (192.168.10.1 - 254)',
+        'scanner.btnRun': 'Uruchom skan',
+        'scanner.btnScanning': 'Skanowanie...',
+        'scanner.btnRescan': 'Skanuj ponownie',
+        'scanner.initialMsg': 'Kliknij „Uruchom skan”, aby zobaczyć proces automatycznego wykrywania usług.',
+        'scanner.statusIdle': 'Status: Bezczynny',
+        'scanner.statusScanning': 'Status: Odpytywanie podsieci 192.168.10.1/24...',
+        'scanner.statusDone': 'Status: Skan zakończony (7 aktywnych usług)',
+        'scanner.foundCount': 'znalezionych',
+        'scanner.discoveredBadge': 'Wykryto',
+        
+        'scanner.dev.gateway': 'Brama domyślna',
+        'scanner.dev.ha': 'Smart Home Hub',
+        'scanner.dev.nas': 'Magazyn danych',
+        'scanner.dev.plex': 'Serwer multimediów',
+        'scanner.dev.immich': 'Kopia zdjęć',
+        'scanner.dev.portainer': 'Zarządzanie kontenerami',
+        'scanner.dev.proxmox': 'Hiperwizor KVM/LXC',
+
+        'area3.tag': '03 / Mobilność',
+        'area3.title': '6 Natywnych Widżetów na Pulpit Androida.',
+        'area3.desc': 'Dedykowana aplikacja z natywnymi widżetami na ekran główny telefonu. Bez mocków — widżety czytają prawdziwe metryki z Twojego NexusPanela i otwierają usługi bezpośrednio w przeglądarce.',
+        
+        'wtab.fav.title': '⭐ Ulubione Aplikacje (2x2)',
+        'wtab.fav.desc': '4 wybrane usługi z logotypami i bezpośrednim linkiem',
+        'wtab.single.title': '🎯 Monitoring Wybranej Usługi (2x2)',
+        'wtab.single.desc': 'Pojedynczy kafelek z czasem odpowiedzi ping (ms) i SLA',
+        'wtab.server.title': '🖥️ Status Serwera Host (4x2 / 4x1)',
+        'wtab.server.desc': 'Obciążenie procesora CPU %, pamięci RAM, temperatura i Uptime',
+        'wtab.summary.title': '📊 Podsumowanie Usług (4x1)',
+        'wtab.summary.desc': 'Liczniki stanu wszystkich usług (Online / Warning / Offline)',
+        'wtab.uptime.title': '⏱️ Wskaźnik Uptime (2x2)',
+        'wtab.uptime.desc': 'Historia dostępności z ostatnich 24 godzin, 7 dni i 30 dni',
+        'wtab.overview.title': '🌐 Nexus Overview (4x2)',
+        'wtab.overview.desc': 'Kompaktowy panel kondycji całego homelabu',
+        'wtab.activeBadge': 'Aktywny',
+        
+        'pwidget.favHeader': 'NexusPanel · Ulubione',
+        'pwidget.serverHeader': 'Status Serwera',
+        'pwidget.summaryHeader': 'Podsumowanie Usług',
+        'pwidget.totalBadge': '12 Łącznie',
+        'pwidget.uptimeHeader': 'Dostępność Homelaba',
+        'pwidget.days30': '30 DNI',
+        'pwidget.overviewHeader': 'Nexus Overview',
+        'pwidget.overviewStatus': 'System OK',
+        'pwidget.overviewActive': 'Aktywne usługi:',
+        'pwidget.overviewAvgPing': 'Średni ping:',
+        'pwidget.cpu': 'CPU',
+        'pwidget.ram': 'RAM',
+        'pwidget.temp': 'TEMP',
+        'pwidget.uptime': 'UPTIME',
+        'pwidget.ping': 'PING',
+
+        'install.tag': 'Instalacja',
+        'install.title': 'Wybierz środowisko uruchomieniowe',
+        'install.tabPve': 'Proxmox VE (LXC)',
+        'install.tabLinux': 'Linux / Raspberry Pi',
+        'install.tabDocker': 'Docker Compose',
+        'install.tabApk': 'Android APK',
+        'install.pveDesc': 'Wklej poniższe polecenie bezpośrednio w konsoli węzła Proxmox VE (PVE Node Shell):',
+        'install.pveFeature1': '• Pobiera szablon Debian 12 i tworzy dedykowany kontener LXC (512 MB RAM, 1 vCPU, 4 GB SSD).',
+        'install.pveFeature2': '• Konfiguruje usługę autostartu systemd i wyświetla gotowy adres URL panelu.',
+        'install.linuxDesc': 'Wklej w terminalu systemu Debian / Ubuntu / Raspberry Pi OS jako root:',
+        'install.dockerDesc': 'Utwórz plik docker-compose.yml i uruchom docker compose up -d:',
+        'install.apkTitle': 'NexusPanel.apk',
+        'install.apkSubtitle': 'Wersja 1.2.0 · Android 8.0+ · 11.1 MB',
+        'install.apkBtn': 'Pobierz plik APK',
+        'install.apkStep1': 'Zainstaluj pobrany plik APK na telefonie.',
+        'install.apkStep2': 'Wpisz adres swojego serwera (np. http://192.168.10.96:3000).',
+        'install.apkStep3': 'Przytrzymaj palec na pulpicie telefonu, wybierz menu „Widżety” i przeciągnij wybrany widżet NexusPanel.',
+
+        'github.cardTitle': 'MarauTech / NexusPanel',
+        'github.cardDesc': 'NexusPanel jest projektem open source. Kod źródłowy, zgłoszenia i aktualności znajdziesz na GitHub.',
+        'github.btnRepo': 'Otwórz GitHub',
+        'github.btnIssues': 'Zgłoś problem',
+
+        'footer.tagline': 'NexusPanel · Self-Hosted Homelab Dashboard & Android Widgets',
+        'footer.license': 'Licencja MIT',
+        'footer.github': 'GitHub',
+        'footer.downloadApk': 'Pobierz APK'
       },
       en: {
+        'meta.title': 'NexusPanel — Modern Homelab Dashboard & Android Widgets',
+        'meta.description': 'Self-hosted homelab startpage with automated LAN device discovery and native Android homescreen widgets.',
+        
         'nav.dashboard': 'Dashboard',
         'nav.scanner': 'LAN Scanner',
         'nav.widgets': 'Android Widgets',
-        'nav.install': 'Install',
+        'nav.install': 'Installation',
         'btn.downloadApk': 'Download APK',
-        'hero.desc': 'NexusPanel organizes all your local services (Proxmox, NAS, Docker, Home Assistant, Plex, Immich) into one clean dashboard. No more memorizing ports and IP addresses.',
+        
+        'hero.badgeSelfHosted': 'Self-hosted',
+        'hero.badgeOpenSource': 'Open source (MIT)',
+        'hero.badgeNoCloud': 'No cloud',
+        'hero.title': 'A startpage for your homelab and widgets for your phone.',
+        'hero.desc': 'NexusPanel gathers all your local services (Proxmox, NAS, Docker, Home Assistant, Plex, Immich) into one clean dashboard. No more memorizing ports and IP addresses.',
         'hero.btnInstall': 'Install on Server',
-        'hero.pveNote': 'Creates a lightweight Debian 12 LXC container on Proxmox VE or installs a systemd service on Linux.'
+        'hero.btnGithub': 'GitHub (MarauTech/NexusPanel)',
+        'hero.pveNote': 'Creates a lightweight Debian 12 LXC container on Proxmox VE or installs a systemd service on Linux.',
+        'common.copy': 'Copy',
+        'common.copied': 'Copied!',
+        
+        'mockup.onlineCount': '11/12 Online',
+        'mockup.hostCpu': 'Host CPU',
+        'mockup.cores': '(4 cores)',
+        'mockup.hostRam': 'Host RAM',
+        'mockup.serverUptime': 'Server Uptime',
+        'mockup.days': 'days',
+        'mockup.hours': 'hrs',
+        'mockup.avgLanPing': 'Average LAN Ping',
+        'mockup.favoritesTitle': 'Favorite Services',
+        'mockup.tilesCount': '8 tiles',
+        'mockup.offline': 'Offline',
+        
+        'area1.tag': '01 / Service Dashboard',
+        'area1.title': 'All homelab services in one place.',
+        'area1.desc': 'Instead of dozens of browser bookmarks and remembering odd ports (:8006, :8123, :32400), NexusPanel gives you a central dashboard with categorization, Spotlight search (Ctrl + K), and favorites pinning.',
+        'area1.check1': 'Continuous availability monitoring (Health check in milliseconds)',
+        'area1.check2': 'Database of 900+ original homelab brand logos',
+        'area1.check3': 'Drag & Drop tile organization and custom categories',
+        'area1.categoryTitle': 'Category View: Infrastructure & Virtualization',
+        'area1.categoryActive': '3 active',
+        
+        'area2.tag': '02 / LAN Scanner',
+        'area2.title': 'Discover network devices without manual typing.',
+        'area2.desc': 'The built-in subnet scanner probes your local network (all 254 IP addresses) for known homelab ports and lets you add discovered servers with a single click.',
+        'scanner.title': 'Subnet Scanner (192.168.10.1 - 254)',
+        'scanner.btnRun': 'Run Scan',
+        'scanner.btnScanning': 'Scanning...',
+        'scanner.btnRescan': 'Scan Again',
+        'scanner.initialMsg': 'Click "Run Scan" to see the automated service discovery process.',
+        'scanner.statusIdle': 'Status: Idle',
+        'scanner.statusScanning': 'Status: Probing subnet 192.168.10.1/24...',
+        'scanner.statusDone': 'Status: Scan complete (7 active services)',
+        'scanner.foundCount': 'discovered',
+        'scanner.discoveredBadge': 'Discovered',
+        
+        'scanner.dev.gateway': 'Default Gateway',
+        'scanner.dev.ha': 'Smart Home Hub',
+        'scanner.dev.nas': 'Data Storage',
+        'scanner.dev.plex': 'Media Server',
+        'scanner.dev.immich': 'Photo Backup',
+        'scanner.dev.portainer': 'Container Management',
+        'scanner.dev.proxmox': 'KVM/LXC Hypervisor',
+
+        'area3.tag': '03 / Mobile Integration',
+        'area3.title': '6 Native Android Homescreen Widgets.',
+        'area3.desc': 'Dedicated mobile app with native widgets for your phone homescreen. No mocks — widgets read real metrics from your NexusPanel and open services directly in your mobile browser.',
+        
+        'wtab.fav.title': '⭐ Favorite Services (2x2)',
+        'wtab.fav.desc': '4 selected services with logos and direct launch links',
+        'wtab.single.title': '🎯 Single Service Monitor (2x2)',
+        'wtab.single.desc': 'Individual tile with real-time ping latency (ms) and SLA',
+        'wtab.server.title': '🖥️ Host Server Status (4x2 / 4x1)',
+        'wtab.server.desc': 'CPU load %, RAM usage, temperature and system uptime',
+        'wtab.summary.title': '📊 Services Summary (4x1)',
+        'wtab.summary.desc': 'Status counters for all services (Online / Warning / Offline)',
+        'wtab.uptime.title': '⏱️ Uptime Gauge (2x2)',
+        'wtab.uptime.desc': 'Availability history over the last 24 hours, 7 days, and 30 days',
+        'wtab.overview.title': '🌐 Nexus Overview (4x2)',
+        'wtab.overview.desc': 'Compact overall homelab health panel',
+        'wtab.activeBadge': 'Active',
+        
+        'pwidget.favHeader': 'NexusPanel · Favorites',
+        'pwidget.serverHeader': 'Server Status',
+        'pwidget.summaryHeader': 'Services Summary',
+        'pwidget.totalBadge': '12 Total',
+        'pwidget.uptimeHeader': 'Homelab Uptime',
+        'pwidget.days30': '30 DAYS',
+        'pwidget.overviewHeader': 'Nexus Overview',
+        'pwidget.overviewStatus': 'System OK',
+        'pwidget.overviewActive': 'Active services:',
+        'pwidget.overviewAvgPing': 'Avg ping:',
+        'pwidget.cpu': 'CPU',
+        'pwidget.ram': 'RAM',
+        'pwidget.temp': 'TEMP',
+        'pwidget.uptime': 'UPTIME',
+        'pwidget.ping': 'PING',
+
+        'install.tag': 'Installation',
+        'install.title': 'Choose your environment',
+        'install.tabPve': 'Proxmox VE (LXC)',
+        'install.tabLinux': 'Linux / Raspberry Pi',
+        'install.tabDocker': 'Docker Compose',
+        'install.tabApk': 'Android APK',
+        'install.pveDesc': 'Paste the command below directly into your Proxmox VE node shell (PVE Shell):',
+        'install.pveFeature1': '• Downloads Debian 12 template and creates a dedicated LXC container (512 MB RAM, 1 vCPU, 4 GB SSD).',
+        'install.pveFeature2': '• Configures systemd autostart service and displays the dashboard URL.',
+        'install.linuxDesc': 'Paste in Debian / Ubuntu / Raspberry Pi OS terminal as root:',
+        'install.dockerDesc': 'Create docker-compose.yml and run docker compose up -d:',
+        'install.apkTitle': 'NexusPanel.apk',
+        'install.apkSubtitle': 'Version 1.2.0 · Android 8.0+ · 11.1 MB',
+        'install.apkBtn': 'Download APK File',
+        'install.apkStep1': 'Install the downloaded APK file on your Android phone.',
+        'install.apkStep2': 'Enter your server address (e.g. http://192.168.10.96:3000).',
+        'install.apkStep3': 'Long-press on your phone home screen, select "Widgets", and place the NexusPanel widget.',
+
+        'github.cardTitle': 'MarauTech / NexusPanel',
+        'github.cardDesc': 'NexusPanel is an open source project. Source code, issues and updates are available on GitHub.',
+        'github.btnRepo': 'Open GitHub',
+        'github.btnIssues': 'Report an Issue',
+
+        'footer.tagline': 'NexusPanel · Self-Hosted Homelab Dashboard & Android Widgets',
+        'footer.license': 'MIT License',
+        'footer.github': 'GitHub',
+        'footer.downloadApk': 'Download APK'
       }
     };
 
-    document.getElementById('langToggleBtn').addEventListener('click', () => {
-      currentLang = currentLang === 'pl' ? 'en' : 'pl';
-      document.getElementById('langLabel').innerText = currentLang.toUpperCase();
+    // Determine initial language: localStorage -> browser language -> 'pl' default
+    function getInitialLanguage() {
+      const saved = localStorage.getItem('nexuspanel-language');
+      if (saved && (saved === 'pl' || saved === 'en')) {
+        return saved;
+      }
+      const navLang = navigator.language || navigator.userLanguage || '';
+      return navLang.toLowerCase().startsWith('pl') ? 'pl' : 'en';
+    }
+
+    let currentLang = getInitialLanguage();
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('nexuspanel-language', lang);
+      document.documentElement.lang = lang;
+
+      // Update Label
+      const langLabel = document.getElementById('langLabel');
+      if (langLabel) langLabel.innerText = lang.toUpperCase();
+
+      // Update Title & Meta
+      document.title = translations[lang]['meta.title'] || document.title;
+      const metaDesc = document.getElementById('metaDescription');
+      if (metaDesc) metaDesc.setAttribute('content', translations[lang]['meta.description'] || '');
+
+      // Update all data-i18n elements
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (i18n[currentLang] && i18n[currentLang][key]) {
-          el.innerText = i18n[currentLang][key];
+        if (translations[lang] && translations[lang][key]) {
+          el.innerText = translations[lang][key];
         }
       });
+
+      // Update dynamic buttons
+      const heroCopyText = document.getElementById('heroCopyText');
+      if (heroCopyText) heroCopyText.innerText = translations[lang]['common.copy'];
+
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.innerText = translations[lang]['common.copy'];
+      });
+
+      const demoScanBtnText = document.getElementById('demoScanBtnText');
+      if (demoScanBtnText && !isScanning) {
+        demoScanBtnText.innerText = scanFinished ? translations[lang]['scanner.btnRescan'] : translations[lang]['scanner.btnRun'];
+      }
+
+      const scanStatusMsg = document.getElementById('scanStatusMsg');
+      if (scanStatusMsg && !isScanning) {
+        scanStatusMsg.innerText = scanFinished ? translations[lang]['scanner.statusDone'] : translations[lang]['scanner.statusIdle'];
+      }
+
+      const scanFoundCountMsg = document.getElementById('scanFoundCountMsg');
+      if (scanFoundCountMsg) {
+        scanFoundCountMsg.innerText = `${discoveredCount} ${translations[lang]['scanner.foundCount']}`;
+      }
+
+      // Re-render scanner items if any exist
+      renderScannerOutput();
+
+      lucide.createIcons();
+    }
+
+    document.getElementById('langToggleBtn').addEventListener('click', () => {
+      const nextLang = currentLang === 'pl' ? 'en' : 'pl';
+      applyLanguage(nextLang);
     });
 
     // 2. Interactive Phone Widget Selector
     const widgetTypes = ['fav', 'single', 'server', 'summary', 'uptime', 'overview'];
+    let currentWidgetType = 'fav';
+
     function setPhoneWidget(type) {
+      currentWidgetType = type;
       widgetTypes.forEach(t => {
         const el = document.getElementById(`pw-${t}`);
         const btn = document.getElementById(`tab-${t}`);
         if (el) el.classList.add('hidden');
         if (btn) {
           btn.className = 'w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors';
-          const badge = btn.querySelector('span.text-accent-blue');
+          const badge = btn.querySelector('.active-badge');
           if (badge) badge.remove();
         }
       });
@@ -970,8 +1244,8 @@
       if (activeBtn) {
         activeBtn.className = 'w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors';
         const badge = document.createElement('span');
-        badge.className = 'text-[10px] font-mono text-accent-blue font-bold';
-        badge.innerText = 'Aktywny';
+        badge.className = 'text-[10px] font-mono text-accent-blue font-bold active-badge';
+        badge.innerText = translations[currentLang]['wtab.activeBadge'];
         activeBtn.appendChild(badge);
       }
       lucide.createIcons();
@@ -998,13 +1272,17 @@
       lucide.createIcons();
     }
 
-    // 4. Copy Helpers
+    // 4. Copy Helpers with i18n
     function copyInstallCmd() {
       const cmd = 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"';
       navigator.clipboard.writeText(cmd).then(() => {
         const text = document.getElementById('heroCopyText');
-        text.innerText = 'Skopiowano';
-        setTimeout(() => { text.innerText = 'Kopiuj'; }, 2000);
+        if (text) {
+          text.innerText = translations[currentLang]['common.copied'];
+          setTimeout(() => {
+            text.innerText = translations[currentLang]['common.copy'];
+          }, 2000);
+        }
       });
     }
 
@@ -1012,64 +1290,96 @@
       const textToCopy = document.getElementById(elementId).innerText;
       navigator.clipboard.writeText(textToCopy).then(() => {
         const btn = document.getElementById(btnId);
-        const originalText = btn.innerText;
-        btn.innerText = 'Skopiowano';
-        setTimeout(() => { btn.innerText = originalText; }, 2000);
+        if (btn) {
+          btn.innerText = translations[currentLang]['common.copied'];
+          setTimeout(() => {
+            btn.innerText = translations[currentLang]['common.copy'];
+          }, 2000);
+        }
       });
     }
 
-    // 5. Network Scanner Terminal Demo
+    // 5. Network Scanner Terminal Demo with i18n
     let isScanning = false;
+    let scanFinished = false;
+    let discoveredCount = 0;
+
     const scannerDevices = [
-      { ip: '192.168.10.1:80', name: 'Router Gateway', label: 'Brama domyślna' },
-      { ip: '192.168.10.30:8123', name: 'Home Assistant', label: 'Smart Home Hub' },
-      { ip: '192.168.10.66:8001', name: 'ASUSTOR Lockerstor NAS', label: 'Magazyn danych' },
-      { ip: '192.168.10.66:32400', name: 'Plex Media Server', label: 'Serwer multimediów' },
-      { ip: '192.168.10.70:2283', name: 'Immich Photo Server', label: 'Kopia zdjęć' },
-      { ip: '192.168.10.96:9443', name: 'Portainer Docker', label: 'Zarządzanie kontenerami' },
-      { ip: '192.168.10.231:8006', name: 'Proxmox Virtual Environment', label: 'Hiperwizor KVM/LXC' }
+      { ip: '192.168.10.1:80', name: 'Router Gateway', labelKey: 'scanner.dev.gateway' },
+      { ip: '192.168.10.30:8123', name: 'Home Assistant', labelKey: 'scanner.dev.ha' },
+      { ip: '192.168.10.66:8001', name: 'ASUSTOR Lockerstor NAS', labelKey: 'scanner.dev.nas' },
+      { ip: '192.168.10.66:32400', name: 'Plex Media Server', labelKey: 'scanner.dev.plex' },
+      { ip: '192.168.10.70:2283', name: 'Immich Photo Server', labelKey: 'scanner.dev.immich' },
+      { ip: '192.168.10.96:9443', name: 'Portainer Docker', labelKey: 'scanner.dev.portainer' },
+      { ip: '192.168.10.231:8006', name: 'Proxmox Virtual Environment', labelKey: 'scanner.dev.proxmox' }
     ];
+
+    function renderScannerOutput() {
+      const out = document.getElementById('scannerTerminalOutput');
+      if (!out) return;
+
+      if (!scanFinished && !isScanning && discoveredCount === 0) {
+        out.innerHTML = `<div class="text-xs font-mono text-slate-500 py-6 text-center">${translations[currentLang]['scanner.initialMsg']}</div>`;
+        return;
+      }
+
+      out.innerHTML = '';
+      for (let i = 0; i < discoveredCount; i++) {
+        const dev = scannerDevices[i];
+        const row = document.createElement('div');
+        row.className = 'p-2 rounded bg-[#0a0e17] border border-app-border flex items-center justify-between text-xs font-mono';
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="text-accent-emerald font-bold shrink-0">✓</span>
+            <span class="text-slate-300 font-bold truncate">${dev.ip}</span>
+            <span class="text-slate-500 truncate hidden sm:inline">— ${dev.name}</span>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[10px] text-slate-400">${translations[currentLang][dev.labelKey] || dev.labelKey}</span>
+            <span class="text-[9px] px-1 rounded bg-emerald-500/10 text-accent-emerald font-bold">${translations[currentLang]['scanner.discoveredBadge']}</span>
+          </div>
+        `;
+        out.appendChild(row);
+      }
+      lucide.createIcons();
+    }
 
     function runScannerDemo() {
       if (isScanning) return;
       isScanning = true;
+      scanFinished = false;
+      discoveredCount = 0;
 
-      const btn = document.getElementById('demoScanBtn');
       const btnText = document.getElementById('demoScanBtnText');
       const out = document.getElementById('scannerTerminalOutput');
       const statusMsg = document.getElementById('scanStatusMsg');
       const countMsg = document.getElementById('scanFoundCountMsg');
 
-      btnText.innerText = 'Skanowanie...';
-      statusMsg.innerText = 'Status: Odpytywanie podsieci 192.168.10.1/24...';
+      btnText.innerText = translations[currentLang]['scanner.btnScanning'];
+      statusMsg.innerText = translations[currentLang]['scanner.statusScanning'];
       out.innerHTML = '';
-      countMsg.innerText = '0 znalezionych';
+      countMsg.innerText = `0 ${translations[currentLang]['scanner.foundCount']}`;
 
-      let count = 0;
       scannerDevices.forEach((dev, idx) => {
         setTimeout(() => {
-          count++;
-          const row = document.createElement('div');
-          row.className = 'p-2 rounded bg-[#0a0e17] border border-app-border flex items-center justify-between text-xs font-mono';
-          row.innerHTML = `
-            <div class="flex items-center gap-2.5 min-w-0">
-              <span class="text-accent-emerald font-bold shrink-0">✓</span>
-              <span class="text-slate-300 font-bold truncate">${dev.ip}</span>
-              <span class="text-slate-500 truncate hidden sm:inline">— ${dev.name}</span>
-            </div>
-            <span class="text-[10px] text-slate-400 shrink-0">${dev.label}</span>
-          `;
-          out.appendChild(row);
-          countMsg.innerText = `${count} znalezionych`;
+          discoveredCount++;
+          renderScannerOutput();
+          countMsg.innerText = `${discoveredCount} ${translations[currentLang]['scanner.foundCount']}`;
 
-          if (count === scannerDevices.length) {
+          if (discoveredCount === scannerDevices.length) {
             isScanning = false;
-            btnText.innerText = 'Skanuj ponownie';
-            statusMsg.innerText = 'Status: Skan zakończony (7 aktywnych usług)';
+            scanFinished = true;
+            btnText.innerText = translations[currentLang]['scanner.btnRescan'];
+            statusMsg.innerText = translations[currentLang]['scanner.statusDone'];
           }
-        }, (idx + 1) * 350);
+        }, (idx + 1) * 320);
       });
     }
+
+    // Initialize Language and Icons on Page Load
+    document.addEventListener('DOMContentLoaded', () => {
+      applyLanguage(currentLang);
+    });
   </script>
 
 </body>
