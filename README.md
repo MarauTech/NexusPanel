@@ -1,28 +1,31 @@
 <p align="center">
   <h1 align="center">🔗 NexusPanel</h1>
-  <p align="center"><strong>Nowoczesny, błyskawiczny i w pełni konfigurowalny ekran startowy dla Twojego homelabu wraz z aplikacją mobilną i widżetami na pulpit Androida.</strong></p>
+  <p align="center"><strong>Ekran startowy dla Twojego homelabu wraz z aplikacją mobilną i 6 widżetami na pulpit Androida.</strong></p>
   <p align="center">
     Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping • Android Widgets & Mobile App
+  </p>
+  <p align="center">
+    🌐 <strong>Strona projektu i prezentacja na żywo:</strong> <a href="https://marautch.github.io/NexusPanel/">https://marautch.github.io/NexusPanel/</a>
   </p>
 </p>
 
 ---
 
-## ⚡ Błyskawiczna instalacja 1 poleceniem
+## ⚡ Instalacja 1 poleceniem
 
-### 🖥️ Proxmox VE (Automatyczne utworzenie dedykowanego kontenera LXC):
-Wklej poniższe polecenie w konsoli Proxmox VE (**PVE Node Shell**):
+### 🖥️ Proxmox VE (Automatyczny dedykowany kontener LXC):
+Wklej poniższe polecenie w konsoli węzła Proxmox VE (**PVE Node Shell**):
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"
 ```
 
-> **Co robi ten skrypt?**
-> 1. Pyta o parametry instalacji *(Domyślnie: 512 MB RAM, 1 vCPU, 4 GB dysk, DHCP)*.
-> 2. Pobiera czysty szablon **Debian 12** i tworzy zoptymalizowany kontener LXC.
-> 3. Instaluje Node.js 20, pobiera najnowszą wersję NexusPanel i buduje aplikację.
+> **Działanie skryptu instalatora:**
+> 1. Konfiguruje parametry kontenera *(Domyślnie: 512 MB RAM, 1 vCPU, 4 GB SSD, DHCP)*.
+> 2. Pobiera oficjalny szablon **Debian 12** i tworzy zoptymalizowany kontener LXC.
+> 3. Instaluje Node.js 20, pobiera najnowszą wersję NexusPanel i kompiluje aplikację.
 > 4. Konfiguruje usługę autostartu **`systemd`** (`nexuspanel.service`).
-> 5. Wyświetla gotowy adres URL: `http://192.168.XX.XX:3000`.
+> 5. Wyświetla gotowy adres URL panelu: `http://192.168.XX.XX:3000`.
 
 ---
 
@@ -65,16 +68,16 @@ NexusPanel zawiera dedykowaną aplikację mobilną dla systemu Android z obsług
 </p>
 
 ### 📥 Pobierz aplikację na Androida:
-Pobierz gotowy plik instalacyjny **[`NexusPanel.apk`](NexusPanel.apk)** i zainstaluj na swoim telefonie.
+Pobierz plik instalacyjny **[`NexusPanel.apk`](NexusPanel.apk)** (11.1 MB) i zainstaluj na telefonie z systemem Android 8.0+.
 
 ### 🧩 6 Dedykowanych Widżetów Android:
 1. **⭐ Ulubione Aplikacje (2x2)**:
-   * 4 najważniejsze usługi homelaba w estetycznych, poziomych kartach.
+   * 4 najważniejsze usługi homelaba w czytelnych kartach.
    * **Prawdziwe logotypy marek** (Proxmox, ASUSTOR, Plex, Immich, Umbrel, Home Assistant, Pi-hole itp.).
    * Duża, czytelna czcionka nazwy usługi i adresu IP oraz kropka stanu na żywo.
-   * **Błyskawiczne otwieranie**: kliknięcie w kartę usługi natychmiast przenosi do właściwego portu w domyślnej przeglądarce telefonu!
+   * **Bezpośrednie otwieranie**: kliknięcie w kartę usługi natychmiast przenosi do właściwego portu w domyślnej przeglądarce telefonu.
 2. **🎯 Monitoring Konkretnej Usługi (2x2)**:
-   * Dedykowana karta z logo, adresem IP, wskaźnikiem dostępności Uptime oraz czasem odpowiedzi w milisekundach (**Ping ms**).
+   * Karta z logo, adresem IP, wskaźnikiem dostępności Uptime oraz czasem odpowiedzi w milisekundach (**Ping ms**).
 3. **🖥️ Status Serwera Host (4x2 / 4x1)**:
    * Wykres obciążenia procesora (**CPU %**), pamięci RAM (**RAM %**), temperatury oraz czasu pracy serwera (**Uptime**).
 4. **📊 Podsumowanie Wszystkich Usług (4x1)**:
@@ -99,7 +102,6 @@ W zakładce **Ustawienia ➔ Studio Widżetów** możesz:
 - [Główne funkcje](#-główne-funkcje)
 - [Aplikacja Mobilna i Widżety](#-aplikacja-mobilna--widżety-na-pulpit-androida)
 - [Wymagania systemowe](#-wymagania-systemowe)
-- [Pierwszy start i kreator powitalny](#-pierwszy-start-i-kreator-powitalny)
 - [Skaner Sieci LAN (Pełna podsieć 1..254)](#-skaner-sieci-lan-pełna-podsieć-1254)
 - [Panel administracyjny i konfiguracja](#-panel-administracyjny-i-konfiguracja)
 - [Kopia zapasowa i reset fabryczny](#-kopia-zapasowa-i-reset-fabryczny)
@@ -117,24 +119,24 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 - ⚡ **Auto-Discovery**: Automatyczne wykrywanie podsieci LAN (`192.168.10.x`, `192.168.1.x`, `10.0.0.x`) i równoległe skanowanie wszystkich 254 adresów IP na popularnych portach homelabu (Proxmox, Home Assistant, Portainer, NAS, Plex, Grafana, Jellyfin, Webmin).
 - 🟢 **Live Health Check & Ping**: Monitorowanie dostępności usług w czasie rzeczywistym z historią SLA (ms).
-- 🎨 **Liquid Glassmorphism**: Czysty interfejs z trybem ciemnym/jasnym, płynnymi animacjami i pełną personalizacją.
-- 📱 **Natywne Widżety Android**: Prawdziwe dane bez mocków, bezpośrednie skróty do usług i telemetria serwera.
-- 🔒 **Self-contained**: Wszystko działa w jednym procesie z bazą SQLite — zero zewnętrznych zależności.
+- 🎨 **Czysty interfejs & Ponad 900 Ikon**: Tryb ciemny/jasny z biblioteką 900+ oryginalnych logotypów homelabowych.
+- 📱 **Natywne Widżety Android**: Prawdziwe dane z Twojego serwera, bezpośrednie skróty do usług i telemetria hosta.
+- 🔒 **Self-contained**: Wszystko działa w jednym procesie z lokalną bazą SQLite — zero zewnętrznych zależności i telemetrii.
 
 ---
 
 ## ✨ Główne funkcje
 
 ### 🖥️ Ekran Startowy (Speed-Dial)
-- 🔲 **Nowoczesne kafelki usług**: Dedykowane logotypy marek, hosty, plakietki portów i wskaźniki SLA.
-- ⭐ **Przypięte Ulubione**: Błyskawiczne oznaczanie gwiazdką i sekcja ulubionych na samej górze.
-- 🔍 **Wyszukiwarka Spotlight**: Błyskawiczne szukanie i filtrowanie pod skrótem `Ctrl + K` (lub `⌘K`).
-- ⛅ **Lokalna Pogoda & Geodekcja**: Pogoda na żywo dopasowana do Twojego adresu IP z temperaturą, wilgotnością i wiatrem.
+- 🔲 **Kafelki usług**: Dedykowane logotypy marek, hosty, plakietki portów i wskaźniki SLA.
+- ⭐ **Przypięte Ulubione**: Oznaczanie gwiazdką i sekcja ulubionych na samej górze.
+- 🔍 **Wyszukiwarka Spotlight**: Szybkie szukanie i filtrowanie pod skrótem `Ctrl + K` (lub `⌘K`).
+- ⛅ **Lokalna Pogoda & Geodekcja**: Pogoda dopasowana do lokalnego adresu IP z temperaturą, wilgotnością i wiatrem.
 - 🌐 **Wielojęzyczność**: Pełne wsparcie dla języka polskiego i angielskiego (przełącznik PL/EN).
-- 📱 **100% Responsywność**: Idealny widok na komputerze, tablecie i smartfonie.
+- 📱 **100% Responsywność**: Czysty widok na komputerze, tablecie i smartfonie.
 
 ### ⚙️ Panel Administracyjny
-- ➕ **Wybór ikon z biblioteki**: Ponad 60 wbudowanych ikon homelabowych i pełna biblioteka Lucide z wyszukiwarką.
+- ➕ **Wybór ikon z biblioteki**: Ponad 900 wbudowanych ikon homelabowych i pełna biblioteka wektorowa Lucide z wyszukiwarką.
 - 📁 **Kategorie i tagi**: Własne grupowanie usług z filtrami segmentowymi.
 - 🖱️ **Drag & Drop**: Zmiana kolejności kafelków i kategorii metodą przeciągnij i upuść.
 - 💾 **Kopia zapasowa i Przywracanie fabryczne**: Eksport/import do pliku JSON oraz bezpieczny 1-klikowy Factory Reset.
@@ -143,7 +145,7 @@ Zamiast zapamiętywać dziesiątki adresów IP, portów i zakładek w przegląda
 
 ## 📦 Wymagania systemowe
 
-- **Pamięć RAM**: Zaledwie ~60–128 MB RAM
+- **Pamięć RAM**: ~60–128 MB RAM
 - **Procesor**: 1 vCPU
 - **Dysk**: 100 MB wolnego miejsca
 - **System**: Proxmox VE 7/8, Debian, Ubuntu, Alpine, Docker, Windows / macOS / Android
@@ -187,22 +189,25 @@ docker compose up -d
 ## 👨‍💻 Dla developerów
 
 ```bash
-# Sklonuj repozytorium
+# 1. Sklonuj repozytorium
 git clone https://github.com/MarauTech/NexusPanel.git
 cd NexusPanel
 
-# Zainstaluj zależności
+# 2. Zainstaluj zależności
 npm install
 
-# Uruchom w trybie dev (React Vite + Node backend równolegle)
+# 3. Uruchom w trybie dev (React Vite + Node backend równolegle)
 npm run dev
 
-# Kompilacja aplikacji Android (Capacitor + Gradle)
+# 4. Kompilacja klienta produkcyjnego
+npm run build
+
+# 5. Kompilacja aplikacji Android (Wymaga JDK 17 i Android SDK)
 cd client
 npm run build
 npx cap sync android
 cd android
-./gradlew assembleRelease
+./gradlew assembleRelease # na Windows: .\gradlew.bat assembleRelease
 ```
 
 ---
