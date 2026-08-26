@@ -3,14 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <!-- Primary Meta Tags -->
   <title id="pageTitle">NexusPanel — Dashboard Homelabu i Widżety Android</title>
+  <meta name="title" id="metaTitle" content="NexusPanel — Dashboard Homelabu i Widżety Android">
   <meta name="description" id="metaDescription" content="Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.">
+  <meta name="keywords" content="homelab dashboard, proxmox dashboard, self-hosted startpage, android homelab widgets, lan discovery, docker dashboard, home assistant dashboard">
+  <meta name="author" content="MarauTech">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#080b11">
+
+  <!-- Canonical & Multilingual Alternate Hreflang Tags -->
+  <link rel="canonical" id="canonicalLink" href="https://marautch.github.io/NexusPanel/">
+  <link rel="alternate" hreflang="pl" href="https://marautch.github.io/NexusPanel/?lang=pl">
+  <link rel="alternate" hreflang="en" href="https://marautch.github.io/NexusPanel/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://marautch.github.io/NexusPanel/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NexusPanel">
+  <meta property="og:url" id="ogUrl" content="https://marautch.github.io/NexusPanel/">
+  <meta property="og:title" id="ogTitle" content="NexusPanel — Dashboard Homelabu i Widżety Android">
+  <meta property="og:description" id="ogDesc" content="Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.">
+  <meta property="og:image" content="https://marautch.github.io/NexusPanel/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="NexusPanel Dashboard Homelabu & Widżety Android">
+  <meta property="og:locale" id="ogLocale" content="pl_PL">
+  <meta property="og:locale:alternate" id="ogLocaleAlt" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" id="twitterUrl" content="https://marautch.github.io/NexusPanel/">
+  <meta name="twitter:title" id="twitterTitle" content="NexusPanel — Dashboard Homelabu i Widżety Android">
+  <meta name="twitter:description" id="twitterDesc" content="Self-hosted ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.">
+  <meta name="twitter:image" content="https://marautch.github.io/NexusPanel/og-image.svg">
+
+  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <!-- Google Fonts: Inter & JetBrains Mono (Preconnected for LCP Performance) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Structured Data: Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "NexusPanel",
+        "url": "https://marautch.github.io/NexusPanel/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Linux, Proxmox VE, Docker, Android",
+        "softwareVersion": "1.2.0",
+        "license": "https://github.com/MarauTech/NexusPanel/blob/main/LICENSE",
+        "description": "Self-hosted homelab startpage dashboard with automated LAN subnet discovery and native Android homescreen widgets.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "MarauTech",
+          "url": "https://github.com/MarauTech"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "url": "https://marautch.github.io/NexusPanel/",
+        "name": "NexusPanel",
+        "description": "Ekran startowy dla homelabu z automatycznym wykrywaniem urządzeń LAN i natywnymi widżetami na pulpit Androida.",
+        "inLanguage": ["pl", "en"]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Czy NexusPanel wymaga zewnętrznej chmury?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nie. NexusPanel jest w 100% rozwiązaniem self-hosted. Wszystkie dane, ustawienia i historia SLA są przechowywane w lokalnej bazie SQLite na Twoim własnym serwerze."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Jak działa skaner sieci LAN?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wbudowany skaner automatycznie rozpoznaje podsieć lokalną (np. 192.168.10.x) i równolegle odpytuje wszystkie 254 adresy IP pod kątem popularnych portów homelaba takich jak Proxmox, Docker, Plex, Home Assistant czy NAS."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Jak zainstalować aplikację i widżety na smartfonie z Androidem?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Pobierz plik NexusPanel.apk, zainstaluj go na telefonie z systemem Android 8.0+, podaj adres lokalnego serwera NexusPanel, a następnie dodaj widżet na ekran główny przez menu widżetów w launcherze."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Jak zainstalować NexusPanel na Proxmox VE?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wystarczy wkleić jedno polecenie w konsoli węzła Proxmox VE (PVE Shell), które automatycznie utworzy dedykowany kontener Debian 12 LXC z autostartem systemd."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -88,7 +197,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
       
       <!-- Brand -->
-      <a href="#" class="flex items-center gap-2.5 group">
+      <a href="#top" class="flex items-center gap-2.5 group" aria-label="NexusPanel Strona Główna">
         <div class="w-7 h-7 rounded-lg bg-accent-blue flex items-center justify-center text-white">
           <i data-lucide="layers" class="w-4 h-4"></i>
         </div>
@@ -99,7 +208,7 @@
       </a>
 
       <!-- Desktop Links -->
-      <nav class="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
+      <nav class="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300" aria-label="Nawigacja główna">
         <a href="#dashboard-section" class="hover:text-white transition-colors" data-i18n="nav.dashboard">Dashboard</a>
         <a href="#scanner-section" class="hover:text-white transition-colors" data-i18n="nav.scanner">Skaner LAN</a>
         <a href="#widgets-section" class="hover:text-white transition-colors flex items-center gap-1.5">
@@ -107,6 +216,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
         </a>
         <a href="#install" class="hover:text-white transition-colors" data-i18n="nav.install">Instalacja</a>
+        <a href="#faq-section" class="hover:text-white transition-colors" data-i18n="nav.faq">FAQ</a>
         <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center gap-1">
           <span>GitHub</span>
           <i data-lucide="external-link" class="w-3 h-3 text-slate-500"></i>
@@ -116,13 +226,13 @@
       <!-- Right controls -->
       <div class="flex items-center gap-2.5">
         <!-- Lang Toggle -->
-        <button id="langToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-[#0e131f] hover:bg-[#141b2b] border border-app-border text-[11px] font-mono font-semibold text-slate-300 transition-colors cursor-pointer" aria-label="Toggle language">
+        <button id="langToggleBtn" class="flex items-center gap-1 px-2 py-1 rounded bg-[#0e131f] hover:bg-[#141b2b] border border-app-border text-[11px] font-mono font-semibold text-slate-300 transition-colors cursor-pointer" aria-label="Przełącz język / Toggle language">
           <i data-lucide="globe" class="w-3 h-3 text-accent-blue"></i>
           <span id="langLabel">PL</span>
         </button>
 
         <!-- Download APK Button -->
-        <a href="NexusPanel.apk" download class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue hover:bg-accent-blueHover text-white text-xs font-semibold transition-colors">
+        <a href="NexusPanel.apk" download="NexusPanel.apk" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-blue hover:bg-accent-blueHover text-white text-xs font-semibold transition-colors" aria-label="Pobierz pakiet APK NexusPanel">
           <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
           <span data-i18n="btn.downloadApk">Pobierz APK</span>
         </a>
@@ -134,7 +244,7 @@
   <!-- ========================================================================= -->
   <!-- 2. HERO SECTION -->
   <!-- ========================================================================= -->
-  <main class="flex-1">
+  <main class="flex-1" id="top">
     <section class="pt-12 pb-16 lg:pt-16 lg:pb-24 max-w-6xl mx-auto px-4 sm:px-6">
       
       <!-- Headline and Copy -->
@@ -177,7 +287,7 @@
               <span class="text-accent-blue font-bold select-none">$</span>
               <code class="truncate">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
             </div>
-            <button onclick="copyInstallCmd()" class="flex items-center gap-1 px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-slate-300 hover:text-white text-[11px] font-semibold transition-colors ml-2 cursor-pointer shrink-0">
+            <button onclick="copyInstallCmd()" class="flex items-center gap-1 px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-slate-300 hover:text-white text-[11px] font-semibold transition-colors ml-2 cursor-pointer shrink-0" aria-label="Skopiuj polecenie instalacyjne">
               <i data-lucide="copy" id="heroCopyIcon" class="w-3 h-3"></i>
               <span id="heroCopyText">Kopiuj</span>
             </button>
@@ -197,7 +307,7 @@
         <!-- Window titlebar -->
         <div class="px-4 py-2.5 bg-[#0a0e17] border-b border-app-border flex items-center justify-between text-xs text-slate-400">
           <div class="flex items-center gap-2 min-w-0">
-            <div class="flex gap-1.5 shrink-0">
+            <div class="flex gap-1.5 shrink-0" aria-hidden="true">
               <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
               <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
               <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
@@ -209,7 +319,7 @@
           </div>
           <div class="flex items-center gap-3 font-mono text-[11px]">
             <span class="text-accent-emerald flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald" aria-hidden="true"></span>
               <span data-i18n="mockup.onlineCount">11/12 Online</span>
             </span>
             <span class="text-slate-500 hidden sm:inline font-mono">Ctrl + K</span>
@@ -249,7 +359,7 @@
               <span class="text-slate-500 font-mono text-[11px]" data-i18n="mockup.tilesCount">8 kafelków</span>
             </div>
 
-            <!-- Service Cards Grid (Realistic Homelab Data with Real Statuses) -->
+            <!-- Service Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               
               <!-- 1. Proxmox VE -->
@@ -263,7 +373,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">4 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -278,7 +388,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">8 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -293,7 +403,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">6 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -308,7 +418,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-amber font-bold">240 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-amber ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-amber ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -323,7 +433,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-rose font-bold" data-i18n="mockup.offline">Offline</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-rose ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-rose ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -338,7 +448,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">2 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -353,7 +463,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">1 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -368,7 +478,7 @@
                 </div>
                 <div class="text-right shrink-0 font-mono text-[10px]">
                   <span class="text-accent-emerald font-bold">5 ms</span>
-                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1"></div>
+                  <div class="w-1.5 h-1.5 rounded-full bg-accent-emerald ml-auto mt-1" aria-hidden="true"></div>
                 </div>
               </div>
 
@@ -425,21 +535,21 @@
               <div class="p-2.5 rounded bg-[#0a0e17] border border-app-border flex items-center justify-between text-xs font-mono">
                 <div class="flex items-center gap-3">
                   <span class="text-orange-400 font-bold">Proxmox PVE</span>
-                  <span class="text-slate-500">https://192.168.10.231:8006</span>
+                  <span class="text-slate-500 font-mono">https://192.168.10.231:8006</span>
                 </div>
                 <span class="text-accent-emerald font-bold">Online (4 ms)</span>
               </div>
               <div class="p-2.5 rounded bg-[#0a0e17] border border-app-border flex items-center justify-between text-xs font-mono">
                 <div class="flex items-center gap-3">
                   <span class="text-sky-400 font-bold">Portainer Docker</span>
-                  <span class="text-slate-500">https://192.168.10.96:9443</span>
+                  <span class="text-slate-500 font-mono">https://192.168.10.96:9443</span>
                 </div>
                 <span class="text-accent-emerald font-bold">Online (2 ms)</span>
               </div>
               <div class="p-2.5 rounded bg-[#0a0e17] border border-app-border flex items-center justify-between text-xs font-mono">
                 <div class="flex items-center gap-3">
                   <span class="text-emerald-400 font-bold">Router Gateway</span>
-                  <span class="text-slate-500">http://192.168.10.1</span>
+                  <span class="text-slate-500 font-mono">http://192.168.10.1</span>
                 </div>
                 <span class="text-accent-emerald font-bold">Online (1 ms)</span>
               </div>
@@ -478,7 +588,7 @@
                 <i data-lucide="terminal" class="w-4 h-4 text-accent-blue"></i>
                 <span class="text-xs font-mono font-bold text-white" data-i18n="scanner.title">Skaner Podsieci (192.168.10.1 - 254)</span>
               </div>
-              <button id="demoScanBtn" onclick="runScannerDemo()" class="flex items-center gap-1.5 px-3 py-1 rounded bg-accent-blue hover:bg-accent-blueHover text-white text-xs font-semibold transition-colors cursor-pointer">
+              <button id="demoScanBtn" onclick="runScannerDemo()" class="flex items-center gap-1.5 px-3 py-1 rounded bg-accent-blue hover:bg-accent-blueHover text-white text-xs font-semibold transition-colors cursor-pointer" aria-label="Uruchom skan demonstracyjny">
                 <i data-lucide="play" class="w-3 h-3"></i>
                 <span id="demoScanBtnText">Uruchom skan</span>
               </button>
@@ -520,7 +630,7 @@
           <!-- Left: 6 Switchable Buttons -->
           <div class="lg:col-span-6 space-y-2" id="widgetTabList">
             
-            <button onclick="setPhoneWidget('fav')" id="tab-fav" class="w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('fav')" id="tab-fav" class="w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.fav.title">⭐ Ulubione Aplikacje (2x2)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.fav.desc">4 wybrane usługi z logotypami i bezpośrednim linkiem</div>
@@ -528,35 +638,35 @@
               <span class="text-[10px] font-mono text-accent-blue font-bold active-badge" data-i18n="wtab.activeBadge">Aktywny</span>
             </button>
 
-            <button onclick="setPhoneWidget('single')" id="tab-single" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('single')" id="tab-single" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.single.title">🎯 Monitoring Wybranej Usługi (2x2)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.single.desc">Pojedynczy kafelek z czasem odpowiedzi ping (ms) i SLA</div>
               </div>
             </button>
 
-            <button onclick="setPhoneWidget('server')" id="tab-server" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('server')" id="tab-server" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.server.title">🖥️ Status Serwera Host (4x2 / 4x1)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.server.desc">Obciążenie procesora CPU %, pamięci RAM, temperatura i Uptime</div>
               </div>
             </button>
 
-            <button onclick="setPhoneWidget('summary')" id="tab-summary" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('summary')" id="tab-summary" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.summary.title">📊 Podsumowanie Usług (4x1)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.summary.desc">Liczniki stanu wszystkich usług (Online / Warning / Offline)</div>
               </div>
             </button>
 
-            <button onclick="setPhoneWidget('uptime')" id="tab-uptime" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('uptime')" id="tab-uptime" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.uptime.title">⏱️ Wskaźnik Uptime (2x2)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.uptime.desc">Historia dostępności z ostatnich 24 godzin, 7 dni i 30 dni</div>
               </div>
             </button>
 
-            <button onclick="setPhoneWidget('overview')" id="tab-overview" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors">
+            <button onclick="setPhoneWidget('overview')" id="tab-overview" class="w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer">
               <div>
                 <div class="text-xs font-bold text-white" data-i18n="wtab.overview.title">🌐 Nexus Overview (4x2)</div>
                 <div class="text-[11px] text-slate-400" data-i18n="wtab.overview.desc">Kompaktowy panel kondycji całego homelabu</div>
@@ -571,7 +681,7 @@
               <div class="w-full rounded-[28px] bg-[#080d17] p-3.5 min-h-[460px] flex flex-col justify-between border border-white/5 text-white">
                 
                 <!-- Phone Header Status -->
-                <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 px-1">
+                <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 px-1" aria-hidden="true">
                   <span>19:42</span>
                   <div class="w-10 h-3 bg-black rounded-full"></div>
                   <div class="flex items-center gap-1">
@@ -587,7 +697,7 @@
                   <div id="pw-fav" class="rounded-xl p-3 bg-[#0f1523] border border-app-border shadow-lg">
                     <div class="flex items-center justify-between mb-2 px-0.5">
                       <span class="text-[11px] font-bold text-white flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-accent-emerald" aria-hidden="true"></span>
                         <span data-i18n="pwidget.favHeader">NexusPanel · Ulubione</span>
                       </span>
                       <span class="text-[9px] font-mono text-accent-emerald bg-emerald-500/10 px-1.5 py-0.5 rounded">4/4 Online</span>
@@ -734,7 +844,7 @@
                 </div>
 
                 <!-- Bottom Bar -->
-                <div class="w-20 h-1 bg-slate-600 rounded-full mx-auto"></div>
+                <div class="w-20 h-1 bg-slate-600 rounded-full mx-auto" aria-hidden="true"></div>
 
               </div>
             </div>
@@ -759,29 +869,29 @@
         </div>
 
         <!-- Tabs -->
-        <div class="flex flex-wrap gap-2 border-b border-app-border pb-3">
-          <button onclick="switchTab('pve')" id="btn-tab-pve" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-accent-blue text-white transition-colors cursor-pointer" data-i18n="install.tabPve">
+        <div class="flex flex-wrap gap-2 border-b border-app-border pb-3" role="tablist">
+          <button onclick="switchTab('pve')" id="btn-tab-pve" role="tab" aria-selected="true" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-accent-blue text-white transition-colors cursor-pointer" data-i18n="install.tabPve">
             Proxmox VE (LXC)
           </button>
-          <button onclick="switchTab('linux')" id="btn-tab-linux" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabLinux">
+          <button onclick="switchTab('linux')" id="btn-tab-linux" role="tab" aria-selected="false" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabLinux">
             Linux / Raspberry Pi
           </button>
-          <button onclick="switchTab('docker')" id="btn-tab-docker" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabDocker">
+          <button onclick="switchTab('docker')" id="btn-tab-docker" role="tab" aria-selected="false" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabDocker">
             Docker Compose
           </button>
-          <button onclick="switchTab('apk')" id="btn-tab-apk" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabApk">
+          <button onclick="switchTab('apk')" id="btn-tab-apk" role="tab" aria-selected="false" class="px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer" data-i18n="install.tabApk">
             Android APK
           </button>
         </div>
 
         <!-- Tab 1: Proxmox -->
-        <div id="content-tab-pve" class="space-y-3">
+        <div id="content-tab-pve" class="space-y-3" role="tabpanel">
           <p class="text-xs text-slate-400" data-i18n="install.pveDesc">
             Wklej poniższe polecenie bezpośrednio w konsoli węzła Proxmox VE (PVE Node Shell):
           </p>
           <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
             <code id="codePve">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn">
+            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Proxmox">
               Kopiuj
             </button>
           </div>
@@ -792,23 +902,23 @@
         </div>
 
         <!-- Tab 2: Linux (Hidden) -->
-        <div id="content-tab-linux" class="hidden space-y-3">
+        <div id="content-tab-linux" class="hidden space-y-3" role="tabpanel">
           <p class="text-xs text-slate-400" data-i18n="install.linuxDesc">
             Wklej w terminalu systemu Debian / Ubuntu / Raspberry Pi OS jako root:
           </p>
           <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
             <code id="codeLinux">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn">
+            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Linuxa">
               Kopiuj
             </button>
           </div>
         </div>
 
         <!-- Tab 3: Docker (Hidden) -->
-        <div id="content-tab-docker" class="hidden space-y-3">
+        <div id="content-tab-docker" class="hidden space-y-3" role="tabpanel">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span data-i18n="install.dockerDesc">Utwórz plik docker-compose.yml i uruchom docker compose up -d:</span>
-            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer copy-btn">
+            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer copy-btn" aria-label="Kopiuj konfigurację Docker Compose">
               Kopiuj
             </button>
           </div>
@@ -829,13 +939,13 @@
         </div>
 
         <!-- Tab 4: Android APK (Hidden) -->
-        <div id="content-tab-apk" class="hidden space-y-3 text-xs text-slate-300">
+        <div id="content-tab-apk" class="hidden space-y-3 text-xs text-slate-300" role="tabpanel">
           <div class="p-3 rounded-lg bg-[#0e131f] border border-app-border flex items-center justify-between">
             <div>
               <div class="font-bold text-white" data-i18n="install.apkTitle">NexusPanel.apk</div>
               <div class="text-slate-400 text-[11px] font-mono" data-i18n="install.apkSubtitle">Wersja 1.2.0 · Android 8.0+ · 11.1 MB</div>
             </div>
-            <a href="NexusPanel.apk" download class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent-emerald hover:bg-emerald-600 text-white font-semibold text-xs transition-colors">
+            <a href="NexusPanel.apk" download="NexusPanel.apk" class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-accent-emerald hover:bg-emerald-600 text-white font-semibold text-xs transition-colors" aria-label="Pobierz pakiet instalacyjny NexusPanel.apk">
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
               <span data-i18n="install.apkBtn">Pobierz plik APK</span>
             </a>
@@ -851,9 +961,75 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- 5. OPEN SOURCE & GITHUB REPO CARD -->
+    <!-- 5. FAQ SECTION (STRUCTURED TECHNICAL FAQ) -->
     <!-- ========================================================================= -->
-    <section class="py-12 border-t border-app-border bg-[#0a0e17]">
+    <section id="faq-section" class="py-16 border-t border-app-border bg-[#0a0e17]">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 space-y-6">
+        
+        <div class="space-y-1">
+          <span class="text-xs font-mono font-bold text-accent-blue uppercase tracking-wider" data-i18n="faq.tag">FAQ</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" data-i18n="faq.title">
+            Często zadawane pytania
+          </h2>
+        </div>
+
+        <div class="space-y-3">
+          
+          <!-- Q1 -->
+          <details class="p-4 rounded-xl bg-app-card border border-app-border group" open>
+            <summary class="font-bold text-sm text-white cursor-pointer list-none flex items-center justify-between">
+              <span data-i18n="faq.q1">Czy NexusPanel wymaga zewnętrznej chmury lub konta?</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed" data-i18n="faq.a1">
+              Nie. NexusPanel jest w 100% rozwiązaniem self-hosted. Wszystkie dane, logi, ustawienia i telemetria są zapisywane w lokalnej bazie SQLite na Twoim serwerze. Aplikacja nie wysyła żadnych danych telemetrycznych na zewnątrz.
+            </p>
+          </details>
+
+          <!-- Q2 -->
+          <details class="p-4 rounded-xl bg-app-card border border-app-border group">
+            <summary class="font-bold text-sm text-white cursor-pointer list-none flex items-center justify-between">
+              <span data-i18n="faq.q2">Jak działa automatyczny skaner podsieci LAN?</span>
+              <summary-icon class="hidden"></summary-icon>
+              <span data-i18n="faq.q2" class="sr-only">Jak działa automatyczny skaner podsieci LAN?</span>
+              <span class="font-bold text-sm text-white" data-i18n="faq.q2">Jak działa automatyczny skaner podsieci LAN?</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed" data-i18n="faq.a2">
+              Skaner automatycznie identyfikuje lokalną podsieć serwera (np. 192.168.10.x) i równolegle odpytuje wszystkie 254 adresy IP pod kątem popularnych portów homelabowych (Proxmox :8006, Home Assistant :8123, Plex :32400, NAS :8001/:5000, Immich :2283). Odnalezione serwery można dodać do panelu jednym kliknięciem.
+            </p>
+          </details>
+
+          <!-- Q3 -->
+          <details class="p-4 rounded-xl bg-app-card border border-app-border group">
+            <summary class="font-bold text-sm text-white cursor-pointer list-none flex items-center justify-between">
+              <span data-i18n="faq.q3">Jak działają widżety na smartfonie z Androidem?</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed" data-i18n="faq.a3">
+              Widżety są natywnymi komponentami Android AppWidget (obsługują Androida 8.0+). Komunikują się bezpośrednio z Twoim serwerem NexusPanel w sieci LAN / VPN, wyświetlają rzeczywisty czas pracy serwera, obciążenie CPU/RAM oraz logotypy usług. Kliknięcie w kafelek natychmiast otwiera daną usługę w domyślnej przeglądarce telefonu.
+            </p>
+          </details>
+
+          <!-- Q4 -->
+          <details class="p-4 rounded-xl bg-app-card border border-app-border group">
+            <summary class="font-bold text-sm text-white cursor-pointer list-none flex items-center justify-between">
+              <span data-i18n="faq.q4">Jak zaktualizować NexusPanel do nowszej wersji?</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed" data-i18n="faq.a4">
+              W przypadku instalacji na Proxmox / Linux wystarczy wejść do katalogu aplikacji, wykonać <code>git pull &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; systemctl restart nexuspanel</code>. W przypadku Dockera wystarczy pobrać nowy obraz poleceniem <code>docker compose pull &amp;&amp; docker compose up -d</code>.
+            </p>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 6. OPEN SOURCE & GITHUB REPO CARD -->
+    <!-- ========================================================================= -->
+    <section class="py-12 border-t border-app-border bg-[#080b11]">
       <div class="max-w-4xl mx-auto px-4 sm:px-6">
         <div class="p-5 rounded-xl bg-app-card border border-app-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">
@@ -878,7 +1054,7 @@
   </main>
 
   <!-- ========================================================================= -->
-  <!-- 6. FOOTER -->
+  <!-- 7. FOOTER -->
   <!-- ========================================================================= -->
   <footer class="border-t border-app-border bg-[#080b11] py-8 text-xs text-slate-500 font-mono">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -888,13 +1064,13 @@
       <div class="flex items-center gap-4">
         <a href="https://github.com/MarauTech/NexusPanel/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300" data-i18n="footer.license">Licencja MIT</a>
         <a href="https://github.com/MarauTech/NexusPanel" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300" data-i18n="footer.github">GitHub</a>
-        <a href="NexusPanel.apk" download class="text-accent-blue hover:underline" data-i18n="footer.downloadApk">Pobierz APK</a>
+        <a href="NexusPanel.apk" download="NexusPanel.apk" class="text-accent-blue hover:underline" data-i18n="footer.downloadApk">Pobierz APK</a>
       </div>
     </div>
   </footer>
 
   <!-- ========================================================================= -->
-  <!-- 7. UNIFIED TRANSLATIONS & JAVASCRIPT ENGINE -->
+  <!-- 8. UNIFIED TRANSLATIONS & JAVASCRIPT ENGINE -->
   <!-- ========================================================================= -->
   <script>
     // Complete 1-to-1 parity translations dictionary
@@ -907,6 +1083,7 @@
         'nav.scanner': 'Skaner LAN',
         'nav.widgets': 'Widżety Android',
         'nav.install': 'Instalacja',
+        'nav.faq': 'FAQ',
         'btn.downloadApk': 'Pobierz APK',
         
         'hero.badgeSelfHosted': 'Self-hosted',
@@ -1015,6 +1192,17 @@
         'install.apkStep2': 'Wpisz adres swojego serwera (np. http://192.168.10.96:3000).',
         'install.apkStep3': 'Przytrzymaj palec na pulpicie telefonu, wybierz menu „Widżety” i przeciągnij wybrany widżet NexusPanel.',
 
+        'faq.tag': 'FAQ',
+        'faq.title': 'Często zadawane pytania',
+        'faq.q1': 'Czy NexusPanel wymaga zewnętrznej chmury lub konta?',
+        'faq.a1': 'Nie. NexusPanel jest w 100% rozwiązaniem self-hosted. Wszystkie dane, logi, ustawienia i telemetria są zapisywane w lokalnej bazie SQLite na Twoim serwerze. Aplikacja nie wysyła żadnych danych telemetrycznych na zewnątrz.',
+        'faq.q2': 'Jak działa automatyczny skaner podsieci LAN?',
+        'faq.a2': 'Skaner automatycznie identyfikuje lokalną podsieć serwera (np. 192.168.10.x) i równolegle odpytuje wszystkie 254 adresy IP pod kątem popularnych portów homelabowych (Proxmox :8006, Home Assistant :8123, Plex :32400, NAS :8001/:5000, Immich :2283). Odnalezione serwery można dodać do panelu jednym kliknięciem.',
+        'faq.q3': 'Jak działają widżety na smartfonie z Androidem?',
+        'faq.a3': 'Widżety są natywnymi komponentami Android AppWidget (obsługują Androida 8.0+). Komunikują się bezpośrednio z Twoim serwerem NexusPanel w sieci LAN / VPN, wyświetlają rzeczywisty czas pracy serwera, obciążenie CPU/RAM oraz logotypy usług. Kliknięcie w kafelek natychmiast otwiera daną usługę w domyślnej przeglądarce telefonu.',
+        'faq.q4': 'Jak zaktualizować NexusPanel do nowszej wersji?',
+        'faq.a4': 'W przypadku instalacji na Proxmox / Linux wystarczy wejść do katalogu aplikacji, wykonać git pull && npm install && npm run build && systemctl restart nexuspanel. W przypadku Dockera wystarczy pobrać nowy obraz poleceniem docker compose pull && docker compose up -d.',
+
         'github.cardTitle': 'MarauTech / NexusPanel',
         'github.cardDesc': 'NexusPanel jest projektem open source. Kod źródłowy, zgłoszenia i aktualności znajdziesz na GitHub.',
         'github.btnRepo': 'Otwórz GitHub',
@@ -1033,6 +1221,7 @@
         'nav.scanner': 'LAN Scanner',
         'nav.widgets': 'Android Widgets',
         'nav.install': 'Installation',
+        'nav.faq': 'FAQ',
         'btn.downloadApk': 'Download APK',
         
         'hero.badgeSelfHosted': 'Self-hosted',
@@ -1141,6 +1330,17 @@
         'install.apkStep2': 'Enter your server address (e.g. http://192.168.10.96:3000).',
         'install.apkStep3': 'Long-press on your phone home screen, select "Widgets", and place the NexusPanel widget.',
 
+        'faq.tag': 'FAQ',
+        'faq.title': 'Frequently Asked Questions',
+        'faq.q1': 'Does NexusPanel require any external cloud or account?',
+        'faq.a1': 'No. NexusPanel is 100% self-hosted. All data, logs, settings, and telemetry are stored in a local SQLite database on your server. The app sends zero telemetry externally.',
+        'faq.q2': 'How does the automated LAN subnet scanner work?',
+        'faq.a2': 'The scanner automatically identifies your server local subnet (e.g. 192.168.10.x) and parallel-probes all 254 IP addresses for popular homelab ports (Proxmox :8006, Home Assistant :8123, Plex :32400, NAS :8001/:5000, Immich :2283). Found servers can be added to your dashboard with one click.',
+        'faq.q3': 'How do the Android homescreen widgets work?',
+        'faq.a3': 'The widgets are native Android AppWidgets (supporting Android 8.0+). They communicate directly with your local NexusPanel server over LAN or VPN, displaying real-time uptime, CPU/RAM stats, and service brand logos. Tapping any tile immediately opens that service in your default mobile browser.',
+        'faq.q4': 'How do I update NexusPanel to a newer version?',
+        'faq.a4': 'For Proxmox / Linux installations, navigate to the app directory and run git pull && npm install && npm run build && systemctl restart nexuspanel. For Docker, simply update the image with docker compose pull && docker compose up -d.',
+
         'github.cardTitle': 'MarauTech / NexusPanel',
         'github.cardDesc': 'NexusPanel is an open source project. Source code, issues and updates are available on GitHub.',
         'github.btnRepo': 'Open GitHub',
@@ -1153,8 +1353,13 @@
       }
     };
 
-    // Determine initial language: localStorage -> browser language -> 'pl' default
+    // Determine initial language: URL param -> localStorage -> browser language -> 'pl' default
     function getInitialLanguage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramLang = urlParams.get('lang');
+      if (paramLang && (paramLang === 'pl' || paramLang === 'en')) {
+        return paramLang;
+      }
       const saved = localStorage.getItem('nexuspanel-language');
       if (saved && (saved === 'pl' || saved === 'en')) {
         return saved;
@@ -1170,14 +1375,42 @@
       localStorage.setItem('nexuspanel-language', lang);
       document.documentElement.lang = lang;
 
+      // Update URL param without refreshing
+      if (window.history.replaceState) {
+        const url = new URL(window.location);
+        url.searchParams.set('lang', lang);
+        window.history.replaceState({}, '', url);
+      }
+
       // Update Label
       const langLabel = document.getElementById('langLabel');
       if (langLabel) langLabel.innerText = lang.toUpperCase();
 
       // Update Title & Meta
       document.title = translations[lang]['meta.title'] || document.title;
+      const metaTitle = document.getElementById('metaTitle');
+      if (metaTitle) metaTitle.setAttribute('content', translations[lang]['meta.title'] || '');
+
       const metaDesc = document.getElementById('metaDescription');
       if (metaDesc) metaDesc.setAttribute('content', translations[lang]['meta.description'] || '');
+
+      const ogTitle = document.getElementById('ogTitle');
+      if (ogTitle) ogTitle.setAttribute('content', translations[lang]['meta.title'] || '');
+
+      const ogDesc = document.getElementById('ogDesc');
+      if (ogDesc) ogDesc.setAttribute('content', translations[lang]['meta.description'] || '');
+
+      const ogLocale = document.getElementById('ogLocale');
+      if (ogLocale) ogLocale.setAttribute('content', lang === 'pl' ? 'pl_PL' : 'en_US');
+
+      const ogLocaleAlt = document.getElementById('ogLocaleAlt');
+      if (ogLocaleAlt) ogLocaleAlt.setAttribute('content', lang === 'pl' ? 'en_US' : 'pl_PL');
+
+      const twitterTitle = document.getElementById('twitterTitle');
+      if (twitterTitle) twitterTitle.setAttribute('content', translations[lang]['meta.title'] || '');
+
+      const twitterDesc = document.getElementById('twitterDesc');
+      if (twitterDesc) twitterDesc.setAttribute('content', translations[lang]['meta.description'] || '');
 
       // Update all data-i18n elements
       document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -1232,7 +1465,7 @@
         const btn = document.getElementById(`tab-${t}`);
         if (el) el.classList.add('hidden');
         if (btn) {
-          btn.className = 'w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors';
+          btn.className = 'w-full p-3 rounded-lg bg-app-card border border-app-border hover:border-slate-600 text-left flex items-center justify-between transition-colors cursor-pointer';
           const badge = btn.querySelector('.active-badge');
           if (badge) badge.remove();
         }
@@ -1242,7 +1475,7 @@
       const activeBtn = document.getElementById(`tab-${type}`);
       if (activeEl) activeEl.classList.remove('hidden');
       if (activeBtn) {
-        activeBtn.className = 'w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors';
+        activeBtn.className = 'w-full p-3 rounded-lg bg-[#141b2b] border-2 border-accent-blue text-left flex items-center justify-between transition-colors cursor-pointer';
         const badge = document.createElement('span');
         badge.className = 'text-[10px] font-mono text-accent-blue font-bold active-badge';
         badge.innerText = translations[currentLang]['wtab.activeBadge'];
@@ -1260,6 +1493,7 @@
         if (content) content.classList.add('hidden');
         if (btn) {
           btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#0e131f] text-slate-400 hover:text-white border border-app-border transition-colors cursor-pointer';
+          btn.setAttribute('aria-selected', 'false');
         }
       });
 
@@ -1268,6 +1502,7 @@
       if (activeContent) activeContent.classList.remove('hidden');
       if (activeBtn) {
         activeBtn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold bg-accent-blue text-white transition-colors cursor-pointer';
+        activeBtn.setAttribute('aria-selected', 'true');
       }
       lucide.createIcons();
     }
