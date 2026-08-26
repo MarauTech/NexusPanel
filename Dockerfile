@@ -21,7 +21,7 @@ RUN npm install --workspace=client --workspace=server 2>/dev/null || npm install
 COPY . .
 
 # Build React frontend
-RUN cd client && npx vite build
+RUN npm run build
 
 # ============================================
 # Stage 2: Production image
