@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" class="dark scroll-smooth">
+<html lang="pl" class="dark scroll-smooth overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -188,7 +188,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen antialiased flex flex-col selection:bg-accent-blue selection:text-white">
+<body class="min-h-screen antialiased flex flex-col selection:bg-accent-blue selection:text-white overflow-x-hidden w-full">
 
   <!-- ========================================================================= -->
   <!-- 1. NAVIGATION -->
@@ -281,13 +281,13 @@
         </div>
 
         <!-- 1-Liner Install Box -->
-        <div class="pt-3 max-w-xl">
-          <div class="flex items-center justify-between p-2.5 pl-3 rounded-lg code-block text-xs">
-            <div class="flex items-center gap-2 truncate text-slate-300">
-              <span class="text-accent-blue font-bold select-none">$</span>
-              <code class="truncate">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
+        <div class="pt-3 max-w-xl w-full">
+          <div class="flex items-center justify-between gap-2 p-2.5 pl-3 rounded-lg code-block text-xs overflow-hidden">
+            <div class="flex items-center gap-2 overflow-x-auto py-0.5 min-w-0 flex-1 text-slate-300">
+              <span class="text-accent-blue font-bold select-none shrink-0">$</span>
+              <code class="whitespace-nowrap font-mono text-[11px] sm:text-xs">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
             </div>
-            <button onclick="copyInstallCmd()" class="flex items-center gap-1 px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-slate-300 hover:text-white text-[11px] font-semibold transition-colors ml-2 cursor-pointer shrink-0" aria-label="Skopiuj polecenie instalacyjne">
+            <button onclick="copyInstallCmd()" class="flex items-center gap-1 px-2.5 py-1.5 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-slate-300 hover:text-white text-[11px] font-semibold transition-colors cursor-pointer shrink-0" aria-label="Skopiuj polecenie instalacyjne">
               <i data-lucide="copy" id="heroCopyIcon" class="w-3 h-3"></i>
               <span id="heroCopyText">Kopiuj</span>
             </button>
@@ -889,9 +889,11 @@
           <p class="text-xs text-slate-400" data-i18n="install.pveDesc">
             Wklej poniższe polecenie bezpośrednio w konsoli węzła Proxmox VE (PVE Node Shell):
           </p>
-          <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
-            <code id="codePve">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Proxmox">
+          <div class="p-3 rounded-lg code-block flex items-center justify-between gap-3 text-xs text-slate-300 overflow-hidden">
+            <div class="overflow-x-auto py-0.5 min-w-0 flex-1">
+              <code id="codePve" class="whitespace-nowrap font-mono text-[11px] sm:text-xs">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
+            </div>
+            <button onclick="copySnippet('codePve', 'btnPveCopy')" id="btnPveCopy" class="px-2.5 py-1.5 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Proxmox">
               Kopiuj
             </button>
           </div>
@@ -906,9 +908,11 @@
           <p class="text-xs text-slate-400" data-i18n="install.linuxDesc">
             Wklej w terminalu systemu Debian / Ubuntu / Raspberry Pi OS jako root:
           </p>
-          <div class="p-3 rounded-lg code-block flex items-center justify-between text-xs text-slate-300">
-            <code id="codeLinux">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
-            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 ml-2 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Linuxa">
+          <div class="p-3 rounded-lg code-block flex items-center justify-between gap-3 text-xs text-slate-300 overflow-hidden">
+            <div class="overflow-x-auto py-0.5 min-w-0 flex-1">
+              <code id="codeLinux" class="whitespace-nowrap font-mono text-[11px] sm:text-xs">bash -c "$(curl -fsSL https://raw.githubusercontent.com/MarauTech/NexusPanel/main/install.sh)"</code>
+            </div>
+            <button onclick="copySnippet('codeLinux', 'btnLinuxCopy')" id="btnLinuxCopy" class="px-2.5 py-1.5 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors shrink-0 cursor-pointer copy-btn" aria-label="Kopiuj polecenie dla Linuxa">
               Kopiuj
             </button>
           </div>
@@ -918,11 +922,11 @@
         <div id="content-tab-docker" class="hidden space-y-3" role="tabpanel">
           <div class="flex items-center justify-between text-xs text-slate-400">
             <span data-i18n="install.dockerDesc">Utwórz plik docker-compose.yml i uruchom docker compose up -d:</span>
-            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer copy-btn" aria-label="Kopiuj konfigurację Docker Compose">
+            <button onclick="copySnippet('codeDocker', 'btnDockerCopy')" id="btnDockerCopy" class="px-2.5 py-1.5 rounded bg-[#141b2b] hover:bg-[#1e293b] border border-app-border text-[11px] font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer copy-btn" aria-label="Kopiuj konfigurację Docker Compose">
               Kopiuj
             </button>
           </div>
-          <pre class="p-3 rounded-lg code-block text-xs text-slate-300 overflow-x-auto"><code id="codeDocker">services:
+          <pre class="p-3 rounded-lg code-block text-[11px] sm:text-xs text-slate-300 overflow-x-auto"><code id="codeDocker">services:
   nexuspanel:
     image: ghcr.io/marautech/nexuspanel:latest
     container_name: nexuspanel
