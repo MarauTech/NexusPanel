@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /NexusPanel.apk
 
-Sitemap: https://marautch.github.io/NexusPanel/sitemap.xml
+Sitemap: https://marautech.github.io/NexusPanel/sitemap.xml

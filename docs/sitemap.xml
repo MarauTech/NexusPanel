@@ -2,12 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://marautch.github.io/NexusPanel/</loc>
+    <loc>https://marautech.github.io/NexusPanel/</loc>
     <lastmod>2026-08-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="pl" href="https://marautch.github.io/NexusPanel/?lang=pl" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://marautch.github.io/NexusPanel/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://marautch.github.io/NexusPanel/" />
+    <xhtml:link rel="alternate" hreflang="pl" href="https://marautech.github.io/NexusPanel/?lang=pl" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://marautech.github.io/NexusPanel/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://marautech.github.io/NexusPanel/" />
   </url>
 </urlset>

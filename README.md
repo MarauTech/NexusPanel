@@ -5,7 +5,7 @@
     Self-hosted • Proxmox VE • Docker • Auto Subnet Discovery • Health Status & Ping • Android Widgets & Mobile App
   </p>
   <p align="center">
-    🌐 <strong>Strona projektu i prezentacja na żywo:</strong> <a href="https://marautch.github.io/NexusPanel/">https://marautch.github.io/NexusPanel/</a>
+    🌐 <strong>Strona projektu i prezentacja na żywo:</strong> <a href="https://marautech.github.io/NexusPanel/">https://marautech.github.io/NexusPanel/</a>
   </p>
 </p>
 
